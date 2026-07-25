@@ -1,0 +1,17 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="32" fill="#0D111A"/>
+  <rect x="64" y="78" width="388" height="350" rx="28" fill="#121722" stroke="#2A3548" stroke-width="2"/>
+  <text x="96" y="132" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="26" font-weight="700">Version A</text>
+  <rect x="96" y="174" width="300" height="60" rx="14" fill="#171D2A" stroke="#39465B"/>
+  <text x="118" y="211" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">Email address</text>
+  <rect x="96" y="258" width="300" height="84" rx="16" fill="#F87171" opacity=".14" stroke="#F87171" stroke-width="2"/>
+  <text x="124" y="308" fill="#FCA5A5" font-family="Arial, sans-serif" font-size="22" font-weight="700">Invalid input.</text>
+  <rect x="508" y="78" width="388" height="350" rx="28" fill="#121722" stroke="#2A3548" stroke-width="2"/>
+  <text x="540" y="132" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="26" font-weight="700">Version B</text>
+  <rect x="540" y="174" width="300" height="60" rx="14" fill="#171D2A" stroke="#39465B"/>
+  <text x="562" y="211" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">Email address</text>
+  <rect x="540" y="258" width="300" height="94" rx="16" fill="#22C55E" opacity=".12" stroke="#2DD4BF" stroke-width="2"/>
+  <text x="568" y="296" fill="#A7F3D0" font-family="Arial, sans-serif" font-size="18" font-weight="700">Enter a valid email address.</text>
+  <text x="568" y="324" fill="#CCFBF1" font-family="Arial, sans-serif" font-size="15">Example: name@example.com</text>
+  <text x="64" y="482" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">A useful error message explains what happened and how to fix it.</text>
+</svg>

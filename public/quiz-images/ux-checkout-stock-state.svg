@@ -1,0 +1,26 @@
+<svg width="960" height="620" viewBox="0 0 960 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="620" rx="32" fill="#0D111A"/>
+  <rect x="54" y="54" width="852" height="512" rx="28" fill="#121722" stroke="#2A3548" stroke-width="2"/>
+  <rect x="96" y="96" width="310" height="374" rx="22" fill="#171D2A"/>
+  <rect x="126" y="126" width="250" height="170" rx="18" fill="#222B3A"/>
+  <circle cx="176" cy="176" r="34" fill="#4F8CFF" opacity=".65"/>
+  <rect x="126" y="324" width="220" height="20" rx="10" fill="#F4F6FB" opacity=".9"/>
+  <rect x="126" y="362" width="180" height="14" rx="7" fill="#A5ADBD" opacity=".8"/>
+  <rect x="126" y="408" width="140" height="38" rx="19" fill="#22C55E" opacity=".85"/>
+  <rect x="458" y="96" width="358" height="374" rx="22" fill="#0D111A" stroke="#2A3548" stroke-width="2"/>
+  <text x="500" y="148" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="30" font-weight="700">Payment</text>
+  <rect x="500" y="184" width="272" height="58" rx="14" fill="#171D2A" stroke="#364156"/>
+  <text x="524" y="221" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">Card number</text>
+  <rect x="500" y="264" width="128" height="58" rx="14" fill="#171D2A" stroke="#364156"/>
+  <rect x="644" y="264" width="128" height="58" rx="14" fill="#171D2A" stroke="#364156"/>
+  <rect x="500" y="350" width="272" height="64" rx="18" fill="#F87171" opacity=".18" stroke="#F87171" stroke-width="2"/>
+  <circle cx="532" cy="382" r="13" fill="#F87171"/>
+  <text x="558" y="377" fill="#FCA5A5" font-family="Arial, sans-serif" font-size="17" font-weight="700">Out of stock</text>
+  <text x="558" y="401" fill="#FECACA" font-family="Arial, sans-serif" font-size="14">Discovered after payment details</text>
+  <rect x="500" y="440" width="272" height="48" rx="24" fill="url(#g)"/>
+  <text x="576" y="471" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="700">Pay now</text>
+  <path d="M410 282h40" stroke="#6965FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M438 266l16 16-16 16" stroke="#6965FF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="518" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">Problem appears too late in the flow.</text>
+  <defs><linearGradient id="g" x1="500" y1="440" x2="772" y2="488"><stop stop-color="#4F8CFF"/><stop offset=".55" stop-color="#6965FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs>
+</svg>

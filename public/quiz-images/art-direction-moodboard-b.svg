@@ -1,0 +1,10 @@
+<svg width="720" height="520" viewBox="0 0 720 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="520" rx="30" fill="#080A0F"/>
+  <rect x="46" y="46" width="288" height="188" rx="22" fill="#101B33"/>
+  <rect x="362" y="46" width="312" height="188" rx="22" fill="#4F8CFF"/>
+  <rect x="46" y="262" width="188" height="212" rx="22" fill="#2DD4BF"/>
+  <rect x="262" y="262" width="188" height="212" rx="22" fill="#6965FF"/>
+  <rect x="478" y="262" width="196" height="212" rx="22" fill="#A855F7"/>
+  <path d="M92 112h176M92 148h110M416 316h168M416 352h98" stroke="#F4F6FB" stroke-width="12" stroke-linecap="round" opacity=".9"/>
+  <text x="54" y="502" fill="#D8E7FF" font-family="Arial, sans-serif" font-size="20">Modern tech, cool, precise</text>
+</svg>

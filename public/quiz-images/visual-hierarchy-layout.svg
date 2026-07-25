@@ -1,0 +1,22 @@
+<svg width="960" height="620" viewBox="0 0 960 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="620" rx="32" fill="#080A0F"/>
+  <rect x="70" y="70" width="820" height="480" rx="28" fill="#121722" stroke="#2A3548" stroke-width="2"/>
+  <rect x="112" y="116" width="736" height="88" rx="18" fill="#171D2A"/>
+  <rect x="134" y="142" width="210" height="18" rx="9" fill="#A5ADBD"/>
+  <rect x="134" y="174" width="520" height="12" rx="6" fill="#70798B"/>
+  <rect x="112" y="232" width="230" height="236" rx="18" fill="#171D2A"/>
+  <rect x="136" y="258" width="182" height="144" rx="14" fill="#263247"/>
+  <rect x="136" y="422" width="170" height="16" rx="8" fill="#F4F6FB"/>
+  <rect x="366" y="232" width="230" height="236" rx="18" fill="#171D2A"/>
+  <rect x="390" y="258" width="182" height="144" rx="14" fill="#263247"/>
+  <rect x="390" y="422" width="170" height="16" rx="8" fill="#F4F6FB"/>
+  <rect x="620" y="232" width="228" height="236" rx="18" fill="#171D2A"/>
+  <rect x="644" y="258" width="180" height="144" rx="14" fill="#263247"/>
+  <rect x="644" y="422" width="170" height="16" rx="8" fill="#F4F6FB"/>
+  <rect x="650" y="126" width="162" height="52" rx="26" fill="url(#g)"/>
+  <text x="685" y="159" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="700">Buy now</text>
+  <circle cx="812" cy="434" r="40" fill="#F59E0B" opacity=".88"/>
+  <text x="790" y="442" fill="#111827" font-family="Arial, sans-serif" font-size="24" font-weight="700">-50%</text>
+  <text x="112" y="516" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">The discount badge competes with the primary action and product hierarchy.</text>
+  <defs><linearGradient id="g" x1="650" y1="126" x2="812" y2="178"><stop stop-color="#4F8CFF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs>
+</svg>

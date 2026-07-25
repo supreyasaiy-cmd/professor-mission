@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="metal" x1="138" y1="76" x2="384" y2="438" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.28" stop-color="#dcece8"/>
+      <stop offset="0.56" stop-color="#f7f9fa"/>
+      <stop offset="1" stop-color="#8ba199"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="104" y1="92" x2="406" y2="424" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.52" stop-color="#c8cdd2"/>
+      <stop offset="1" stop-color="#6f7780"/>
+    </linearGradient>
+    <linearGradient id="line" x1="150" y1="132" x2="360" y2="376" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbfcfc"/>
+      <stop offset="0.48" stop-color="#c8ced4"/>
+      <stop offset="1" stop-color="#737d87"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="156" y1="136" x2="356" y2="374" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.45" stop-color="#a7ead4"/>
+      <stop offset="1" stop-color="#8ba199"/>
+    </linearGradient>
+    <radialGradient id="inner" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(212 170) rotate(52) scale(260)">
+      <stop stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.48" stop-color="#dcece8" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#8ba199" stop-opacity="0.62"/>
+    </radialGradient>
+    <filter id="shadow" x="46" y="52" width="420" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="15" dy="20" stdDeviation="17" flood-color="#171717" flood-opacity="0.18"/>
+    </filter>
+    <filter id="soft" x="104" y="104" width="304" height="304" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="5" dy="8" stdDeviation="5" flood-color="#171717" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="256" r="178" fill="url(#metal)"/><circle cx="256" cy="256" r="173" fill="none" stroke="url(#rim)" stroke-width="10"/>
+    <path d="M152 118C190 92 328 88 372 126" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.46"/>
+    <path d="M102 288C138 390 252 442 354 394" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.18"/>
+  </g>
+  <g filter="url(#soft)">
+    <path d="M154 358H360" stroke="url(#line)" stroke-width="26" stroke-linecap="round"/>
+    <rect x="176" y="276" width="42" height="82" rx="16" fill="none" stroke="url(#line)" stroke-width="24"/>
+    <rect x="236" y="226" width="42" height="132" rx="16" fill="none" stroke="url(#line)" stroke-width="24"/>
+    <rect x="296" y="174" width="42" height="184" rx="16" fill="none" stroke="url(#accent)" stroke-width="24"/>
+  </g>
+</svg>

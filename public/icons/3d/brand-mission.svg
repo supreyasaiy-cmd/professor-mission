@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <filter id="remove-dark-background" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <feColorMatrix
+        in="SourceGraphic"
+        type="matrix"
+        values="
+          1 0 0 0 0
+          0 1 0 0 0
+          0 0 1 0 0
+          1.35 1.35 1.35 0 -0.42"
+      />
+    </filter>
+    <filter id="soft-shadow" x="-18%" y="-18%" width="136%" height="136%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="12" dy="18" stdDeviation="16" flood-color="#101513" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#soft-shadow)">
+    <image
+      href="/icons/3d/brand-mission-source.png"
+      x="26"
+      y="26"
+      width="460"
+      height="460"
+      preserveAspectRatio="xMidYMid meet"
+      filter="url(#remove-dark-background)"
+    />
+  </g>
+</svg>

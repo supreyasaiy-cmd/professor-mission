@@ -1,0 +1,21 @@
+<svg width="960" height="620" viewBox="0 0 960 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="620" rx="32" fill="#0D111A"/>
+  <rect x="84" y="78" width="792" height="454" rx="28" fill="#121722" stroke="#2A3548" stroke-width="2"/>
+  <text x="122" y="136" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">Weekly study hours by skill</text>
+  <text x="122" y="170" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="17">Original practice chart</text>
+  <line x1="162" y1="438" x2="808" y2="438" stroke="#566176" stroke-width="2"/>
+  <line x1="162" y1="224" x2="162" y2="438" stroke="#566176" stroke-width="2"/>
+  <rect x="220" y="344" width="72" height="94" rx="10" fill="#4F8CFF"/>
+  <rect x="360" y="282" width="72" height="156" rx="10" fill="#6965FF"/>
+  <rect x="500" y="250" width="72" height="188" rx="10" fill="#A855F7"/>
+  <rect x="640" y="310" width="72" height="128" rx="10" fill="#2DD4BF"/>
+  <text x="225" y="474" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="16">Reading</text>
+  <text x="348" y="474" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="16">Listening</text>
+  <text x="502" y="474" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="16">Writing</text>
+  <text x="638" y="474" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="16">Speaking</text>
+  <text x="238" y="330" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="18" font-weight="700">3</text>
+  <text x="378" y="268" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="18" font-weight="700">5</text>
+  <text x="518" y="236" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="18" font-weight="700">6</text>
+  <text x="658" y="296" fill="#F4F6FB" font-family="Arial, sans-serif" font-size="18" font-weight="700">4</text>
+  <text x="84" y="574" fill="#A5ADBD" font-family="Arial, sans-serif" font-size="18">Writing received the most study time, while Reading received the least.</text>
+</svg>
