@@ -10,11 +10,15 @@ export type LearningPathName =
   | "Communication"
   | "Critical Thinking"
   | "DesignOps"
-  | "UX Research"
+  | "UX Researcher"
+  | "UX Research Method"
+  | "UX/UI Design on Agile Way"
+  | "Design System"
   | "Product Owner"
-  | "Product Analytics"
+  | "Product Data Analyst"
   | "AI Product Workflow"
   | "Career Portfolio"
+  | "Communication & CX Mastery"
   | "Stock Investing"
   | "Thai Tax & Personal Finance";
 

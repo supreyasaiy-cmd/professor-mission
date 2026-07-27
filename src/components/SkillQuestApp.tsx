@@ -91,10 +91,14 @@ const pathProgressTones: Record<string, ProgressTone> = {
   "critical-thinking": "graphite",
   designops: "violet",
   "ux-research": "mint",
+  "ux-research-method": "blue",
+  "agile-ux-ui": "mint",
+  "design-system": "violet",
   "product-owner": "blue",
   "product-analytics": "champagne",
   "ai-product-workflow": "violet",
   "career-portfolio": "mint",
+  "cx-communication": "champagne",
   "stock-investing": "graphite",
   "thai-tax-personal-finance": "champagne",
 };
@@ -604,7 +608,7 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
           });
           const currentLesson = inProgress ?? pathLessons[completed] ?? pathLessons[0];
           const percent = Math.round((completed / Math.max(pathLessons.length, 1)) * 100);
-          const category = path.id === "designops" || path.id === "ux-research" ? "Career & Design" : path.id === "stock-investing" || path.id === "thai-tax-personal-finance" ? "Money & Life" : null;
+          const category = ["designops", "ux-research", "ux-research-method", "agile-ux-ui", "design-system", "cx-communication"].includes(path.id) ? "Career & Design" : path.id === "stock-investing" || path.id === "thai-tax-personal-finance" ? "Money & Life" : null;
           const safetyLabel = path.id === "stock-investing" ? "Not Financial Advice" : path.id === "thai-tax-personal-finance" ? "Not an Official Tax Calculation" : null;
 
           return (

@@ -827,7 +827,7 @@ const rawQuestions: Question[] = [
   },
   {
     id: "ux-research-q-research-question-vs-business-question",
-    learningPath: "UX Research",
+    learningPath: "UX Researcher",
     skill: "Research Planning",
     topic: "Research Question vs Business Question",
     difficulty: "Junior",
