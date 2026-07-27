@@ -79,3 +79,20 @@ export function getDailyQuote(date: Date) {
 
   return motivationalQuotes[hash] ?? defaultMotivationalQuote;
 }
+
+export function getRandomQuote(previousId?: string) {
+  if (motivationalQuotes.length <= 1) return defaultMotivationalQuote;
+
+  const randomValue =
+    typeof crypto !== "undefined" && "getRandomValues" in crypto
+      ? crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+      : Math.random();
+
+  let index = Math.floor(randomValue * motivationalQuotes.length);
+
+  if (motivationalQuotes[index]?.id === previousId) {
+    index = (index + 1) % motivationalQuotes.length;
+  }
+
+  return motivationalQuotes[index] ?? defaultMotivationalQuote;
+}

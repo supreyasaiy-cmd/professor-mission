@@ -1,15 +1,22 @@
-import { IBM_Plex_Sans_Thai, Manrope } from "next/font/google";
+import { Kanit, Roboto, Sarabun } from "next/font/google";
 
-export const interfaceFont = IBM_Plex_Sans_Thai({
+export const interfaceFont = Sarabun({
   variable: "--font-interface",
   subsets: ["latin", "thai"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-export const displayFont = Manrope({
+export const displayFont = Kanit({
   variable: "--font-display",
+  subsets: ["latin", "thai"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+export const englishFont = Roboto({
+  variable: "--font-english",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });

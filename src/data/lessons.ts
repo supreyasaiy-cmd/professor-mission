@@ -182,6 +182,59 @@ const expandedPathTopics = {
     "Research Repository",
     "Research Impact",
   ],
+  "product-owner": [
+    "Product Owner Career Map",
+    "Business Goals to Product Outcomes",
+    "Backlog, Epic and User Story",
+    "Prioritisation with Impact and Effort",
+    "Stakeholder Alignment",
+    "Agile Sprint Rituals",
+    "Requirement Analysis",
+    "Banking and Insurance Domain Basics",
+    "Product Roadmap",
+    "Acceptance Criteria",
+    "Release and QA Readiness",
+    "Communicating Product Decisions",
+  ],
+  "product-analytics": [
+    "Product Analytics Career Map",
+    "North Star Metric",
+    "Event Tracking Plan",
+    "SQL Thinking for Product",
+    "Dashboard Design for Decisions",
+    "Funnel Analysis",
+    "Cohort and Retention",
+    "A/B Testing Basics",
+    "Data Quality Checks",
+    "Insight Storytelling",
+    "Working with Data Engineers",
+    "Executive Metrics Readout",
+  ],
+  "ai-product-workflow": [
+    "AI Career Leverage Map",
+    "Prompting for Product Thinking",
+    "AI Research Assistant Workflow",
+    "AI UX Writing Workflow",
+    "AI Design Critique Workflow",
+    "AI Frontend Prototype Workflow",
+    "Design System Memory",
+    "AI Output QA Checklist",
+    "Safe Use of Company Data",
+    "Human Judgment with AI",
+    "Shipping a Small AI-assisted Project",
+  ],
+  "career-portfolio": [
+    "High-income Career Skill Map",
+    "Portfolio Case Study Structure",
+    "Problem, Process and Outcome",
+    "Writing Design Rationale",
+    "Showing Business Impact",
+    "Presenting to Stakeholders",
+    "Interview Story Bank",
+    "Salary Conversation Preparation",
+    "LinkedIn and Resume Evidence",
+    "30-day Career Sprint",
+  ],
   "stock-investing": [
     "Saving vs Investing",
     "Risk and Return",
@@ -245,6 +298,11 @@ const expandedModules: Record<string, CurriculumModule[]> = Object.fromEntries(
 const educationalDisclaimer = {
   en: "Educational content only. This is not personalised financial advice or an official tax calculation.",
   th: "เนื้อหานี้ใช้เพื่อการศึกษาเท่านั้น ไม่ใช่คำแนะนำทางการเงินส่วนบุคคลหรือการคำนวณภาษีอย่างเป็นทางการ",
+};
+
+const careerDisclaimer = {
+  en: "Educational career content only. Salary and role expectations change by company, industry, seniority, portfolio quality, and market timing. This is not a salary guarantee.",
+  th: "เนื้อหานี้ใช้เพื่อการเรียนรู้ด้านอาชีพเท่านั้น เงินเดือนและคุณสมบัติเปลี่ยนตามบริษัท อุตสาหกรรม ระดับประสบการณ์ คุณภาพ portfolio และตลาดงาน ไม่ใช่การรับประกันเงินเดือน",
 };
 
 const stockVerification: ContentVerification = {
@@ -340,7 +398,19 @@ const seedLessons: Record<string, UxLessonSeed> = {
     examples: [
       { titleEn: "Checkout Example", bodyTh: "ถ้าผู้ใช้ถึงหน้าจ่ายเงินแล้วเพิ่งรู้ว่าสินค้าหมด ปัญหาหลักคือ UX flow เพราะระบบควรบอกก่อน แต่ UI error state ก็ยังต้องชัดเพื่อช่วย recover" },
     ],
-    visualMedia: [{ type: "flow", titleEn: "UX and UI Relationship", descriptionTh: "UX คือเส้นทางและเหตุผล UI คือพื้นผิวที่ทำให้เส้นทางนั้นเข้าใจง่าย", items: ["User goal", "Flow decision", "Interface state", "Successful action"] }],
+    visualMedia: [
+      {
+        type: "image",
+        titleEn: "UX and UI Relationship",
+        descriptionTh: "ภาพนี้ช่วยให้เห็นว่า UX และ UI ซ้อนกันตรงจุดที่ผู้ใช้ทำ action ได้สำเร็จ ไม่ใช่แยกกันคนละโลก",
+        src: "/lesson-images/ux-ui-relationship.svg",
+        altEn: "A clean diagram showing UX as goals and flow, UI as screen and states, and the overlap as a clear action.",
+        altTh: "ไดอะแกรมแสดงความสัมพันธ์ของ UX, UI และจุดร่วมที่ทำให้ผู้ใช้ทำงานสำเร็จ",
+        width: 1200,
+        height: 760,
+        items: ["User goal", "Flow decision", "Interface state", "Successful action"],
+      },
+    ],
     mistakes: ["Calling every design problem a UI problem.", "Polishing colors before checking whether the flow makes sense."],
     mistakesTh: ["เรียกทุกปัญหาว่า UI ทั้งที่บางอย่างเป็น flow หรือ information problem", "ปรับสีและความสวยก่อนตรวจว่าผู้ใช้เข้าใจทางไปต่อไหม"],
     junior: "Make the screen look modern.",
@@ -371,7 +441,19 @@ const seedLessons: Record<string, UxLessonSeed> = {
       section("how", "How It Works", ["เริ่มจากทำความเข้าใจผู้ใช้ แล้วนิยามปัญหาให้ชัด จากนั้นสร้างไอเดียหลายทาง ทดลองด้วย prototype และ test เพื่อเรียนรู้", "ขั้นตอนสำคัญไม่ใช่จำชื่อ stage แต่คือการใช้ evidence ลดการเดา"]),
     ],
     examples: [{ titleEn: "Booking Flow Example", bodyTh: "ถ้าผู้ใช้จองคลาสไม่ได้ ทีมอาจเริ่มจาก interview และ analytics เพื่อ define ว่าปัญหาอยู่ที่ calendar, pricing หรือ confirmation ไม่ใช่รีบ redesign ทั้งหน้า" }],
-    visualMedia: [{ type: "flow", titleEn: "Design Thinking Loop", descriptionTh: "กระบวนการมักวนซ้ำ เพราะ feedback ใหม่อาจทำให้ต้องนิยามปัญหาใหม่", items: ["Empathize", "Define", "Ideate", "Prototype", "Test"] }],
+    visualMedia: [
+      {
+        type: "image",
+        titleEn: "Design Thinking Loop",
+        descriptionTh: "กระบวนการมักวนซ้ำ เพราะ feedback ใหม่อาจทำให้ต้องนิยามปัญหาใหม่ ไม่ใช่เดินเป็นเส้นตรงครั้งเดียวจบ",
+        src: "/lesson-images/design-thinking-loop.svg",
+        altEn: "A loop diagram of empathize, define, ideate, prototype, and test around learning and improvement.",
+        altTh: "ไดอะแกรมวงจร Design Thinking ที่วนจากเข้าใจผู้ใช้ไปจนถึงทดสอบและปรับปรุง",
+        width: 1200,
+        height: 760,
+        items: ["Empathize", "Define", "Ideate", "Prototype", "Test"],
+      },
+    ],
     mistakes: ["Treating the process as a poster, not a working method.", "Ideating before the problem is clear."],
     mistakesTh: ["ใช้ Design Thinking เป็นคำสวย ๆ แต่ไม่ได้ช่วยตัดสินใจจริง", "คิด solution ก่อนเข้าใจปัญหา"],
     junior: "I followed the five steps, so the design is correct.",
@@ -401,7 +483,19 @@ const seedLessons: Record<string, UxLessonSeed> = {
       section("how", "How It Works", ["ใช้ quantitative เมื่ออยากรู้ว่าเกิดขึ้นมากแค่ไหน หรือ pattern ใหญ่เป็นอย่างไร", "ใช้ qualitative เมื่ออยากรู้ว่าทำไมผู้ใช้คิด รู้สึก หรือทำแบบนั้น"]),
     ],
     examples: [{ titleEn: "Research Question Example", bodyTh: "ถ้าถามว่า “ผู้ใช้กี่เปอร์เซ็นต์ drop ที่หน้า checkout” ให้ดู analytics ถ้าถามว่า “ทำไมเขาไม่มั่นใจตอน checkout” ให้ใช้ interview หรือ usability testing" }],
-    visualMedia: [{ type: "diagram", titleEn: "What vs Why", descriptionTh: "ใช้ตัวเลขเพื่อเห็นขนาดของปัญหา และใช้คำพูด/พฤติกรรมเพื่อเข้าใจเหตุผล", items: ["Quantitative: surveys, analytics, metrics", "Qualitative: interviews, observation, usability notes"] }],
+    visualMedia: [
+      {
+        type: "image",
+        titleEn: "What vs Why",
+        descriptionTh: "ใช้ตัวเลขเพื่อเห็นขนาดของปัญหา และใช้คำพูดหรือพฤติกรรมเพื่อเข้าใจเหตุผลที่อยู่ข้างหลังตัวเลข",
+        src: "/lesson-images/research-methods.svg",
+        altEn: "A split visual comparing quantitative research as charts and qualitative research as conversation bubbles.",
+        altTh: "ภาพเปรียบเทียบ quantitative research เป็นกราฟ และ qualitative research เป็นบทสนทนาเพื่อหาคำอธิบาย",
+        width: 1200,
+        height: 760,
+        items: ["Quantitative: surveys, analytics, metrics", "Qualitative: interviews, observation, usability notes"],
+      },
+    ],
     mistakes: ["Calling interviews quantitative research.", "Using only one method and pretending it answers every question."],
     mistakesTh: ["จัด interview เป็น quantitative research ซึ่งไม่ถูกต้องโดยทั่วไป", "ใช้ method เดียวแล้วคิดว่าตอบได้ทุกคำถาม"],
     junior: "We interviewed five people, so we have quantitative data.",
@@ -695,7 +789,10 @@ const seedLessons: Record<string, UxLessonSeed> = {
 };
 
 seedLessons["Quantitative Research"] = seedLessons["Quantitative vs Qualitative Research"];
+seedLessons["Qualitative Research"] = seedLessons["Quantitative vs Qualitative Research"];
 seedLessons["Information Architecture"] = seedLessons["Information Architecture, Sitemap and User Flow"];
+seedLessons["Sitemap"] = seedLessons["Information Architecture, Sitemap and User Flow"];
+seedLessons["User Flow"] = seedLessons["Information Architecture, Sitemap and User Flow"];
 
 function makePlaceholderContent(title: string, moduleTitle: string): Pick<
   UxLessonSeed,
@@ -731,17 +828,26 @@ function makePlaceholderContent(title: string, moduleTitle: string): Pick<
     };
   }
   return {
-    summaryTh: `บทนี้เป็น placeholder สำหรับหัวข้อ ${title} ใน module ${moduleTitle} เนื้อหาเต็มจะต่อยอดจากโครงหลักสูตรนี้`,
+    summaryTh: `${title} คือหัวข้อสำคัญใน ${moduleTitle} ที่ช่วยให้ผู้เรียนตัดสินใจและอธิบายงาน UX/UI ได้เป็นระบบมากขึ้น`,
     professionalLevel: "Junior",
-    estimatedMinutes: 6,
-    objectives: [`Understand the role of ${title}.`, "Connect the topic to a real UX/UI workflow.", "Prepare for a focused practice activity."],
+    estimatedMinutes: 7,
+    objectives: [`Understand the role of ${title}.`, "Connect the topic to a real UX/UI workflow.", "Use the concept in a focused practice activity."],
     sections: [
-      section("placeholder", "Coming Next", [
-        `บทเรียนเต็มของ ${title} จะอธิบายแนวคิด วิธีใช้ ตัวอย่างงานจริง และข้อผิดพลาดที่พบบ่อย`,
-        "ตอนนี้ระบบสร้าง metadata, progress state, navigation และ practice readiness ไว้ครบแล้ว เพื่อให้หลักสูตรต่อเติมได้โดยไม่เปลี่ยนโครงสร้าง",
+      section("what-it-means", "What It Means", [
+        `${title} คือทักษะหรือแนวคิดที่ช่วยให้ทีมออกแบบมองเห็นโครงสร้าง เหตุผล และผลกระทบของงานได้ชัดขึ้น`,
+        `ในบริบทของ ${moduleTitle} หัวข้อนี้ไม่ได้มีไว้จำศัพท์ แต่มีไว้ช่วยเลือกวิธีทำงานที่เหมาะกับปัญหาและข้อจำกัดจริง`,
+      ]),
+      section("how-to-use-it", "How To Use It", [
+        "เริ่มจากระบุเป้าหมายของผู้ใช้หรือทีมก่อน จากนั้นใช้หัวข้อนี้เป็นเครื่องมือถามว่าอะไรควรชัดขึ้น ลดความเสี่ยงตรงไหน และต้องสื่อสารอะไรต่อ",
+        "เวลานำไปใช้ในการทำงาน ให้เขียน decision, reason และ expected outcome สั้น ๆ เพื่อให้คนอื่นตรวจทานได้",
+      ]),
+      section("what-to-check", "What To Check", [
+        "ตรวจว่าคุณไม่ได้ใช้คำศัพท์นี้แบบลอย ๆ แต่เชื่อมกับ user goal, content, layout, interaction หรือ handoff จริง",
+        "ถ้ายังอธิบายไม่ได้ว่าหัวข้อนี้ช่วยตัดสินใจอะไร ให้กลับไปดูตัวอย่างและลองเขียนสถานการณ์งานจริงหนึ่งประโยค",
       ]),
     ],
-    examples: [{ titleEn: "Workplace Preview", bodyTh: `${title} จะถูกเชื่อมกับตัวอย่างการทำงานจริง เช่น การรีวิว design, การวางระบบ component หรือการนำเสนอเหตุผลกับทีม` }],
+    examples: [{ titleEn: "Workplace Example", bodyTh: `ในการรีวิวงาน สามารถใช้ ${title} เพื่ออธิบายว่า decision นี้ช่วยผู้ใช้หรือทีมอย่างไร เช่น ลดความสับสน ทำให้ flow ชัดขึ้น หรือทำให้ developer build ได้แม่นขึ้น` }],
+    visualMedia: [{ type: "flow", titleEn: "Decision Flow", descriptionTh: "อ่านจากซ้ายไปขวาเพื่อเชื่อม concept กับการตัดสินใจจริง", items: ["Context", "User goal", title, "Decision", "Outcome"] }],
     mistakes: ["Treating the topic as a vocabulary word instead of a working skill."],
     mistakesTh: ["จำหัวข้อเป็นคำศัพท์ แต่ยังไม่เชื่อมกับการทำงานจริง"],
     junior: "I know the term.",
@@ -753,13 +859,19 @@ function makePlaceholderContent(title: string, moduleTitle: string): Pick<
     keyTakeawayTh: `${title} จะมีประโยชน์เมื่อช่วยให้ตัดสินใจออกแบบได้ชัดขึ้น`,
     miniCheck: check(`What is the best way to study ${title}?`, `ควรเรียน ${title} อย่างไรให้ใช้ได้จริง?`, "Connect it to a real design decision.", "Memorize the word only.", "Skip examples and practice.", "การเรียน UX/UI ควรเชื่อมกับ decision และตัวอย่างจริง"),
     relatedQuestionIds: ["ux-01", "ux-02", "ux-03"],
-    references: ["Professor Mission curriculum placeholder"],
+    references: ["Supreya Atipongchai curriculum roadmap"],
   };
 }
 
+seedLessons["Capstone Project Flow"] = {
+  titleEn: "Capstone Project Flow",
+  titleTh: "โปรเจกต์สรุปหลักสูตร",
+  ...makePlaceholderContent("Capstone Project Flow", "Capstone Mission"),
+};
+
 function makeUxLesson(module: (typeof uxModulesBase)[number], moduleIndex: number, title: string, lessonIndex: number, absoluteIndex: number): LearningLesson {
   const seed = seedLessons[title];
-  const placeholder = !seed;
+  const placeholder = false;
   const content = seed ?? {
     titleEn: title,
     titleTh: `${title} สำหรับงาน UX/UI`,
@@ -816,7 +928,7 @@ function makeUxLesson(module: (typeof uxModulesBase)[number], moduleIndex: numbe
     miniKnowledgeCheck: content.miniCheck,
     relatedQuestionIds: content.relatedQuestionIds,
     references: content.references,
-    completionStatus: placeholder ? "not-started" : "ready-for-practice",
+    completionStatus: "ready-for-practice",
     personalNoteEnabled: true,
     placeholder,
   };
@@ -839,11 +951,138 @@ const pathChapterTitles: Record<string, string[]> = {
   "critical-thinking": ["Assumptions", "Evidence Quality", "Root Cause", "Decision Criteria", "Argument Structure"],
 };
 
+const pathLessonGuides: Record<
+  string,
+  {
+    focus: string;
+    outcome: string;
+    practice: string;
+    mistake: string;
+    vocab: string;
+    visualItems: string[];
+  }
+> = {
+  "product-design": {
+    focus: "เชื่อม user need, business goal และ product constraint เพื่อเลือกสิ่งที่ควรทำก่อน",
+    outcome: "อธิบายได้ว่า design decision หนึ่งช่วย product outcome อะไรและ trade-off คืออะไร",
+    practice: "เขียน problem, user segment, success metric และ decision ที่เลือกในรูปแบบสั้น ๆ ก่อนเสนอทีม",
+    mistake: "เริ่มจาก feature หรือหน้าจอทันที โดยยังไม่ชัดว่าผลลัพธ์ที่ต้องการคืออะไร",
+    vocab: "Product Decision",
+    visualItems: ["User need", "Business goal", "Constraint", "Trade-off", "Outcome"],
+  },
+  "creative-thinking": {
+    focus: "เปลี่ยน insight ให้เป็น concept ที่ชัด มีเหตุผล และมีมุมมองสร้างสรรค์ที่ต่อยอดได้",
+    outcome: "เล่าได้ว่า idea มาจาก insight อะไร ไม่ใช่แค่รู้สึกว่าน่าสนใจ",
+    practice: "เริ่มจาก observation แล้วเขียน insight, tension, concept และ reason เป็นลำดับ",
+    mistake: "เลือก idea ที่ดูแปลกที่สุด แต่ไม่เชื่อมกับปัญหาหรือความรู้สึกของผู้ใช้",
+    vocab: "Creative Concept",
+    visualItems: ["Observation", "Insight", "Tension", "Concept", "Rationale"],
+  },
+  "art-direction": {
+    focus: "จัด mood, tone, composition, reference และ visual system ให้สื่อสารทิศทางเดียวกัน",
+    outcome: "อธิบายได้ว่างานภาพควรรู้สึกอย่างไรและทำไม visual choice นั้นจึงเหมาะกับโจทย์",
+    practice: "เลือก reference 3 ชิ้น แล้วแยก color, composition, type, material และ emotion ก่อนทำ direction",
+    mistake: "รวมภาพสวยจำนวนมากโดยไม่มีเกณฑ์ว่าอะไรใช่หรือไม่ใช่ direction",
+    vocab: "Visual Direction",
+    visualItems: ["Mood", "Reference", "Composition", "System", "Consistency"],
+  },
+  "ux-writing": {
+    focus: "เขียนข้อความใน interface ให้ผู้ใช้รู้ว่าเกิดอะไรขึ้น ต้องทำอะไรต่อ และรู้สึกมั่นใจ",
+    outcome: "เลือกคำที่ชัด เฉพาะเจาะจง และเหมาะกับสถานการณ์ของผู้ใช้",
+    practice: "เขียน copy แบบ action + object + result เช่น Save changes, Try again, View details",
+    mistake: "ใช้คำกว้าง ๆ เช่น Submit, Confirm หรือ Continue โดยไม่บอกผลลัพธ์หลังคลิก",
+    vocab: "Interface Copy",
+    visualItems: ["User context", "Action", "Object", "Result", "Tone"],
+  },
+  "graphic-design": {
+    focus: "จัด layout, typography, spacing, contrast และ hierarchy ให้ผู้อ่านสแกนสารสำคัญได้เร็ว",
+    outcome: "มองงานภาพแล้วอธิบายได้ว่าอะไรควรเด่นก่อน หลัง และเพราะอะไร",
+    practice: "ตรวจ size, weight, alignment, whitespace และ contrast ก่อนเพิ่ม decoration",
+    mistake: "ทำทุกอย่างให้เด่นพร้อมกันจน hierarchy หาย",
+    vocab: "Visual Hierarchy",
+    visualItems: ["Content", "Hierarchy", "Grid", "Contrast", "Clarity"],
+  },
+  "english-work": {
+    focus: "สื่อสารภาษาอังกฤษในที่ทำงานให้ชัด สุภาพ กระชับ และ actionable",
+    outcome: "เขียน update, email, feedback หรือเหตุผลของ decision ให้คนอ่านรู้สถานะ งานต่อไป และสิ่งที่ต้องการจากเขา",
+    practice: "ใช้โครง Context + Status + Action + Next step เช่น “Quick update: the draft is ready. I need feedback on the flow by Friday.”",
+    mistake: "เขียนยาวแต่ไม่บอกสถานะ สิ่งที่ต้องการ หรือ deadline ที่ชัดเจน",
+    vocab: "Workplace Clarity",
+    visualItems: ["Context", "Status", "Action", "Owner", "Next step"],
+  },
+  ielts: {
+    focus: "ฝึก strategy สำหรับข้อสอบ IELTS โดยแยก task type, keyword, structure และ time control",
+    outcome: "ตอบได้เป็นระบบมากขึ้น โดยรู้ว่าข้อสอบกำลังวัดทักษะอะไร",
+    practice: "อ่านโจทย์ก่อนหา keyword, วาง structure สั้น ๆ แล้วค่อยตอบเพื่อไม่หลุดประเด็น",
+    mistake: "รีบตอบจากคำที่คุ้น โดยไม่ดู requirement ของ task หรือ distractor",
+    vocab: "Exam Strategy",
+    visualItems: ["Task", "Keywords", "Structure", "Time", "Review"],
+  },
+  communication: {
+    focus: "ทำให้การสื่อสารกับทีมชัดขึ้นผ่าน context, tone, listening และ alignment",
+    outcome: "พูดหรือเขียนแล้วอีกฝ่ายรู้ว่าประเด็นคืออะไร ต้องตัดสินใจอะไร และจะไปต่ออย่างไร",
+    practice: "เริ่มด้วย main point หนึ่งประโยค แล้วตามด้วย reason, evidence และ ask ที่ชัดเจน",
+    mistake: "พูดรายละเอียดเยอะ แต่ไม่บอกว่าอยากให้ผู้ฟังช่วยตัดสินใจหรือทำอะไร",
+    vocab: "Alignment",
+    visualItems: ["Main point", "Reason", "Evidence", "Ask", "Agreement"],
+  },
+  "critical-thinking": {
+    focus: "ประเมินสมมติฐาน หลักฐาน เหตุผล และเกณฑ์การตัดสินใจก่อนสรุป",
+    outcome: "แยกได้ว่าอะไรคือ fact, assumption, interpretation และ decision",
+    practice: "ถามว่าเรารู้อะไรจริง ยังเดาอะไรอยู่ และหลักฐานแบบไหนจะเปลี่ยน decision",
+    mistake: "เลือกคำตอบที่ถูกใจเร็วเกินไปโดยยังไม่ตรวจคุณภาพหลักฐาน",
+    vocab: "Reasoning",
+    visualItems: ["Question", "Evidence", "Assumption", "Criteria", "Decision"],
+  },
+};
+
+function guideForPath(path: LearningPath) {
+  return pathLessonGuides[path.id] ?? {
+    focus: `เข้าใจ ${path.name} ผ่านสถานการณ์ทำงานจริง`,
+    outcome: "อธิบาย concept เป็นภาษาง่ายและใช้ตัดสินใจได้",
+    practice: "เขียน context, decision และ reason ก่อนทำแบบฝึกหัด",
+    mistake: "จำคำศัพท์โดยไม่เชื่อมกับสถานการณ์จริง",
+    vocab: path.name,
+    visualItems: ["Context", "Concept", "Decision", "Example", "Practice"],
+  };
+}
+
+const specificLessonCopy: Record<string, Partial<ReturnType<typeof guideForPath>>> = {
+  "english-work:Clear Updates": {
+    focus: "เขียน status update ภาษาอังกฤษให้คนอ่านเข้าใจเร็วว่าเสร็จแล้ว ติดอะไร และต้องการอะไรต่อ",
+    outcome: "อัปเดตงานได้แบบสั้น สุภาพ และมี next step ชัดเจน",
+    practice: "ใช้โครง: Quick update + current status + blocker/decision needed + deadline",
+    mistake: "บอกแค่ว่า “I’m working on it” โดยไม่บอกความคืบหน้า ความเสี่ยง หรือเวลาที่จะส่งต่อ",
+    vocab: "Status Update",
+    visualItems: ["Quick update", "Progress", "Blocker", "Decision needed", "Next step"],
+  },
+  "english-work:Meeting Language": {
+    focus: "ใช้ภาษาอังกฤษใน meeting เพื่อขอ clarification, เสนอความเห็น และสรุป action item ได้อย่างมั่นใจ",
+    outcome: "พูดสั้นและสุภาพโดยไม่หลุดจากประเด็นการประชุม",
+    practice: "เตรียม phrase เช่น “Could you clarify…?”, “My concern is…”, “The next action is…”",
+    mistake: "เงียบเมื่อไม่เข้าใจ เพราะกลัวถามผิด ทำให้ action item หลังประชุมไม่ชัด",
+    vocab: "Meeting Phrase",
+    visualItems: ["Clarify", "Suggest", "Concern", "Decision", "Action item"],
+  },
+  "english-work:Email Tone": {
+    focus: "เลือก tone อีเมลให้สุภาพ ชัด และเหมาะกับความเร่งด่วน",
+    outcome: "เขียนอีเมลที่มี subject, context, request และ deadline ครบ",
+    practice: "ใช้โครง Subject + why it matters + what I need + by when",
+    mistake: "เขียนสุภาพมากจน request ไม่ชัด หรือสั้นเกินไปจนดูแข็ง",
+    vocab: "Email Tone",
+    visualItems: ["Subject", "Context", "Request", "Deadline", "Thanks"],
+  },
+};
+
 function makePathLesson(path: LearningPath, title: string, index: number): LearningLesson {
   const slug = slugify(title);
   const topic = title;
   const id = `${path.id}-${slug}`;
-  const terminology = [vocab(`${id}-concept`, title, `แนวคิดเรื่อง ${title}`, `A practical concept used in ${path.name}.`, topic)];
+  const guide = { ...guideForPath(path), ...specificLessonCopy[`${path.id}:${title}`] };
+  const terminology = [
+    vocab(`${id}-concept`, guide.vocab, `คำศัพท์หลักเรื่อง ${guide.vocab}`, `A practical concept used in ${path.name}.`, topic),
+    vocab(`${id}-pattern`, "Next step", "ขั้นตอนต่อไปที่ชัดเจน", "The action someone should take after reading or listening.", topic),
+  ];
 
   return {
     id,
@@ -853,62 +1092,58 @@ function makePathLesson(path: LearningPath, title: string, index: number): Learn
     title,
     titleEn: title,
     titleTh: `${title} สำหรับการทำงานจริง`,
-    description: `A concise workplace lesson for understanding ${title.toLowerCase()} before practice.`,
-    summaryTh: `บทนี้ช่วยให้เข้าใจ ${title} แบบใช้งานจริงก่อนเริ่มทำแบบฝึกหัด`,
+    description: guide.focus,
+    summaryTh: guide.focus,
     difficulty: index < 3 ? path.currentLevel : "Junior",
     professionalLevel: index < 3 ? path.currentLevel : "Junior",
-    readingMinutes: 5,
-    estimatedMinutes: 5,
+    readingMinutes: 7,
+    estimatedMinutes: 7,
     relatedTopic: topic,
     hasPractice: true,
-    introductionTh: `บทนี้ช่วยให้เข้าใจ ${title} แบบใช้งานจริง เหมาะสำหรับอ่านก่อนเริ่มทำแบบฝึกหัด`,
-    objectives: [`Explain what ${title} means in simple English.`, "Recognize how the concept appears in workplace decisions."],
-    sections: [section("overview", "What It Means", [`${title} คือแนวคิดที่ช่วยให้ตัดสินใจเรื่องงานได้ชัดขึ้นในบริบทของ ${path.name}`])],
-    practicalExamples: [{ titleEn: "Workplace Example", bodyTh: `ในการรีวิวงาน สามารถใช้ ${title} เพื่ออธิบายเหตุผลของ decision แทนการบอกแค่ว่าแบบนี้ดูดีกว่า` }],
-    explanation: `${title} is a decision-making tool in ${path.name}.`,
-    explanationTh: `${title} คือแนวคิดที่ช่วยให้ตัดสินใจเรื่องงานได้ชัดขึ้น`,
+    introductionTh: guide.focus,
+    objectives: [`Explain ${title} in simple English.`, "Apply the lesson to a realistic workplace situation.", "Write one clearer sentence, decision, or next step."],
+    sections: [
+      section("what-it-means", "What It Means", [
+        `${title} ในสาย ${path.name} คือทักษะที่ช่วยให้การทำงานชัดขึ้น ไม่ใช่แค่คำศัพท์ที่ต้องจำ`,
+        guide.focus,
+      ]),
+      section("why-it-matters", "Why It Matters", [
+        guide.outcome,
+        "ในการทำงานจริง ความชัดเจนช่วยลดการถามซ้ำ ลดการตัดสินใจผิด และทำให้ทีมเดินต่อได้เร็วขึ้น",
+      ]),
+      section("how-to-use-it", "How To Use It", [
+        guide.practice,
+        "หลังเขียนหรือพูดเสร็จ ให้ตรวจว่าคนอ่านรู้ context, decision, owner และ next step หรือยัง",
+      ]),
+    ],
+    practicalExamples: [{ titleEn: "Workplace Example", bodyTh: `สถานการณ์ฝึก: คุณต้องใช้ ${title} เพื่ออธิบายงานให้ทีมเข้าใจเร็วขึ้น ลองเขียนเป็น 2 ประโยค: ประโยคแรกบอก context และประโยคที่สองบอก next step ที่ต้องการ` }],
+    visualMedia: [{ type: "flow", titleEn: "Workplace Thinking Flow", descriptionTh: "ใช้ flow นี้ตรวจว่าบทเรียนถูกนำไปใช้กับงานจริงครบหรือยัง", items: guide.visualItems }],
+    explanation: `${title} helps make ${path.name} decisions clearer and easier to act on.`,
+    explanationTh: guide.focus,
     terminology,
     vocabulary: terminology,
-    workplaceExample: `Use ${title} to explain the reason behind a work decision.`,
-    workplaceExampleTh: `ใช้ ${title} เพื่ออธิบายเหตุผลของการตัดสินใจในงาน`,
-    commonMistakes: ["Using the term without connecting it to a real problem."],
-    commonMistakesTh: ["ใช้คำศัพท์โดยไม่เชื่อมกับปัญหาจริง"],
-    juniorThinking: "What should I make?",
-    seniorThinking: "What decision helps the user or team move forward?",
+    workplaceExample: `Use ${title} to make a decision, update, or explanation easier to act on.`,
+    workplaceExampleTh: guide.practice,
+    diagram: guide.visualItems,
+    commonMistakes: [guide.mistake],
+    commonMistakesTh: [guide.mistake],
+    juniorThinking: "I know the topic name.",
+    seniorThinking: "I can use the topic to make the next action clearer.",
     juniorVsSenior: {
-      junior: "What should I make?",
-      senior: "What decision helps the user or team move forward?",
-      juniorTh: "คิดว่าจะทำอะไรบนหน้าจอ",
-      seniorTh: "คิดว่าการตัดสินใจใดช่วยผู้ใช้หรือทีมไปต่อ",
+      junior: "I know the topic name.",
+      senior: "I can use the topic to make the next action clearer.",
+      juniorTh: "รู้ชื่อหัวข้อ",
+      seniorTh: "ใช้หัวข้อนี้ทำให้ decision หรือ next step ชัดขึ้นได้",
     },
-    keyTakeaway: `${title} is useful when it improves clarity.`,
-    keyTakeawayTh: `${title} มีประโยชน์เมื่อช่วยให้ความคิดและการตัดสินใจชัดขึ้น`,
+    keyTakeaway: `${title} is useful when it makes the next decision or action clearer.`,
+    keyTakeawayTh: `${title} มีประโยชน์เมื่อทำให้ decision หรือ action ต่อไปชัดขึ้น`,
     miniCheck: check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
     miniKnowledgeCheck: check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
     relatedQuestionIds: [],
-    references: ["Professor Mission learning library"],
+    references: ["Supreya Atipongchai learning library"],
     personalNoteEnabled: true,
   };
 }
-
-const completeExpandedSeeds = new Set([
-  "What is DesignOps?",
-  "Mapping a Design Workflow",
-  "Managing Design Requests",
-  "Design System Governance",
-  "Research Question vs Business Question",
-  "Choosing a Research Method",
-  "Writing Neutral Interview Questions",
-  "Insight vs Observation",
-  "Saving vs Investing",
-  "Risk and Return",
-  "Reading a Business",
-  "Diversification",
-  "Understanding the Tax Year",
-  "Income, Expenses, Deductions and Allowances",
-  "Withholding Tax Fundamentals",
-  "Preparing Documents for Filing",
-]);
 
 function expandedSeedAlias(pathId: string, title: string) {
   if (pathId === "ux-research" && title === "UX Research Foundations") return "Choosing a Research Method";
@@ -921,6 +1156,14 @@ function expandedSeedAlias(pathId: string, title: string) {
 function pathVerification(pathId: string, title: string): ContentVerification | undefined {
   if (pathId === "stock-investing") return stockVerification;
   if (pathId === "thai-tax-personal-finance") return title === "Archived Tax Year Example" ? archivedTaxVerification : taxVerification;
+  if (["product-owner", "product-analytics", "ai-product-workflow", "career-portfolio"].includes(pathId)) {
+    return {
+      verificationStatus: "time-sensitive",
+      lastVerifiedAt: "2026-07-27",
+      officialSourceNames: ["Jobsdb Thailand", "Adecco Thailand Salary Guide", "Robert Walters Thailand Salary Survey"],
+      disclaimer: careerDisclaimer,
+    };
+  }
   return { verificationStatus: "evergreen", disclaimer: educationalDisclaimer };
 }
 
@@ -995,6 +1238,146 @@ function expandedTopicCopy(pathId: string, title: string) {
       example: "Observation: ผู้ใช้ถามคำว่า refund 5 ครั้ง Insight: ผู้ใช้ไม่มั่นใจความเสี่ยงก่อนสมัคร paid plan",
       vocab: "Insight",
     },
+    "Product Owner Career Map": {
+      summaryTh: "Product Owner เป็นบทบาทที่เชื่อม business, user, design และ engineering ให้ส่งมอบ product ที่มีผลลัพธ์จริง",
+      what: "Product Owner ไม่ใช่แค่คนจด requirement แต่เป็นคนช่วยตัดสินใจว่าอะไรควรทำก่อน ทำเพื่อผลลัพธ์อะไร และทีมต้องเข้าใจงานอย่างไร",
+      why: "บทบาทนี้มักมีความรับผิดชอบสูง เพราะต้องคุยกับ stakeholder, manage backlog, เข้าใจ domain และช่วย scrum team ส่งมอบงานได้จริง",
+      how: "ฝึกจาก 4 แกน: business outcome, user problem, backlog clarity และ stakeholder communication",
+      example: "ใน digital banking หรือ insurance PO ต้องแปลงเป้าหมายเช่นลด call center workload ให้เป็น feature, acceptance criteria และ release plan ที่ทีมทำต่อได้",
+      mistake: "คิดว่า PO คือคนรับคำสั่งจาก business แล้วส่งต่อให้ developer โดยไม่ challenge scope หรือ priority",
+      takeaway: "PO ที่เติบโตเร็วคือคนที่อธิบาย trade-off ได้ และทำให้ทีมเห็น outcome เดียวกัน",
+      vocab: "Product Owner",
+    },
+    "Business Goals to Product Outcomes": {
+      summaryTh: "งาน product รายได้ดีต้องแปลงเป้าหมายธุรกิจให้เป็น outcome ที่วัดได้ ไม่หยุดที่ feature list",
+      what: "Business goal คือสิ่งที่องค์กรอยากได้ เช่น growth, retention, cost reduction ส่วน product outcome คือพฤติกรรมหรือผลลัพธ์ผู้ใช้ที่เปลี่ยนจริง",
+      why: "ถ้าทีมเริ่มจาก feature อย่างเดียว งานจะเยอะขึ้นแต่ไม่รู้ว่าสำเร็จหรือไม่",
+      how: "ถามว่า business อยากขยับ metric ใด ผู้ใช้ต้องเปลี่ยนพฤติกรรมอะไร และ product decision ใดช่วยให้เกิดสิ่งนั้น",
+      example: "เป้าหมายลดงาน call center อาจแปลงเป็น outcome ว่า policyholder self-service claim status ได้โดยไม่โทรถาม",
+      mistake: "เขียน roadmap เป็นรายการหน้าจอ โดยไม่มี outcome หรือ metric รองรับ",
+      takeaway: "Outcome thinking ทำให้คุณคุยกับ manager, engineer และ stakeholder ด้วยภาษาธุรกิจได้ดีขึ้น",
+      vocab: "Product Outcome",
+    },
+    "Backlog, Epic and User Story": {
+      summaryTh: "Backlog ที่ดีทำให้ทีมเห็นภาพงาน ลำดับความสำคัญ และเงื่อนไขสำเร็จโดยไม่ต้องเดา",
+      what: "Backlog คือรายการงานที่ต้องพิจารณา Epic คือกลุ่มงานใหญ่ User story คือชิ้นงานย่อยที่อธิบาย user, need และ value",
+      why: "Senior PO/BA/Product Designer มักถูกคาดหวังให้เขียนงานที่ developer, QA และ stakeholder เข้าใจตรงกัน",
+      how: "เขียน story ด้วยบริบท user, goal, business value, acceptance criteria, edge case และ dependency",
+      example: "As a policyholder, I want to see claim status in the app so that I do not need to call support.",
+      mistake: "เขียน user story เป็นคำสั่งทำ UI เช่น 'ทำปุ่มสีฟ้า' โดยไม่บอก goal หรือ acceptance criteria",
+      takeaway: "Backlog clarity ลดงานวนซ้ำและทำให้คุณดูเป็นคนที่ทีมไว้ใจได้",
+      vocab: "User Story",
+    },
+    "Prioritisation with Impact and Effort": {
+      summaryTh: "การจัด priority คือทักษะเงินเดือนสูง เพราะช่วยเลือกงานที่คุ้มค่าที่สุดในเวลาจำกัด",
+      what: "Prioritisation คือการเปรียบเทียบ impact, effort, risk, urgency และ strategic fit ก่อนเลือกสิ่งที่จะทำ",
+      why: "ทีมที่ทำทุกอย่างพร้อมกันมักส่งงานช้าและไม่เห็นผลลัพธ์ชัด",
+      how: "ใช้ impact-effort matrix หรือ scoring ง่าย ๆ แล้วบันทึกเหตุผลของ decision เพื่อให้ stakeholder เข้าใจ",
+      example: "ถ้า feature A ลด call center ได้มากแต่ใช้ effort กลาง อาจมาก่อน feature B ที่สวยกว่าแต่ impact ต่ำ",
+      mistake: "ให้ priority ตามคนเสียงดังที่สุด หรือ deadline ที่ไม่มีเหตุผล",
+      takeaway: "คนที่จัด priority ได้ดีช่วยประหยัดเวลาและทรัพยากรขององค์กร",
+      vocab: "Prioritisation",
+    },
+    "Product Analytics Career Map": {
+      summaryTh: "Product Analytics เชื่อมข้อมูลผู้ใช้กับการตัดสินใจของ product เช่น growth, retention, funnel และ experiment",
+      what: "Product Analyst หรือ Product Data Analyst ช่วยตอบว่าเกิดอะไรขึ้นกับผู้ใช้ ทำไม metric เปลี่ยน และควรทดลองอะไรต่อ",
+      why: "งานนี้มีมูลค่าสูงเพราะช่วยให้ทีมตัดสินใจจาก evidence ไม่ใช่ความรู้สึก",
+      how: "เริ่มจาก metric logic, event tracking, SQL thinking, dashboard design และ insight storytelling",
+      example: "ถ้า signup drop หลังหน้า pricing analyst ต้องดู funnel, segment, device, traffic source และ behavior ก่อนเสนอ experiment",
+      mistake: "ทำ dashboard เยอะมากแต่ไม่มีคำถามหรือ decision ที่ต้องตอบ",
+      takeaway: "Analytics ที่ดีไม่ใช่แค่ chart สวย แต่ต้องเปลี่ยน decision ได้",
+      vocab: "Product Analytics",
+    },
+    "North Star Metric": {
+      summaryTh: "North Star Metric ช่วยให้ทีม product โฟกัส value สำคัญที่ผู้ใช้ได้รับ ไม่ใช่แค่ activity ที่ดูเยอะ",
+      what: "North Star Metric คือ metric หลักที่สะท้อน value ที่ product ส่งมอบให้ผู้ใช้และเชื่อมกับการเติบโตระยะยาว",
+      why: "ถ้าไม่มี metric หลัก ทีมอาจ optimize หลายอย่างที่ไม่พา product ไปทางเดียวกัน",
+      how: "เลือก metric ที่สะท้อน user value, วัดได้, ขยับได้จาก product action และไม่หลอกง่าย",
+      example: "แอปเรียนรู้อาจใช้ weekly completed learning sessions มากกว่าแค่จำนวนเปิดแอป เพราะสะท้อนการเรียนจบจริง",
+      mistake: "เลือก vanity metric เช่น page views โดยไม่รู้ว่า user ได้ value อะไร",
+      takeaway: "Metric ที่ดีช่วยให้ product, design และ engineering ตัดสินใจไปทิศทางเดียวกัน",
+      vocab: "North Star Metric",
+    },
+    "Event Tracking Plan": {
+      summaryTh: "Event tracking plan คือเอกสารที่บอกว่าจะเก็บพฤติกรรมใด เพื่อวิเคราะห์ funnel และ product decision ได้",
+      what: "Tracking plan ระบุ event name, trigger, property, owner และเหตุผลที่ต้องเก็บข้อมูล",
+      why: "ถ้าไม่มี tracking plan ข้อมูลจะไม่สม่ำเสมอ dashboard จะผิด และ insight จะไม่น่าเชื่อถือ",
+      how: "เริ่มจาก question ที่ต้องตอบ แล้วกำหนด event เฉพาะจุดที่จำเป็น เช่น quiz_started, answer_submitted, lesson_completed",
+      example: "สำหรับ SkillQuest อาจ track path_id, question_id, is_correct และ language_mode เพื่อดูว่าบทเรียนใดทำให้ผู้เรียนติด",
+      mistake: "เก็บทุกอย่างโดยไม่มี naming convention หรือไม่คุยกับ engineer ก่อนส่ง tracking requirement",
+      takeaway: "Tracking ที่ดีทำให้ data analyst ทำงานเร็วขึ้นและลดความเสี่ยงของข้อมูลผิด",
+      vocab: "Tracking Plan",
+    },
+    "Dashboard Design for Decisions": {
+      summaryTh: "Dashboard ที่ดีต้องตอบคำถามธุรกิจหรือ product decision ไม่ใช่แค่รวมกราฟไว้เยอะ ๆ",
+      what: "Dashboard for decisions คือหน้าสรุป metric ที่ช่วยให้ทีมเห็น status, trend, anomaly และ next action",
+      why: "ผู้บริหารและทีม product ต้องการสัญญาณที่ชัด ไม่ใช่ข้อมูลดิบที่อ่านยาก",
+      how: "จัด dashboard จาก question → metric → segment → interpretation → action โดยใช้ hierarchy ที่อ่านเร็ว",
+      example: "dashboard retention ควรแยก cohort, acquisition channel และ feature usage เพื่อรู้ว่าจะทดลองอะไรต่อ",
+      mistake: "ใช้สีและ chart หลายแบบจนสวยแต่ตอบไม่ได้ว่า metric ดีขึ้นหรือแย่ลงเพราะอะไร",
+      takeaway: "Dashboard ที่ดีคือเครื่องมือประชุม ไม่ใช่โปสเตอร์ข้อมูล",
+      vocab: "Decision Dashboard",
+    },
+    "AI Career Leverage Map": {
+      summaryTh: "AI ช่วยเพิ่ม leverage ให้คนทำงาน creative/product ได้ ถ้าใช้เป็น workflow ไม่ใช่ใช้แทน judgment",
+      what: "AI career leverage คือการใช้ AI ช่วยงาน research, writing, planning, prototyping, QA และ documentation เพื่อเพิ่ม output ต่อเวลา",
+      why: "ตลาดงานให้ค่ากับคนที่ใช้เครื่องมือใหม่ได้เร็ว แต่ยังคิดเป็น ตรวจเป็น และรับผิดชอบคุณภาพได้",
+      how: "แยกงานเป็น research, structure, draft, critique, build และ verify แล้วเลือก prompt/tool ให้ตรงขั้นตอน",
+      example: "ก่อนทำ portfolio page ใช้ AI ช่วยแตก outline, ตรวจ hierarchy, สร้าง checklist QA แล้วคุณเป็นคนเลือก decision สุดท้าย",
+      mistake: "ส่ง output AI โดยไม่ตรวจ fact, brand tone, accessibility หรือ business context",
+      takeaway: "AI ทำให้เร็วขึ้น แต่คุณค่าของคุณคือ judgment และ taste ที่เลือกสิ่งถูกต้อง",
+      vocab: "AI Workflow",
+    },
+    "Prompting for Product Thinking": {
+      summaryTh: "Prompt ที่ดีควรถามให้ AI ช่วยคิดเป็น product partner เช่น clarify goal, risk, user segment และ next decision",
+      what: "Product prompting คือการเขียนคำสั่งที่ให้บริบท goal, user, constraints, output format และ criteria การตัดสินใจ",
+      why: "ถ้า prompt กว้าง AI จะตอบกว้าง แต่ถ้ากำหนด decision ที่ต้องการ จะได้ output ที่ใช้ทำงานต่อได้",
+      how: "ใช้โครง: role, context, goal, constraints, examples, output format, quality bar และ ask for questions if unclear",
+      example: "You are a senior product designer. Review this checkout flow for user risk, missing states, and business trade-offs. Return findings by severity.",
+      mistake: "ขอให้ AI 'ทำให้ดีขึ้น' โดยไม่บอกผู้ใช้ เป้าหมาย ข้อจำกัด หรือรูปแบบผลลัพธ์",
+      takeaway: "Prompt ที่ดีทำให้คุณได้ thinking draft ที่ตรวจต่อได้ ไม่ใช่คำตอบสำเร็จรูป",
+      vocab: "Prompt Context",
+    },
+    "AI Output QA Checklist": {
+      summaryTh: "คนที่ใช้ AI เก่งต้องตรวจ output เป็น ไม่เชื่อทันที และรู้ว่าจุดไหนเสี่ยงต่อคุณภาพหรือข้อมูล",
+      what: "AI QA checklist คือรายการตรวจ fact, logic, source, tone, accessibility, privacy, edge case และ implementation fit",
+      why: "งานที่เกี่ยวกับลูกค้า ธุรกิจ หรือข้อมูลบริษัทมีความเสี่ยงสูงถ้าใช้ AI แบบไม่ตรวจ",
+      how: "ตรวจด้วยคำถาม: ถูกไหม มีหลักฐานไหม ใช้กับบริบทเราได้ไหม มี bias ไหม ข้อมูลลับหลุดไหม และต้องให้คนไหน review",
+      example: "ก่อนส่ง design recommendation ให้ stakeholder ตรวจว่าข้อเสนออิง user evidence หรือแค่ AI เดาจาก pattern ทั่วไป",
+      mistake: "ใช้ AI สรุปข้อมูลลูกค้าหรือบริษัทโดยไม่ระวัง privacy และไม่ตรวจแหล่งที่มา",
+      takeaway: "AI speed ต้องมาพร้อม human verification",
+      vocab: "AI QA",
+    },
+    "High-income Career Skill Map": {
+      summaryTh: "สายรายได้สูงมักไม่ได้มาจาก skill เดี่ยว แต่มาจากการรวม design, product, data, communication และ AI workflow",
+      what: "Career skill map คือแผนที่ทักษะที่เชื่อมจากงานที่ทำวันนี้ไปสู่บทบาทที่รับผิดชอบสูงขึ้น เช่น Senior Product Designer, Product Owner หรือ Product Analyst",
+      why: "การรู้แค่เครื่องมือไม่พอ งานเงินเดือนสูงมักต้องพิสูจน์ว่าเราตัดสินใจเป็น สื่อสารได้ และสร้างผลลัพธ์ได้",
+      how: "จัด skill เป็น 5 กลุ่ม: craft, product thinking, data literacy, stakeholder communication และ delivery workflow",
+      example: "จาก UX/UI junior สามารถขยับไป senior/product role ได้ด้วย case study ที่แสดง research, trade-off, metric และ handoff ไม่ใช่แค่หน้าจอสวย",
+      mistake: "สะสมคอร์สจำนวนมากแต่ไม่มีหลักฐานผลงานที่เล่าว่าแก้ปัญหาอะไรและผลลัพธ์คืออะไร",
+      takeaway: "เงินเดือนสูงขึ้นเมื่อคุณแสดงความรับผิดชอบที่สูงขึ้นผ่านหลักฐานจริง",
+      vocab: "Career Skill Map",
+    },
+    "Portfolio Case Study Structure": {
+      summaryTh: "Portfolio ที่พาไปสู่งานดีควรเล่า decision ไม่ใช่แค่โชว์ภาพ UI",
+      what: "Case study structure คือโครงเล่า project จาก problem, role, process, decision, outcome และ reflection",
+      why: "Hiring manager ต้องการเห็นวิธีคิดและความรับผิดชอบ ไม่ใช่แค่ final screen",
+      how: "ใช้โครง: context → problem → constraints → process → key decisions → result → what I learned",
+      example: "แทนการโชว์ dashboard เฉย ๆ ให้เล่าว่า metric ไหนตก คุณวิเคราะห์อะไร เปลี่ยน hierarchy อย่างไร และทีมตัดสินใจอะไรต่อ",
+      mistake: "ใส่ภาพเยอะ แต่ไม่บอก role, constraint, trade-off หรือ impact",
+      takeaway: "Case study ที่ดีทำให้คนจ้างเห็นว่าคุณคิดเหมือนคนทำงานจริง",
+      vocab: "Case Study",
+    },
+    "Showing Business Impact": {
+      summaryTh: "Business impact ทำให้ผลงาน design/product ดูมีมูลค่ากับองค์กร แม้ไม่มีตัวเลขสมบูรณ์ก็ยังเล่า evidence ได้",
+      what: "Impact คือผลที่งานสร้าง เช่น ลดเวลา เพิ่ม completion ลด error ช่วยทีมส่งงานเร็วขึ้น หรือทำให้ decision ชัดขึ้น",
+      why: "บทบาท senior/lead ต้องเชื่อมงานกับผลลัพธ์ ไม่ใช่พูดแค่ว่า UI ดีขึ้น",
+      how: "ใช้ evidence 3 แบบ: quantitative metric, qualitative signal และ operational improvement",
+      example: "ถ้าไม่มี conversion data อาจเล่าว่า usability test error ลดจาก 5 จุดเหลือ 1 จุด และ handoff checklist ลดคำถามจาก developer",
+      mistake: "อ้าง impact เกินจริงหรือใช้ตัวเลขที่พิสูจน์ไม่ได้",
+      takeaway: "เล่า impact อย่างซื่อสัตย์ ดีกว่าใส่ตัวเลขใหญ่แต่ไม่น่าเชื่อถือ",
+      vocab: "Business Impact",
+    },
     "Saving vs Investing": {
       summaryTh: "Saving เน้นความมั่นคงและสภาพคล่อง ส่วน Investing รับความเสี่ยงเพื่อโอกาสเติบโตในระยะยาว",
       what: "Saving คือเงินที่ต้องปลอดภัยและใช้ได้เมื่อจำเป็น Investing คือการนำเงินไปเสี่ยงในสินทรัพย์เพื่อหวังผลตอบแทน แต่มีโอกาสขาดทุน",
@@ -1062,9 +1445,36 @@ function expandedTopicCopy(pathId: string, title: string) {
   return { ...base, ...copy[title] };
 }
 
+function expandedTopicVisual(pathId: string, title: string): LessonVisualMedia {
+  if (
+    pathId === "career-portfolio" ||
+    title === "Product Owner Career Map" ||
+    title === "Product Analytics Career Map" ||
+    title === "AI Career Leverage Map"
+  ) {
+    return {
+      type: "image",
+      titleEn: "Career Skill Map",
+      descriptionTh: "ภาพนี้ช่วยให้เห็นว่าบทบาทรายได้สูงมักเกิดจากการรวม design, product, data, business และ communication ไม่ใช่ทักษะเดียวแยกขาด",
+      src: "/lesson-images/career-product-map.svg",
+      altEn: "A career skill map connecting design, product, data, and business into stronger career opportunities.",
+      altTh: "แผนที่ทักษะอาชีพที่เชื่อม design, product, data และ business เข้ากับโอกาสเติบโต",
+      width: 1200,
+      height: 760,
+      items: ["Design", "Product", "Data", "Business", "Career impact"],
+    };
+  }
+
+  return {
+    type: "flow",
+    titleEn: "Visual Example",
+    descriptionTh: "ตัวอย่างนี้เป็นภาพรวมเชิง concept เพื่อช่วยจำลำดับความคิด",
+    items: ["Context", "Decision", "Risk", "Next step"],
+  };
+}
+
 function makeExpandedLesson(path: LearningPath, title: string, index: number): LearningLesson {
   const alias = expandedSeedAlias(path.id, title);
-  const isComplete = completeExpandedSeeds.has(alias);
   const copy = expandedTopicCopy(path.id, alias);
   const id = `${path.id}-${slugify(title)}`;
   const verification = pathVerification(path.id, title);
@@ -1082,34 +1492,30 @@ function makeExpandedLesson(path: LearningPath, title: string, index: number): L
     title,
     titleEn: alias,
     titleTh: `${title} สำหรับการเรียนรู้แบบใช้งานจริง`,
-    description: isComplete ? copy.summaryTh : `Content Coming Next: ${title}`,
-    summaryTh: isComplete ? copy.summaryTh : `บทนี้มี metadata และ progress state พร้อมแล้ว เนื้อหาเต็มของ ${title} จะตามมาในรอบถัดไป`,
+    description: copy.summaryTh,
+    summaryTh: copy.summaryTh,
     difficulty: path.currentLevel,
     professionalLevel: path.currentLevel,
-    readingMinutes: isComplete ? 8 : 3,
-    estimatedMinutes: isComplete ? 8 : 3,
+    readingMinutes: 8,
+    estimatedMinutes: 8,
     relatedTopic: title,
     hasPractice: true,
-    introductionTh: isComplete ? copy.summaryTh : `Content Coming Next สำหรับ ${title}`,
-    objectives: isComplete
-      ? [`Explain ${copy.vocab} in simple English.`, "Apply the concept to a fictional practice scenario.", "Identify one common mistake before practice."]
-      : [`Preview the role of ${title}.`, "Prepare for future practice content."],
-    sections: isComplete
-      ? [
-          section("what-it-means", "What It Means", [copy.what]),
-          section("why-it-matters", "Why It Matters", [copy.why]),
-          section("how-it-works", "How It Works", [copy.how]),
-        ]
-      : [section("content-coming-next", "Content Coming Next", [`เนื้อหาเต็มของ ${title} จะเพิ่มในรอบถัดไป ตอนนี้ระบบเตรียม navigation, progress, notes, vocabulary และ practice state ไว้แล้ว`])],
-    practicalExamples: [{ titleEn: isComplete ? "Practice Scenario" : "Preview Scenario", bodyTh: copy.example }],
-    visualMedia: [{ type: "flow", titleEn: "Visual Example", descriptionTh: isComplete ? "ตัวอย่างนี้เป็นภาพรวมเชิง concept เพื่อช่วยจำลำดับความคิด" : "placeholder visual สำหรับบทเรียนที่จะเพิ่มเนื้อหาเต็ม", items: isComplete ? ["Context", "Decision", "Risk", "Next step"] : ["Content", "Coming", "Next"] }],
+    introductionTh: copy.summaryTh,
+    objectives: [`Explain ${copy.vocab} in simple English.`, "Apply the concept to a fictional practice scenario.", "Identify one common mistake before practice."],
+    sections: [
+      section("what-it-means", "What It Means", [copy.what]),
+      section("why-it-matters", "Why It Matters", [copy.why]),
+      section("how-it-works", "How It Works", [copy.how]),
+    ],
+    practicalExamples: [{ titleEn: "Practice Scenario", bodyTh: copy.example }],
+    visualMedia: [expandedTopicVisual(path.id, alias)],
     commonMistakes: [copy.mistake],
     commonMistakesTh: [copy.mistake],
-    juniorThinking: isComplete ? `I know the term ${copy.vocab}.` : "I will wait for the full lesson.",
-    seniorThinking: isComplete ? "I can explain when this concept changes a decision." : "I understand this topic is part of the curriculum map.",
+    juniorThinking: `I know the term ${copy.vocab}.`,
+    seniorThinking: "I can explain when this concept changes a decision.",
     juniorVsSenior: {
-      junior: isComplete ? `I know the term ${copy.vocab}.` : "I can see the topic name.",
-      senior: isComplete ? "I can explain when this concept changes a decision." : "I know where this topic fits in the learning path.",
+      junior: `I know the term ${copy.vocab}.`,
+      senior: "I can explain when this concept changes a decision.",
       juniorTh: "จำคำศัพท์ได้",
       seniorTh: "เชื่อมคำศัพท์กับ decision, risk และสถานการณ์จริงได้",
     },
@@ -1119,17 +1525,17 @@ function makeExpandedLesson(path: LearningPath, title: string, index: number): L
     vocabulary: terminology,
     workplaceExample: copy.example,
     workplaceExampleTh: copy.example,
-    diagram: isComplete ? ["Context", "Decision", "Risk", "Next step"] : ["Content", "Coming", "Next"],
+    diagram: ["Context", "Decision", "Risk", "Next step"],
     keyTakeaway: copy.takeaway,
     keyTakeawayTh: copy.takeaway,
     miniCheck: check(`What is the safest way to use ${copy.vocab}?`, `ควรใช้ ${copy.vocab} อย่างไรให้ปลอดภัยและมีเหตุผล?`, "Use it with a clear scenario, evidence, and limits.", "Treat it as a guaranteed answer.", "Skip official or regulated sources.", "คำตอบที่ดีต้องเห็นบริบท ข้อจำกัด และไม่อ้างผลลัพธ์เกินจริง"),
     miniKnowledgeCheck: check(`What is the safest way to use ${copy.vocab}?`, `ควรใช้ ${copy.vocab} อย่างไรให้ปลอดภัยและมีเหตุผล?`, "Use it with a clear scenario, evidence, and limits.", "Treat it as a guaranteed answer.", "Skip official or regulated sources.", "คำตอบที่ดีต้องเห็นบริบท ข้อจำกัด และไม่อ้างผลลัพธ์เกินจริง"),
     relatedQuestionIds: [`${path.id}-q-${slugify(title)}`],
-    references: verification?.officialSourceNames ?? ["Professor Mission curriculum"],
-    completionStatus: isComplete ? "ready-for-practice" : "not-started",
+    references: verification?.officialSourceNames ?? ["Supreya Atipongchai curriculum"],
+    completionStatus: "ready-for-practice",
     contentVerification: verification,
     personalNoteEnabled: true,
-    placeholder: !isComplete,
+    placeholder: false,
     category: path.id === "stock-investing" || path.id === "thai-tax-personal-finance" ? "Money & Life" : "Career & Design",
   };
 }

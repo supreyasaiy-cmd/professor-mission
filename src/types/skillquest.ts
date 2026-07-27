@@ -11,6 +11,10 @@ export type LearningPathName =
   | "Critical Thinking"
   | "DesignOps"
   | "UX Research"
+  | "Product Owner"
+  | "Product Analytics"
+  | "AI Product Workflow"
+  | "Career Portfolio"
   | "Stock Investing"
   | "Thai Tax & Personal Finance";
 
@@ -123,9 +127,14 @@ export interface LessonPracticalExample {
 }
 
 export interface LessonVisualMedia {
-  type: "diagram" | "figma-grid-cheat-sheet" | "flow";
+  type: "diagram" | "figma-grid-cheat-sheet" | "flow" | "image";
   titleEn: string;
   descriptionTh: string;
+  src?: string;
+  altEn?: string;
+  altTh?: string;
+  width?: number;
+  height?: number;
   items?: string[];
 }
 

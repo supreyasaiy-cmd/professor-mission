@@ -110,7 +110,7 @@ function QuestionImage({
               <div>
                 <Soft3DIcon name="actionZoom" size="md" decorative shadow={false} className="mx-auto" />
                 <p className="mt-3 text-sm font-semibold text-[var(--text-primary)]">Image unavailable</p>
-                <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{image.altEn}</p>
+                <p className="font-subtitle mt-1 text-xs leading-5 text-[var(--text-secondary)]">{image.altEn}</p>
               </div>
             </div>
           )}
@@ -118,8 +118,8 @@ function QuestionImage({
       </button>
       {image.captionEn || image.captionTh ? (
         <figcaption className="border-t border-[var(--border)] px-4 py-3">
-          {showEnglish && image.captionEn ? <p className="text-xs leading-5 text-[var(--text-secondary)]">{image.captionEn}</p> : null}
-          {showThai && image.captionTh ? <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{image.captionTh}</p> : null}
+          {showEnglish && image.captionEn ? <p className="font-subtitle text-xs leading-5 text-[var(--text-secondary)]">{image.captionEn}</p> : null}
+          {showThai && image.captionTh ? <p className="font-subtitle mt-1 text-xs leading-6 text-[var(--text-secondary)]">{image.captionTh}</p> : null}
         </figcaption>
       ) : null}
     </figure>
@@ -179,8 +179,8 @@ function ImageZoomDialog({
         </div>
         {image.captionEn || image.captionTh ? (
           <div className="px-2 pt-3">
-            {showEnglish && image.captionEn ? <p className="text-sm leading-6 text-[var(--text-secondary)]">{image.captionEn}</p> : null}
-            {showThai && image.captionTh ? <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">{image.captionTh}</p> : null}
+            {showEnglish && image.captionEn ? <p className="font-subtitle text-sm leading-6 text-[var(--text-secondary)]">{image.captionEn}</p> : null}
+            {showThai && image.captionTh ? <p className="font-subtitle mt-1 text-sm leading-7 text-[var(--text-secondary)]">{image.captionTh}</p> : null}
           </div>
         ) : null}
       </div>

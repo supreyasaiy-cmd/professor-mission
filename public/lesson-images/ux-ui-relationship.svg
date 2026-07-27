@@ -1,0 +1,34 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="64" fill="#F8F8F6"/>
+  <rect x="44" y="44" width="1112" height="672" rx="48" fill="url(#bg)" stroke="#171717" stroke-opacity=".08"/>
+  <path d="M178 392C178 250 292 136 434 136C576 136 690 250 690 392C690 534 576 648 434 648C292 648 178 534 178 392Z" fill="url(#ux)" stroke="#171717" stroke-opacity=".12"/>
+  <path d="M510 392C510 250 624 136 766 136C908 136 1022 250 1022 392C1022 534 908 648 766 648C624 648 510 534 510 392Z" fill="url(#ui)" stroke="#171717" stroke-opacity=".12"/>
+  <path d="M600 187C655 234 690 308 690 392C690 476 655 550 600 597C545 550 510 476 510 392C510 308 545 234 600 187Z" fill="white" fill-opacity=".64" stroke="#171717" stroke-opacity=".1"/>
+  <text x="434" y="334" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="700" fill="#171717">UX</text>
+  <text x="434" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" fill="#666766">Goal, flow, context</text>
+  <text x="766" y="334" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="700" fill="#171717">UI</text>
+  <text x="766" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" fill="#666766">Screen, state, visual</text>
+  <text x="600" y="432" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#171717">Clear action</text>
+  <g filter="url(#shadow)">
+    <rect x="400" y="500" width="400" height="86" rx="43" fill="#171717"/>
+    <text x="600" y="554" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="white">Experience users can complete</text>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="70" x2="1116" y2="714" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".45" stop-color="#ECFBFF"/>
+      <stop offset="1" stop-color="#F7EEF8"/>
+    </linearGradient>
+    <linearGradient id="ux" x1="208" y1="158" x2="650" y2="626" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDF9FF"/>
+      <stop offset="1" stop-color="#78E7FF"/>
+    </linearGradient>
+    <linearGradient id="ui" x1="554" y1="154" x2="994" y2="642" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7EFFF"/>
+      <stop offset="1" stop-color="#C26CFF"/>
+    </linearGradient>
+    <filter id="shadow" x="360" y="472" width="480" height="166" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#171717" flood-opacity=".16"/>
+    </filter>
+  </defs>
+</svg>

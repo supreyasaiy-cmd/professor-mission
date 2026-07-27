@@ -319,9 +319,9 @@ const rawQuestions: Question[] = [
       d: "concept ที่ใช้ได้กับทุกอย่างมักจะกว้างเกินไป",
     },
     practicalExample:
-      "A Professor Mission campaign could show messy first attempts becoming sharper after feedback and review.",
+      "A Supreya Atipongchai learning campaign could show messy first attempts becoming sharper after feedback and review.",
     practicalExampleTh:
-      "แคมเปญของ Professor Mission อาจโชว์งานแรกที่ยังยุ่ง ๆ ค่อย ๆ ชัดขึ้นหลัง feedback และการทบทวน",
+      "แคมเปญของ Supreya Atipongchai อาจโชว์งานแรกที่ยังยุ่ง ๆ ค่อย ๆ ชัดขึ้นหลัง feedback และการทบทวน",
     keyTakeaway: "Strong concepts make an insight visible and memorable.",
     keyTakeawayTh: "concept ที่แข็งแรงทำให้ insight มองเห็นและจดจำได้",
     hint: "Look for the answer that connects image, emotion, and product value.",

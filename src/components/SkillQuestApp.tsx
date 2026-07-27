@@ -1,10 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { learningPaths } from "@/data/learning-paths";
 import { adjacentLessons, findLesson, findLessonById, findPathBySlug, lessonsForPath, modulesForPath } from "@/data/lessons";
-import { defaultMotivationalQuote, getDailyQuote, type MotivationalQuote } from "@/data/motivational-quotes";
+import { defaultMotivationalQuote, getRandomQuote, type MotivationalQuote } from "@/data/motivational-quotes";
 import { questions } from "@/data/questions";
 import {
   clearSession,
@@ -29,6 +30,7 @@ import { Soft3DIcon } from "./icons/soft-3d-icon";
 import type { Soft3DIconName } from "./icons/icon-types";
 
 type View = "home" | "learn" | "learn-path" | "lesson" | "quiz" | "review" | "progress" | "settings";
+type InitialQuizStart = { choiceId?: string; currentIndex?: number; lessonId?: string; pathId?: string; submitted?: boolean };
 
 const languageLabels: Record<LanguageMode, string> = {
   TH: "TH",
@@ -74,6 +76,33 @@ function progressForPath(path: LearningPath, progress: ProgressState) {
   return Math.min(100, Math.round(((completed + base) / total) * 100));
 }
 
+type ProgressTone = "blue" | "violet" | "mint" | "champagne" | "graphite";
+
+const pathProgressTones: Record<string, ProgressTone> = {
+  "ux-ui": "blue",
+  "product-design": "violet",
+  "creative-thinking": "mint",
+  "art-direction": "champagne",
+  "ux-writing": "mint",
+  "graphic-design": "blue",
+  "english-work": "violet",
+  ielts: "blue",
+  communication: "champagne",
+  "critical-thinking": "graphite",
+  designops: "violet",
+  "ux-research": "mint",
+  "product-owner": "blue",
+  "product-analytics": "champagne",
+  "ai-product-workflow": "violet",
+  "career-portfolio": "mint",
+  "stock-investing": "graphite",
+  "thai-tax-personal-finance": "champagne",
+};
+
+function progressToneForPath(pathId: string): ProgressTone {
+  return pathProgressTones[pathId] ?? "graphite";
+}
+
 function getTodayAnswered(progress: ProgressState) {
   const today = new Date().toDateString();
   return progress.answers.filter((answer) => new Date(answer.answeredAt).toDateString() === today).length;
@@ -81,6 +110,10 @@ function getTodayAnswered(progress: ProgressState) {
 
 function getQuestion(id: string) {
   return questions.find((question) => question.id === id);
+}
+
+function pathIdForQuestion(question: Question) {
+  return learningPaths.find((path) => path.name === question.learningPath)?.id ?? learningPaths[0].id;
 }
 
 function createSession(pathId: string, lesson?: LearningLesson): QuizSessionState {
@@ -109,10 +142,47 @@ function createSession(pathId: string, lesson?: LearningLesson): QuizSessionStat
   };
 }
 
-export function SkillQuestApp({ initialView, learningPathSlug, lessonSlug }: { initialView: View; learningPathSlug?: string; lessonSlug?: string }) {
+function createSessionFromStart(initialQuizStart?: InitialQuizStart) {
+  if (!initialQuizStart) return null;
+  const pathId = initialQuizStart.pathId ?? defaultProgress.activePathId ?? learningPaths[0].id;
+  const lesson = initialQuizStart.lessonId ? lessonsForPath(pathId).find((item) => item.id === initialQuizStart.lessonId) : undefined;
+  const session = createSession(pathId, lesson);
+  const currentIndex = Math.max(0, Math.min(session.questionIds.length - 1, initialQuizStart.currentIndex ?? 0));
+  const question = getQuestion(session.questionIds[currentIndex]);
+  const submittedAnswer = initialQuizStart.submitted && initialQuizStart.choiceId && question
+    ? [{
+        answeredAt: "1970-01-01T00:00:00.000Z",
+        isCorrect: initialQuizStart.choiceId === question.correctChoiceId,
+        questionId: question.id,
+        selectedChoiceId: initialQuizStart.choiceId,
+      }]
+    : [];
+
+  return {
+    ...session,
+    answers: submittedAnswer,
+    currentIndex,
+  };
+}
+
+export function SkillQuestApp({
+  initialView,
+  initialQuizStart,
+  initialSettingsPatch,
+  learningPathSlug,
+  lessonSlug,
+}: {
+  initialView: View;
+  initialQuizStart?: InitialQuizStart;
+  initialSettingsPatch?: Partial<UserSettings>;
+  learningPathSlug?: string;
+  lessonSlug?: string;
+}) {
+  const initialSettings = useMemo(() => ({ ...defaultSettings, ...initialSettingsPatch }), [initialSettingsPatch]);
+  const initialSession = useMemo(() => createSessionFromStart(initialQuizStart), [initialQuizStart]);
   const [progress, setProgress] = useState<ProgressState>(defaultProgress);
-  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
-  const [session, setSession] = useState<QuizSessionState | null>(null);
+  const [settings, setSettings] = useState<UserSettings>(initialSettings);
+  const [session, setSession] = useState<QuizSessionState | null>(initialSession);
   const [heroQuote, setHeroQuote] = useState<MotivationalQuote>(defaultMotivationalQuote);
   const [todayAnswered, setTodayAnswered] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState("");
@@ -123,18 +193,18 @@ export function SkillQuestApp({ initialView, learningPathSlug, lessonSlug }: { i
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const savedProgress = loadProgress();
-      const savedSettings = loadSettings();
+      const savedSettings = { ...loadSettings(), ...initialSettingsPatch };
       setProgress(savedProgress);
       setSettings(savedSettings);
-      setSession(loadSession());
-      setHeroQuote(getDailyQuote(new Date()));
+      setSession(initialSession ?? loadSession());
+      setHeroQuote(getRandomQuote(defaultMotivationalQuote.id));
       setTodayAnswered(getTodayAnswered(savedProgress));
       setShowTranslations(savedSettings.languageMode !== "EN");
       setStorageReady(true);
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [initialSession, initialSettingsPatch]);
 
   useEffect(() => {
     if (!storageReady) return;
@@ -154,7 +224,7 @@ export function SkillQuestApp({ initialView, learningPathSlug, lessonSlug }: { i
   const activePath = learningPaths.find((path) => path.id === (session?.pathId ?? progress.activePathId)) ?? learningPaths[0];
   const dueReview = progress.reviewQueue.length;
 
-  function startQuiz(pathId = activePath.id, lessonId?: string) {
+  const startQuiz = useCallback((pathId = activePath.id, lessonId?: string) => {
     const lesson = lessonId ? lessonsForPath(pathId).find((item) => item.id === lessonId) : undefined;
     const newSession = createSession(pathId, lesson);
     const nextProgress = { ...progress, activePathId: pathId };
@@ -165,7 +235,7 @@ export function SkillQuestApp({ initialView, learningPathSlug, lessonSlug }: { i
     saveSession(newSession);
     setProgress(nextProgress);
     saveProgress(nextProgress);
-  }
+  }, [activePath.id, progress, settings.languageMode]);
 
   function submitAnswer(question: Question) {
     if (!selectedChoice || !session) return;
@@ -286,6 +356,7 @@ export function SkillQuestApp({ initialView, learningPathSlug, lessonSlug }: { i
     return (
       <QuizView
         activePath={activePath}
+        progress={progress}
         settings={settings}
         session={session}
         selectedChoice={selectedChoice}
@@ -366,60 +437,62 @@ function HomeView({
         <div className="pointer-events-none absolute left-1/2 top-4 h-36 w-36 -translate-x-1/2 rounded-full gradient-iridescent opacity-45 blur-3xl" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto h-px max-w-4xl bg-gradient-to-r from-transparent via-black/20 to-transparent" />
         <div className="relative mx-auto grid min-h-[15rem] max-w-5xl content-center sm:min-h-[17rem] lg:min-h-[20rem]">
-          <p className="font-display text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--text-secondary)] sm:text-sm">✦ Professor Mission ✦</p>
-          <h1 className="mx-auto mt-6 max-w-5xl text-balance font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
+          <p className="font-display text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--text-secondary)] sm:text-sm">Class Room</p>
+          <h1 className="mx-auto mt-6 max-w-5xl text-balance font-display text-4xl font-semibold leading-[1.6] tracking-normal text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
             {heroQuote.english}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
+          <p className="font-subtitle mx-auto mt-6 max-w-2xl text-pretty text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
             {heroQuote.thai}
           </p>
         </div>
       </div>
-      <div className="grid gap-5 lg:grid-cols-[1.55fr_0.75fr]">
-        <section className="relative min-h-[27rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-6 shadow-editorial sm:p-8 lg:p-10">
+      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial sm:p-8 lg:p-10">
           <div className="pointer-events-none absolute -right-14 -top-10 h-72 w-72 rounded-full gradient-iridescent opacity-90 blur-[1px]" />
-          <div className="pointer-events-none absolute right-8 top-16 h-48 w-48 rotate-12 rounded-[3rem] border border-black/10 bg-white/35 backdrop-blur-md" />
+          <div className="pointer-events-none absolute right-8 top-16 hidden h-48 w-48 rotate-12 rounded-[3rem] border border-black/10 bg-white/35 backdrop-blur-md sm:block" />
           <div className="pointer-events-none absolute bottom-8 right-10 hidden h-32 w-56 -rotate-6 rounded-[2rem] bg-[var(--gradient-lime)] opacity-90 shadow-[0_22px_48px_rgba(23,23,23,0.14)] lg:block" />
-          <div className="relative grid min-h-[23rem] content-between gap-10 lg:max-w-[68%]">
+          <div className="relative grid content-between gap-8 sm:min-h-[23rem] sm:gap-10 lg:max-w-[72%]">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge icon="statusInProgress">{textByMode(mode, "Continue Learning", "เรียนต่อ")}</Badge>
+              <Badge icon="statusInProgress">Dashboard</Badge>
               <Badge>{activePath.currentLevel}</Badge>
               <Badge icon="actionTranslation">{languageLabels[mode]}</Badge>
             </div>
             <div>
-              <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--text-muted)]">Current lesson</p>
-              <h2 className="mt-3 text-balance font-display text-5xl font-extrabold leading-none tracking-tight text-[var(--text-primary)] sm:text-6xl">
-                {activePath.name.split(" ")[0]}
-                <span className="block">{activePath.name.includes("IELTS") ? "Mission" : "Mission"}</span>
+              <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--text-muted)]">Today&apos;s focus</p>
+              <h2 className="mt-3 text-balance font-display text-4xl font-extrabold leading-none tracking-tight text-[var(--text-primary)] sm:text-6xl">
+                Learning
+                <span className="block">Dashboard</span>
               </h2>
-              <p className="mt-5 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-                {textByMode(mode, activePath.currentGoal, activePath.currentGoalTh)}
+              <p className="font-subtitle mt-5 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
+                Keep the Home screen clear: see your current level, daily goal, review queue, and the next practice action without browsing lessons here.
               </p>
               {showThai(mode) ? (
-                <p className="mt-2 max-w-xl text-sm leading-7 text-[var(--text-secondary)]">
-                  {activePath.name} — {activePath.descriptionTh}
+                <p className="font-subtitle mt-2 max-w-xl text-sm leading-7 text-[var(--text-secondary)]">
+                  หน้า Home เหลือเป็น Dashboard สำหรับดูภาพรวมและเริ่มฝึกต่อ ส่วนเนื้อหาบทเรียนอยู่ในหน้า Learn
                 </p>
               ) : null}
             </div>
             <div>
               <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                 <div>
-                  <ProgressBar value={progressForPath(activePath, progress)} />
+                  <ProgressBar value={Math.min(Math.round((todayAnswered / Math.max(progress.dailyGoal, 1)) * 100), 100)} variant="rainbow" />
                   <div className="mt-2 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
-                    <span>{textByMode(mode, "Skill progress", "ความก้าวหน้าของทักษะ")}</span>
-                    <span>{progressForPath(activePath, progress)}%</span>
+                    <span>Daily goal</span>
+                    <span>
+                      {todayAnswered}/{progress.dailyGoal}
+                    </span>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)]">
-                  8 min
-                  <span className="block text-xs font-medium text-[var(--text-muted)]">{textByMode(mode, "Estimated", "เวลาโดยประมาณ")}</span>
+                  {dueReview}
+                  <span className="block text-xs font-medium text-[var(--text-muted)]">Due review</span>
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href="/quiz" onClick={() => onStartQuiz(activePath.id)} className="button-primary">
+                <a href={`/quiz?start=1&path=${activePath.id}`} onClick={() => onStartQuiz(activePath.id)} className="button-primary">
                   <Soft3DIcon name="navigationPractice" size="sm" decorative shadow={false} />
                   {hasSession ? "Resume Mission" : "Start Mission"}
-                </Link>
+                </a>
                 <Link href="/review" className="button-ghost">
                   <Soft3DIcon name="navigationReview" size="sm" decorative shadow={false} />
                   Review Mistakes
@@ -429,7 +502,7 @@ function HomeView({
           </div>
         </section>
 
-        <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white/86 p-5 shadow-editorial">
+        <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white/88 p-5 shadow-editorial">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">
@@ -455,10 +528,44 @@ function HomeView({
         </section>
       </div>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {learningPaths.slice(0, 4).map((path) => (
-          <PathCard key={path.id} path={path} progress={progressForPath(path, progress)} settings={settings} onStartQuiz={onStartQuiz} compact />
-        ))}
+      <section className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-white/88 p-5 shadow-editorial sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Learning levels</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">Current level by lesson</h2>
+          </div>
+          <Link href="/learn" className="button-ghost w-full sm:w-auto">
+            <Soft3DIcon name="navigationLearn" size="sm" decorative shadow={false} />
+            Open Learn
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {learningPaths.map((path) => {
+            const pathProgress = progressForPath(path, progress);
+            return (
+              <article key={path.id} className="grid min-h-28 grid-cols-[auto_1fr] gap-3 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-white)] p-4 shadow-[0_8px_22px_rgba(23,23,23,0.045)]">
+                <span className="grid h-11 w-11 place-items-center">
+                  <Soft3DIcon name={learningPathIconMap[path.name]} size="sm" decorative shadow={false} active />
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="truncate font-display text-base font-extrabold tracking-tight text-[var(--text-primary)]">{path.name}</h3>
+                    <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-extrabold text-[var(--text-primary)]">{path.currentLevel}</span>
+                  </div>
+                  <p className="font-subtitle mt-2 line-clamp-2 text-xs leading-5 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p>
+                  <div className="mt-3">
+                    <ProgressBar value={pathProgress} tone={progressToneForPath(path.id)} />
+                    <div className="mt-1 flex justify-between text-[11px] font-semibold text-[var(--text-muted)]">
+                      <span>Progress</span>
+                      <span>{pathProgress}%</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
     </section>
   );
@@ -468,10 +575,25 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
   const mode = settings.languageMode;
   return (
     <PageShell
-      eyebrow="Learning Library"
-      title="Read first. Practice with sharper judgment later."
-      summary="This section works like a compact digital textbook with bilingual lessons, workplace examples, notes, vocabulary, and reading progress."
+      eyebrow="Learn Mode"
+      title="Build understanding before the quiz."
+      summary="A calm reading library for concepts, examples, vocabulary, notes, and chapter progress."
     >
+      <div className="mb-5 overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[#fbfbf8] p-5 shadow-editorial sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[1fr_0.72fr] lg:items-end">
+          <div>
+            <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--text-muted)]">Reading Library</p>
+            <h2 className="mt-3 max-w-2xl text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+              Choose a path, read the chapter, collect useful words.
+            </h2>
+          </div>
+          <div className="font-subtitle grid gap-2 rounded-[1.75rem] border border-[var(--border)] bg-white p-4 text-sm leading-6 text-[var(--text-secondary)]">
+            <span><strong className="text-[var(--text-primary)]">Learn</strong> is for reading and sense-making.</span>
+            <span><strong className="text-[var(--text-primary)]">Practice</strong> is where you answer under focus.</span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {learningPaths.map((path) => {
           const pathLessons = lessonsForPath(path.id);
@@ -486,14 +608,15 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
           const safetyLabel = path.id === "stock-investing" ? "Not Financial Advice" : path.id === "thai-tax-personal-finance" ? "Not an Official Tax Calculation" : null;
 
           return (
-            <article key={path.id} className="group relative min-h-[24rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial transition hover:-translate-y-1 hover:border-[var(--border-strong)] sm:p-6">
-              <div className={`absolute right-[-3rem] top-[-3rem] h-40 w-40 rounded-full bg-gradient-to-br ${path.accent} opacity-70 transition group-hover:scale-110`} />
+            <article key={path.id} className="group relative min-h-[24rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[#fffefb] p-5 shadow-[0_14px_36px_rgba(23,23,23,0.055)] transition hover:-translate-y-1 hover:border-[var(--border-strong)] sm:p-6">
+              <div className="absolute inset-y-6 left-0 w-1.5 rounded-r-full bg-[linear-gradient(180deg,#cbd5dc,#f1eee5)]" />
+              <div className={`absolute right-[-3rem] top-[-3rem] h-40 w-40 rounded-full bg-gradient-to-br ${path.accent} opacity-25 transition group-hover:scale-105`} />
               <div className="relative grid min-h-[21rem] content-between">
                 <div>
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="flex flex-wrap gap-2">
-                        <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">{path.currentLevel}</p>
+                        <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">Read Track · {path.currentLevel}</p>
                         {category ? <Badge>{category}</Badge> : null}
                         {safetyLabel ? <Badge icon="statusGoal">{safetyLabel}</Badge> : null}
                       </div>
@@ -501,25 +624,25 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
                     </div>
                     <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" alt={path.name} priority active />
                   </div>
-                  <p className="mt-5 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, path.description, path.descriptionTh)}</p>
-                  <div className="mt-5 grid gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                    <span>{pathLessons.length} chapters</span>
-                    <span>{completed} completed</span>
-                    <span>Current chapter: {currentLesson?.title ?? "Overview"}</span>
+                  <p className="font-subtitle mt-5 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, path.description, path.descriptionTh)}</p>
+                  <div className="mt-5 grid gap-2 rounded-2xl border border-[var(--border)] bg-white/70 p-3 text-xs font-semibold text-[var(--text-secondary)]">
+                    <span>{pathLessons.length} reading chapters</span>
+                    <span>{completed} chapters completed</span>
+                    <span className="line-clamp-1">Next read: {currentLesson?.title ?? "Overview"}</span>
                   </div>
                 </div>
                 <div className="mt-6">
-                  <ProgressBar value={percent} />
+                  <ProgressBar value={percent} tone={progressToneForPath(path.id)} />
                   <div className="mt-2 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
                     <span>Reading progress</span>
                     <span>{percent}%</span>
                   </div>
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                     <Link href={`/learn/${path.id}/${currentLesson?.slug ?? ""}`} className="button-primary flex-1">
-                      Continue Reading
+                      Open Reader
                     </Link>
                     <Link href={`/learn/${path.id}`} className="button-ghost flex-1">
-                      View Chapters
+                      Chapter Map
                     </Link>
                   </div>
                 </div>
@@ -552,13 +675,13 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
       <div className="mb-5 rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-[var(--text-secondary)]">{completed}/{pathLessons.length} chapters completed</p>
+            <p className="font-subtitle text-sm font-semibold text-[var(--text-secondary)]">{completed}/{pathLessons.length} chapters completed</p>
             <h2 className="mt-2 font-display text-2xl font-extrabold text-[var(--text-primary)]">{path.currentLevel} reading track</h2>
           </div>
           <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" decorative active />
         </div>
         <div className="mt-4">
-          <ProgressBar value={Math.round((completed / Math.max(pathLessons.length, 1)) * 100)} />
+          <ProgressBar value={Math.round((completed / Math.max(pathLessons.length, 1)) * 100)} tone={progressToneForPath(path.id)} />
         </div>
       </div>
 
@@ -573,14 +696,14 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
                   <div>
                     <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Module {String(module.number).padStart(2, "0")}</p>
                     <h2 className="mt-2 text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">{module.titleEn}</h2>
-                    <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{module.descriptionTh}</p>
+                    <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{module.descriptionTh}</p>
                   </div>
                   <Badge icon="statusCompleted">{moduleCompleted}/{moduleLessons.length} completed</Badge>
                 </div>
                 <div className="mt-5 grid gap-3">
                   {moduleLessons.map((lesson) => {
                     const state = progress.lessons?.[lesson.id];
-                    const status = state?.completed ? "completed" : state?.reviewFlag ? "review-recommended" : state?.readingProgress ? "in-progress" : lesson.placeholder ? "not-started" : "ready-for-practice";
+                    const status = state?.completed ? "completed" : state?.reviewFlag ? "review-recommended" : state?.readingProgress ? "in-progress" : "ready-for-practice";
                     return (
                       <Link
                         key={lesson.id}
@@ -592,11 +715,11 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
                             <Badge>Lesson {lesson.number}</Badge>
                             <Badge>{lesson.professionalLevel ?? lesson.difficulty}</Badge>
                             <Badge>{lesson.estimatedMinutes ?? lesson.readingMinutes} min</Badge>
-                            <Badge icon={lesson.placeholder ? "statusLocked" : "navigationPractice"}>{lesson.placeholder ? "Seed pending" : "Practice ready"}</Badge>
+                            <Badge icon="navigationPractice">Practice ready</Badge>
                             {state?.bookmarked ? <Badge icon="actionBookmark">Bookmarked</Badge> : null}
                           </span>
                           <span className="mt-3 block font-display text-xl font-extrabold text-[var(--text-primary)]">{lesson.titleEn ?? lesson.title}</span>
-                          <span className="mt-1 block text-sm leading-7 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.titleTh}</span>
+                          <span className="font-subtitle mt-1 block text-sm leading-7 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.titleTh}</span>
                         </span>
                         <span className="shrink-0 text-sm font-extrabold text-[var(--text-primary)]">{status}</span>
                       </Link>
@@ -624,8 +747,8 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
                       {lesson.hasPractice ? <Badge icon="navigationPractice">Practice ready</Badge> : null}
                     </div>
                     <h2 className="mt-4 text-balance font-display text-2xl font-extrabold text-[var(--text-primary)]">{lesson.title}</h2>
-                    <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.titleTh}</p>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">{lesson.description}</p>
+                    <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.titleTh}</p>
+                    <p className="font-subtitle mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">{lesson.description}</p>
                   </div>
                   <Link href={`/learn/${path.id}/${lesson.slug}`} className="button-primary shrink-0">
                     {state?.readingProgress ? "Continue Reading" : "Read Lesson"}
@@ -686,6 +809,15 @@ function LessonReadingView({
   const adjacent = adjacentLessons(currentPath.id, currentLesson.slug);
   const miniCorrect = currentLesson.miniCheck ? miniChoice === currentLesson.miniCheck.correctChoiceId : false;
   const savedNote = state?.note ?? progress.savedNotes?.find((item) => item.lessonId === currentLesson.id)?.text ?? "";
+  const readingSections = currentLesson.sections ?? [];
+  const contents = [
+    { id: "lesson-brief", label: "Lesson Brief" },
+    { id: "learning-objectives", label: "Learning Objectives" },
+    ...readingSections.map((item) => ({ id: item.id, label: item.titleEn })),
+    ...(currentLesson.visualMedia?.length ? [{ id: "visual-model", label: "Visual Model" }] : []),
+    { id: "workplace-example", label: "Workplace Example" },
+    { id: "mini-check", label: "Mini Check" },
+  ];
 
   function markComplete() {
     onUpdateLessonProgress(currentLesson.id, {
@@ -732,18 +864,24 @@ function LessonReadingView({
       summary={lesson.description}
     >
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
-        <article className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial sm:p-7 lg:p-9">
+        <article className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial sm:p-7 lg:p-10">
           <div className="flex flex-wrap items-center gap-2">
             <Badge>{lesson.professionalLevel ?? lesson.difficulty}</Badge>
             <Badge>{lesson.estimatedMinutes ?? lesson.readingMinutes} min read</Badge>
             <Badge>{state?.completed ? "completed" : state?.readingProgress ? "in-progress" : "not-started"}</Badge>
-            {currentLesson.placeholder ? <Badge icon="statusLocked">Seed pending</Badge> : <Badge icon="navigationPractice">Practice ready</Badge>}
+            <Badge icon="navigationPractice">Practice ready</Badge>
             {state?.bookmarked ? <Badge icon="actionBookmark">Bookmarked</Badge> : null}
             {currentLesson.contentVerification ? <VerificationBadges verification={currentLesson.contentVerification} /> : null}
           </div>
 
-          <section className="mt-7">
-            <p className="text-base leading-8 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.introductionTh}</p>
+          <section id="lesson-brief" className="mt-7 scroll-mt-28 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+            <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lesson Brief</p>
+            <p className="mt-3 max-w-4xl text-base leading-8 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.introductionTh}</p>
+            <div className="mt-4 rounded-2xl border border-[var(--border)] bg-white p-4">
+              <p className="font-display text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">Why this matters</p>
+              {showEnglish(mode) ? <p className="mt-2 font-subtitle text-sm font-semibold leading-6 text-[var(--text-primary)]">{lesson.keyTakeaway}</p> : null}
+              {showThai(mode) ? <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.keyTakeawayTh}</p> : null}
+            </div>
           </section>
 
           {currentLesson.contentVerification ? <VerificationNotice verification={currentLesson.contentVerification} /> : null}
@@ -751,13 +889,16 @@ function LessonReadingView({
           <details className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 md:hidden">
             <summary className="cursor-pointer font-display text-sm font-extrabold text-[var(--text-primary)]">Contents</summary>
             <div className="mt-3 grid gap-2 text-sm text-[var(--text-secondary)]">
-              {(currentLesson.sections ?? []).map((item) => (
-                <a key={item.id} href={`#${item.id}`} className="rounded-2xl bg-white px-3 py-2">{item.titleEn}</a>
+              {contents.map((item, index) => (
+                <a key={item.id} href={`#${item.id}`} className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-bold text-[var(--text-primary)]">{index + 1}</span>
+                  <span>{item.label}</span>
+                </a>
               ))}
             </div>
           </details>
 
-          <LessonBlock title="Learning Objectives">
+          <LessonBlock id="learning-objectives" title="Learning Objectives" step={1}>
             <ul className="grid gap-2 text-sm leading-7 text-[var(--text-secondary)]">
               {lesson.objectives.map((objective) => (
                 <li key={objective}>• {objective}</li>
@@ -765,8 +906,14 @@ function LessonReadingView({
             </ul>
           </LessonBlock>
 
-          {currentLesson.sections?.map((item) => (
-            <LessonBlock key={item.id} id={item.id} title={item.titleEn}>
+          <LessonBlock title="Read In This Order" step={2}>
+            <p className="font-subtitle text-sm leading-7 text-[var(--text-secondary)]">
+              อ่านทีละส่วนตามลำดับนี้ก่อน แล้วค่อยดูภาพประกอบเพื่อจับ mental model จากนั้นปิดท้ายด้วยตัวอย่างงานจริงและ mini check
+            </p>
+          </LessonBlock>
+
+          {currentLesson.sections?.map((item, index) => (
+            <LessonBlock key={item.id} id={item.id} title={item.titleEn} step={index + 3}>
               {item.bodyTh.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               {item.bullets?.length ? (
                 <ul className="grid gap-2">
@@ -775,32 +922,24 @@ function LessonReadingView({
               ) : null}
             </LessonBlock>
           )) ?? (
-            <LessonBlock title="Simple Explanation">
+            <LessonBlock title="Simple Explanation" step={3}>
               {showEnglish(mode) ? <p>{lesson.explanation}</p> : null}
               {showThai(mode) ? <p>{lesson.explanationTh}</p> : null}
             </LessonBlock>
           )}
 
-          {currentLesson.visualMedia?.map((media) => (
-            <LessonBlock key={media.titleEn} title={media.titleEn}>
-              <p>{media.descriptionTh}</p>
+          {currentLesson.visualMedia?.map((media, index) => (
+            <LessonBlock key={media.titleEn} id={index === 0 ? "visual-model" : undefined} title={media.titleEn} step={(currentLesson.sections?.length ?? 1) + 3 + index}>
+              <p className="font-subtitle">{media.descriptionTh}</p>
               {media.type === "figma-grid-cheat-sheet" ? <FigmaGridCheatSheet /> : <VisualMediaPreview media={media} />}
             </LessonBlock>
           ))}
 
-          <LessonBlock title="Professional Terminology">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(lesson.vocabulary ?? lesson.terminology).map((vocabulary) => (
-                <VocabularyCard key={vocabulary.id} vocabulary={vocabulary} onSave={onSaveVocabulary} saved={progress.savedVocabulary?.some((item) => item.id === vocabulary.id)} />
-              ))}
-            </div>
-          </LessonBlock>
-
-          <LessonBlock title="Workplace Example">
+          <LessonBlock id="workplace-example" title="Workplace Example" step={(currentLesson.sections?.length ?? 1) + 4}>
             {currentLesson.practicalExamples?.length ? (
               <div className="grid gap-3">
                 {currentLesson.practicalExamples.map((example) => (
-                  <div key={example.titleEn} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div key={example.titleEn} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
                     <p className="font-display text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">{example.titleEn}</p>
                     <p className="mt-2">{example.bodyTh}</p>
                   </div>
@@ -842,48 +981,29 @@ function LessonReadingView({
             </LessonBlock>
           ) : null}
 
-          <LessonBlock title="Junior vs Senior Thinking">
+          <LessonBlock title="Better Design Judgment">
             <div className="grid gap-3 sm:grid-cols-2">
-              <p className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              <p className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
                 {lesson.juniorVsSenior?.junior ?? lesson.juniorThinking}
                 {lesson.juniorVsSenior?.juniorTh ? <span className="mt-2 block">{lesson.juniorVsSenior.juniorTh}</span> : null}
               </p>
-              <p className="rounded-2xl border border-[var(--border)] bg-white p-4 font-semibold text-[var(--text-primary)]">
+              <p className="rounded-2xl border border-[var(--border)] bg-white p-4 font-semibold text-[var(--text-primary)] sm:p-5">
                 {lesson.juniorVsSenior?.senior ?? lesson.seniorThinking}
                 {lesson.juniorVsSenior?.seniorTh ? <span className="mt-2 block font-medium text-[var(--text-secondary)]">{lesson.juniorVsSenior.seniorTh}</span> : null}
               </p>
             </div>
           </LessonBlock>
 
-          <LessonBlock title="Key Takeaway">
-            {showEnglish(mode) ? <p className="font-semibold text-[var(--text-primary)]">{lesson.keyTakeaway}</p> : null}
-            {showThai(mode) ? <p>{lesson.keyTakeawayTh}</p> : null}
-          </LessonBlock>
-
-          <LessonBlock title="Personal Note">
-            <textarea
-              key={`${lesson.id}-${savedNote}`}
-              defaultValue={savedNote}
-              onChange={(event) => setNoteDraft(event.target.value)}
-              rows={4}
-              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm leading-6 text-[var(--text-primary)] outline-none transition focus:border-[var(--border-strong)] focus:bg-white focus:ring-2 focus:ring-black/10"
-              placeholder="Write a short note in Thai or English..."
-            />
-            <div className="mt-3 flex flex-wrap gap-3">
-              <button type="button" className="button-primary" onClick={() => onSaveNote(lesson.id, noteDraft || savedNote)}>
-                Save Note
-              </button>
-              <button type="button" className="button-ghost" onClick={saveAllVocabulary}>
-                Save Vocabulary
-              </button>
-              <button type="button" className="button-ghost" onClick={addToReview}>
-                Add to Review
-              </button>
+          <LessonBlock title="Professional Terminology">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(lesson.vocabulary ?? lesson.terminology).map((vocabulary) => (
+                <VocabularyCard key={vocabulary.id} vocabulary={vocabulary} onSave={onSaveVocabulary} saved={progress.savedVocabulary?.some((item) => item.id === vocabulary.id)} />
+              ))}
             </div>
           </LessonBlock>
 
           {lesson.miniCheck ? (
-            <LessonBlock title="Mini Knowledge Check">
+            <LessonBlock id="mini-check" title="Mini Knowledge Check" step={(currentLesson.sections?.length ?? 1) + 8}>
               <p className="font-semibold text-[var(--text-primary)]">{lesson.miniCheck.question}</p>
               {showThai(mode) ? <p>{lesson.miniCheck.questionTh}</p> : null}
               <div className="mt-4 grid gap-3">
@@ -916,6 +1036,28 @@ function LessonReadingView({
             </LessonBlock>
           ) : null}
 
+          <LessonBlock title="Personal Note">
+            <textarea
+              key={`${lesson.id}-${savedNote}`}
+              defaultValue={savedNote}
+              onChange={(event) => setNoteDraft(event.target.value)}
+              rows={4}
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm leading-6 text-[var(--text-primary)] outline-none transition focus:border-[var(--border-strong)] focus:bg-white focus:ring-2 focus:ring-black/10"
+              placeholder="Write a short note in Thai or English..."
+            />
+            <div className="mt-3 flex flex-wrap gap-3">
+              <button type="button" className="button-primary" onClick={() => onSaveNote(lesson.id, noteDraft || savedNote)}>
+                Save Note
+              </button>
+              <button type="button" className="button-ghost" onClick={saveAllVocabulary}>
+                Save Vocabulary
+              </button>
+              <button type="button" className="button-ghost" onClick={addToReview}>
+                Add to Review
+              </button>
+            </div>
+          </LessonBlock>
+
           <div className="mt-8 flex flex-col gap-3 border-t border-[var(--border)] pt-5 sm:flex-row sm:flex-wrap">
             <button type="button" className="button-ghost" onClick={toggleBookmark}>
               <Soft3DIcon name="actionBookmark" size="sm" decorative shadow={false} />
@@ -924,9 +1066,9 @@ function LessonReadingView({
             {adjacent.previous ? <Link href={`/learn/${path.id}/${adjacent.previous.slug}`} className="button-ghost">Previous Lesson</Link> : null}
             {adjacent.next ? <Link href={`/learn/${path.id}/${adjacent.next.slug}`} className="button-ghost">Next Lesson</Link> : null}
             <button type="button" className="button-ghost" onClick={markComplete}>Mark as Read</button>
-            <Link href="/quiz" className="button-primary" onClick={() => onStartQuiz(path.id, lesson.id)}>
+            <a href={`/quiz?start=1&path=${path.id}&lesson=${lesson.id}`} className="button-primary" onClick={() => onStartQuiz(path.id, lesson.id)}>
               Start Lesson Practice
-            </Link>
+            </a>
           </div>
         </article>
 
@@ -943,11 +1085,12 @@ function LessonReadingView({
           </div>
           {currentLesson.sections?.length ? (
             <div className="mt-6 hidden border-t border-[var(--border)] pt-5 xl:block">
-              <p className="font-display text-sm font-extrabold text-[var(--text-primary)]">Contents</p>
+              <p className="font-display text-sm font-extrabold text-[var(--text-primary)]">Read in order</p>
               <div className="mt-3 grid gap-2">
-                {currentLesson.sections.map((item) => (
-                  <a key={item.id} href={`#${item.id}`} className="rounded-2xl bg-[var(--surface)] px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-white hover:text-[var(--text-primary)]">
-                    {item.titleEn}
+                {contents.map((item, index) => (
+                  <a key={item.id} href={`#${item.id}`} className="flex items-center gap-3 rounded-2xl bg-[var(--surface)] px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-white hover:text-[var(--text-primary)]">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-xs text-[var(--text-primary)]">{index + 1}</span>
+                    <span>{item.label}</span>
                   </a>
                 ))}
               </div>
@@ -961,6 +1104,7 @@ function LessonReadingView({
 
 function QuizView({
   activePath,
+  progress,
   settings,
   session,
   selectedChoice,
@@ -975,6 +1119,7 @@ function QuizView({
   onSaveVocabulary,
 }: {
   activePath: LearningPath;
+  progress: ProgressState;
   settings: UserSettings;
   session: QuizSessionState | null;
   selectedChoice: string;
@@ -992,15 +1137,31 @@ function QuizView({
   if (!session) {
     return (
       <PageShell
-        eyebrow="Quiz"
-        title="Start a focused practice session."
-        summary="Pick up a short multiple-choice quiz and get feedback after every answer."
+        eyebrow="Practice Mode"
+        title="Train one decision at a time."
+        summary="A focused quiz space for answering, checking feedback, and sending weak spots to Review."
       >
-        <div className="grid gap-4 md:grid-cols-2">
-          {learningPaths.slice(0, 6).map((path) => (
-            <PathCard key={path.id} path={path} progress={48} settings={settings} onStartQuiz={onStartQuiz} compact />
-          ))}
-        </div>
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/72 p-4 text-[var(--text-primary)] shadow-[0_24px_70px_rgba(23,23,23,0.11),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl sm:p-6 lg:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,#d9f4ff_0%,rgba(217,244,255,0)_68%)] opacity-75 blur-2xl" />
+          <div className="pointer-events-none absolute bottom-[-9rem] left-10 h-64 w-64 rounded-full bg-[radial-gradient(circle,#e5dcff_0%,rgba(229,220,255,0)_70%)] opacity-55 blur-2xl" />
+          <div className="pointer-events-none absolute left-[-7rem] top-1/3 h-52 w-52 rounded-full bg-[radial-gradient(circle,#ddffef_0%,rgba(221,255,239,0)_72%)] opacity-60 blur-2xl" />
+          <div className="relative mb-6 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="font-display text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--text-muted)]">Quiz Launchpad</p>
+              <h2 className="mt-3 max-w-2xl text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+                Pick a path and enter a short practice round.
+              </h2>
+            </div>
+            <div className="font-subtitle rounded-[1.75rem] border border-[var(--border)] bg-white/70 px-4 py-3 text-sm text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              Submit once · Learn from feedback · Review mistakes
+            </div>
+          </div>
+          <div className="relative grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {learningPaths.slice(0, 6).map((path) => (
+              <PracticeLaunchCard key={path.id} path={path} progress={progressForPath(path, progress)} settings={settings} onStartQuiz={onStartQuiz} />
+            ))}
+          </div>
+        </section>
       </PageShell>
     );
   }
@@ -1053,10 +1214,10 @@ function QuizView({
                 .map((question) => (
                   <div key={question.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
                     <p className="text-sm font-medium text-white">{question.topic}</p>
-                    <p className="mt-1 text-sm text-[var(--text-secondary)]">{textByMode(mode, question.keyTakeaway, question.keyTakeawayTh)}</p>
+                    <p className="font-subtitle mt-1 text-sm text-[var(--text-secondary)]">{textByMode(mode, question.keyTakeaway, question.keyTakeawayTh)}</p>
                   </div>
                 ))}
-              {incorrect === 0 ? <p className="text-sm text-[var(--text-secondary)]">{textByMode(mode, "No mistakes in this session. Smooth run.", "เซสชันนี้ไม่มีข้อผิดพลาด เยี่ยมมาก")}</p> : null}
+              {incorrect === 0 ? <p className="font-subtitle text-sm text-[var(--text-secondary)]">{textByMode(mode, "No mistakes in this session. Smooth run.", "เซสชันนี้ไม่มีข้อผิดพลาด เยี่ยมมาก")}</p> : null}
             </div>
           </div>
         </div>
@@ -1076,6 +1237,10 @@ function QuizView({
   const correctChoice = currentQuestion.choices.find((choice) => choice.id === currentQuestion.correctChoiceId);
   const selectedAnswer = currentQuestion.choices.find((choice) => choice.id === selected);
   const sessionLesson = session.lessonId ? findLessonById(session.lessonId) : undefined;
+  const quizFormId = `quiz-answer-${currentQuestion.id}`;
+  const nextQuestionHref = session.currentIndex + 1 >= session.questionIds.length
+    ? "/review"
+    : `/quiz?start=1&path=${session.pathId}&index=${session.currentIndex + 1}${session.lessonId ? `&lesson=${session.lessonId}` : ""}`;
 
   return (
     <PageShell
@@ -1083,6 +1248,7 @@ function QuizView({
       title={activePath.name}
       summary="One question at a time. Submit once, study the feedback, then continue."
     >
+      <div className="rounded-[2.25rem] border border-white/70 bg-white/58 p-2 shadow-[0_24px_70px_rgba(23,23,23,0.1),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-2xl sm:p-4">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-4 shadow-editorial sm:p-7 lg:p-8">
           <div className="flex flex-wrap items-center gap-2">
@@ -1107,7 +1273,7 @@ function QuizView({
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="max-w-3xl">
               {showEnglish(mode) ? <h2 className="text-balance font-display text-2xl font-extrabold leading-tight text-[var(--text-primary)] sm:text-3xl">{currentQuestion.question}</h2> : null}
-              {revealThai ? <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">{currentQuestion.questionTh ?? currentQuestion.explanationTh ?? currentQuestion.question}</p> : null}
+              {revealThai ? <p className="font-subtitle mt-4 text-base leading-8 text-[var(--text-secondary)]">{currentQuestion.questionTh ?? currentQuestion.explanationTh ?? currentQuestion.question}</p> : null}
             </div>
             {showThai(mode) ? (
               <button type="button" onClick={onToggleTranslations} className="button-ghost shrink-0">
@@ -1119,18 +1285,27 @@ function QuizView({
           {currentQuestion.media ? (
             <QuestionMedia media={currentQuestion.media} showEnglish={showEnglish(mode)} showThai={revealThai} />
           ) : null}
-          <div className="mt-6 grid gap-3">
+          <form id={quizFormId} action="/quiz" method="get" className="mt-6 grid gap-3">
+            <input type="hidden" name="start" value="1" />
+            <input type="hidden" name="path" value={session.pathId} />
+            <input type="hidden" name="index" value={session.currentIndex} />
+            <input type="hidden" name="submitted" value="1" />
+            {session.lessonId ? <input type="hidden" name="lesson" value={session.lessonId} /> : null}
             {currentQuestion.choices.map((choice) => {
               const isSelected = selected === choice.id;
               const isCorrect = submitted && choice.id === currentQuestion.correctChoiceId;
               const isWrong = submitted && isSelected && !isCorrect;
               return (
-                <button
+                <label
                   key={choice.id}
-                  type="button"
-                  disabled={submitted}
-                  onClick={() => onSelectChoice(choice.id)}
-                  className={`min-h-14 rounded-2xl border px-4 py-3 text-left text-sm leading-6 shadow-[0_0_0_rgba(23,23,23,0)] transition focus:outline-none focus:ring-2 focus:ring-black ${
+                  aria-disabled={submitted}
+                  onPointerDown={() => {
+                    if (!submitted) onSelectChoice(choice.id);
+                  }}
+                  onClick={() => {
+                    if (!submitted) onSelectChoice(choice.id);
+                  }}
+                  className={`min-h-14 cursor-pointer rounded-2xl border px-4 py-3 text-left text-sm leading-6 shadow-[0_0_0_rgba(23,23,23,0)] transition focus-within:ring-2 focus-within:ring-black ${
                     isCorrect
                       ? "border-[#66f4c0] bg-[#effff8] text-[var(--text-primary)]"
                       : isWrong
@@ -1140,6 +1315,7 @@ function QuizView({
                           : "border-[var(--border)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] hover:shadow-[0_10px_26px_rgba(23,23,23,0.08)]"
                   }`}
                 >
+                  <input className="sr-only" disabled={submitted} name="choice" required type="radio" value={choice.id} defaultChecked={isSelected} />
                   <span className="flex items-start gap-3">
                     <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--border)] bg-white text-xs font-bold uppercase">
                       {isCorrect ? <Soft3DIcon name="statusCorrect" size="xs" decorative shadow={false} /> : isWrong ? <Soft3DIcon name="statusIncorrect" size="xs" decorative shadow={false} /> : choice.id}
@@ -1149,10 +1325,10 @@ function QuizView({
                       {canShowThai || (submitted && showThai(mode)) ? <span className="mt-1 block text-[var(--text-secondary)]">{choice.textTh ?? choice.text}</span> : null}
                     </span>
                   </span>
-                </button>
+                </label>
               );
             })}
-          </div>
+          </form>
 
           {!submitted && revealThai ? (
             <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
@@ -1180,10 +1356,10 @@ function QuizView({
                 <Soft3DIcon name={answer?.isCorrect ? "statusCorrect" : "statusIncorrect"} size="sm" decorative shadow={false} />
                 <h3 className="font-semibold text-[var(--text-primary)]">{answer?.isCorrect ? textByMode(mode, "Correct", "ตอบถูก") : textByMode(mode, "Review this idea", "ควรทบทวนแนวคิดนี้")}</h3>
               </div>
-              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+              <p className="font-subtitle mt-3 text-sm leading-6 text-[var(--text-secondary)]">
                 {textByMode(mode, "Recommended answer", "คำตอบที่แนะนำ")}: <span className="font-semibold text-[var(--text-primary)]">{correctChoice?.text}</span>
               </p>
-              {showThai(mode) ? <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{correctChoice?.textTh ?? correctChoice?.text}</p> : null}
+              {showThai(mode) ? <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{correctChoice?.textTh ?? correctChoice?.text}</p> : null}
               {!answer?.isCorrect ? (
                 <p className="mt-3 text-sm leading-6 text-[#8f352c]">
                   {textByMode(mode, "Your answer", "คำตอบของคุณ")}: {selectedAnswer?.text}.{" "}
@@ -1194,12 +1370,12 @@ function QuizView({
                   )}
                 </p>
               ) : null}
-              {showThai(mode) ? <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{currentQuestion.explanationTh ?? currentQuestion.explanation}</p> : null}
-              {showEnglish(mode) ? <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{currentQuestion.explanation}</p> : null}
+              {showThai(mode) ? <p className="font-subtitle mt-3 text-sm leading-7 text-[var(--text-secondary)]">{currentQuestion.explanationTh ?? currentQuestion.explanation}</p> : null}
+              {showEnglish(mode) ? <p className="font-subtitle mt-3 text-sm leading-6 text-[var(--text-secondary)]">{currentQuestion.explanation}</p> : null}
               <div className="mt-4 rounded-2xl border border-[var(--border)] bg-white p-4">
                 <p className="font-display text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">{textByMode(mode, "Practical workplace example", "ตัวอย่างการใช้งานจริง")}</p>
-                {showEnglish(mode) ? <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{currentQuestion.practicalExample}</p> : null}
-                {showThai(mode) ? <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{currentQuestion.practicalExampleTh ?? currentQuestion.practicalExample}</p> : null}
+                {showEnglish(mode) ? <p className="font-subtitle mt-2 text-sm leading-6 text-[var(--text-secondary)]">{currentQuestion.practicalExample}</p> : null}
+                {showThai(mode) ? <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{currentQuestion.practicalExampleTh ?? currentQuestion.practicalExample}</p> : null}
               </div>
               <div className="mt-4 rounded-2xl border border-[var(--border)] bg-white p-4">
                 <p className="font-display text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">{textByMode(mode, "Important vocabulary", "คำศัพท์สำคัญ")}</p>
@@ -1225,21 +1401,21 @@ function QuizView({
                   <Soft3DIcon name="actionHint" size="sm" decorative shadow={false} />
                   Hint
                 </button>
-                <button type="button" disabled={!selectedChoice} onClick={() => onSubmit(currentQuestion)} className="button-primary disabled:cursor-not-allowed disabled:opacity-45">
+                <button type="submit" form={quizFormId} onClick={() => selectedChoice ? onSubmit(currentQuestion) : undefined} className="button-primary">
                   Submit Answer
                   <Soft3DIcon name="actionSubmit" size="sm" decorative shadow={false} />
                 </button>
               </>
             ) : (
-              <button type="button" onClick={onNext} className="button-primary">
+              <a href={nextQuestionHref} onClick={onNext} className="button-primary">
                 {session.currentIndex + 1 >= session.questionIds.length ? "Finish Session" : "Next Question"}
                 <Soft3DIcon name="actionNext" size="sm" decorative shadow={false} />
-              </button>
+              </a>
             )}
           </div>
         </section>
 
-        <aside className="hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white/82 p-5 shadow-editorial xl:block">
+        <aside className="hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white/76 p-5 text-[var(--text-primary)] shadow-[0_18px_48px_rgba(23,23,23,0.08)] xl:block">
           <p className="font-display text-sm font-extrabold text-[var(--text-primary)]">{textByMode(mode, "Session focus", "โฟกัสของเซสชัน")}</p>
           <div className="mt-4 space-y-4 text-sm text-[var(--text-secondary)]">
             <p>{textByMode(mode, "Practice time: 5-10 minutes", "เวลาแนะนำ: 5-10 นาที")}</p>
@@ -1247,6 +1423,7 @@ function QuizView({
             <p>{textByMode(mode, "Review behavior: Incorrect answers enter the local review queue.", "ข้อที่ตอบผิดจะถูกเพิ่มเข้า Review Queue ในเครื่อง")}</p>
           </div>
         </aside>
+      </div>
       </div>
     </PageShell>
   );
@@ -1282,7 +1459,7 @@ function ReviewView({
           <h1 className="mt-4 text-balance font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-[#f7fff8] sm:text-5xl lg:text-6xl">
             Turn mistakes into stronger judgment.
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-[#c9d8cd]">
+          <p className="font-subtitle mt-4 max-w-2xl text-base leading-8 text-[#c9d8cd]">
             Incorrect answers and useful vocabulary are saved locally for later review.
           </p>
         </div>
@@ -1291,12 +1468,12 @@ function ReviewView({
           <div className="rounded-[2rem] border border-white/18 bg-white/88 p-8 text-center shadow-[0_26px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl">
             <Soft3DIcon name="statusMastered" size="md" decorative shadow={false} active className="mx-auto" />
             <h2 className="mt-5 text-xl font-bold text-[var(--text-primary)]">No review items yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
+            <p className="font-subtitle mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
               Missed quiz answers will appear here with the learning point that needs another pass.
             </p>
-            <Link href="/quiz" className="button-primary mt-5">
+            <a href="/quiz?start=1" className="button-primary mt-5">
               Start Quiz
-            </Link>
+            </a>
           </div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
@@ -1319,12 +1496,12 @@ function ReviewView({
                     <Badge icon="statusReviewDue">review-recommended</Badge>
                   </div>
                   <h2 className="mt-4 text-lg font-semibold text-[var(--text-primary)]">{lesson.title}</h2>
-                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.keyTakeawayTh}</p>
+                  <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.keyTakeawayTh}</p>
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                     <Link href={`/learn/${path.id}/${lesson.slug}`} className="button-primary">
                       Open Lesson
                     </Link>
-                    <button type="button" onClick={() => onClearReviewItem(lesson.id)} className="button-ghost">
+                    <button type="button" onPointerDown={() => onClearReviewItem(lesson.id)} onClick={() => onClearReviewItem(lesson.id)} className="button-ghost">
                       Mark Reviewed
                     </button>
                   </div>
@@ -1338,12 +1515,12 @@ function ReviewView({
                     <Badge icon="statusReviewDue">{item.incorrectAttempts} {textByMode(mode, "mistake", "ครั้งที่ผิด")}</Badge>
                   </div>
                   <h2 className="mt-4 text-lg font-semibold text-[var(--text-primary)]">{textByMode(mode, question.topic, question.topicTh)}</h2>
-                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, question.keyTakeaway, question.keyTakeawayTh)}</p>
+                  <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, question.keyTakeaway, question.keyTakeawayTh)}</p>
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                    <Link href="/quiz" onClick={() => onStartQuiz()} className="button-primary">
+                    <a href={`/quiz?start=1&path=${pathIdForQuestion(question)}`} onClick={() => onStartQuiz(pathIdForQuestion(question))} className="button-primary">
                       Practice Again
-                    </Link>
-                    <button type="button" onClick={() => onClearReviewItem(question.id)} className="button-ghost">
+                    </a>
+                    <button type="button" onPointerDown={() => onClearReviewItem(question.id)} onClick={() => onClearReviewItem(question.id)} className="button-ghost">
                       Mark Reviewed
                     </button>
                   </div>
@@ -1365,7 +1542,7 @@ function ReviewView({
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-sm leading-7 text-[#c9d8cd]">
+            <p className="font-subtitle mt-3 text-sm leading-7 text-[#c9d8cd]">
               {textByMode(mode, "Save useful words from quiz feedback and they will appear here.", "กดบันทึกคำศัพท์จาก feedback แล้วคำศัพท์จะมาแสดงที่นี่")}
             </p>
           )}
@@ -1382,7 +1559,7 @@ function ReviewView({
                 const path = lesson ? findPathBySlug(lesson.learningPathId) : undefined;
                 return (
                   <article key={note.lessonId} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{lesson?.title ?? "Lesson note"}</p>
+                    <p className="font-subtitle text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{lesson?.title ?? "Lesson note"}</p>
                     <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{note.text}</p>
                     {lesson && path ? (
                       <Link href={`/learn/${path.id}/${lesson.slug}`} className="mt-3 inline-flex text-sm font-bold text-[var(--text-primary)]">
@@ -1394,7 +1571,7 @@ function ReviewView({
               })}
             </div>
           ) : (
-            <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">Save notes from lessons and they will appear here for review.</p>
+            <p className="font-subtitle mt-3 text-sm leading-7 text-[var(--text-secondary)]">Save notes from lessons and they will appear here for review.</p>
           )}
         </section>
       </div>
@@ -1447,7 +1624,7 @@ function ProgressView({ progress, settings }: { progress: ProgressState; setting
               <span className="shrink-0 text-sm text-[var(--text-muted)]">{progressForPath(path, progress)}%</span>
             </div>
             <div className="mt-4">
-              <ProgressBar value={progressForPath(path, progress)} />
+              <ProgressBar value={progressForPath(path, progress)} tone={progressToneForPath(path.id)} />
             </div>
           </div>
         ))}
@@ -1456,43 +1633,49 @@ function ProgressView({ progress, settings }: { progress: ProgressState; setting
   );
 }
 
-function PathCard({ path, progress, settings, onStartQuiz, compact = false }: { path: LearningPath; progress: number; settings: UserSettings; onStartQuiz: (pathId: string) => void; compact?: boolean }) {
+function PracticeLaunchCard({ path, progress, settings, onStartQuiz }: { path: LearningPath; progress: number; settings: UserSettings; onStartQuiz: (pathId: string) => void }) {
   const mode = settings.languageMode;
-  const category = path.id === "designops" || path.id === "ux-research" ? "Career & Design" : path.id === "stock-investing" || path.id === "thai-tax-personal-finance" ? "Money & Life" : null;
-  const safetyLabel = path.id === "stock-investing" ? "Not Financial Advice" : path.id === "thai-tax-personal-finance" ? "Not an Official Tax Calculation" : null;
+  const questionCount = questions.filter((question) => question.learningPath === path.name).length;
+
   return (
-    <article className="group relative min-h-72 overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial transition hover:-translate-y-1 hover:border-[var(--border-strong)] sm:p-6">
-      <div className={`absolute right-[-3rem] top-[-3rem] h-40 w-40 rounded-full bg-gradient-to-br ${path.accent} opacity-75 transition group-hover:scale-110`} />
-      <div className="absolute right-8 top-16 h-20 w-28 rotate-12 rounded-[1.5rem] border border-black/10 bg-white/45 backdrop-blur-md" />
-      <div className="relative grid min-h-64 content-between">
-        <div>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap gap-2">
-                <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">{path.currentLevel}</p>
-                {category ? <Badge>{category}</Badge> : null}
-                {safetyLabel ? <Badge icon="statusGoal">{safetyLabel}</Badge> : null}
-              </div>
-              <h2 className="mt-3 max-w-[12rem] text-balance font-display text-3xl font-extrabold leading-none tracking-tight text-[var(--text-primary)]">{path.name}</h2>
-            </div>
-            <div className="shrink-0">
-              <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" alt={path.name} priority={compact} active />
-            </div>
-          </div>
-          <p className="mt-5 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, path.description, path.descriptionTh)}</p>
-          {!compact ? <p className="mt-3 text-xs leading-6 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p> : null}
+    <article className="group relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/72 p-4 text-[var(--text-primary)] shadow-[0_16px_42px_rgba(23,23,23,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/86 sm:p-5">
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+      <div className="pointer-events-none absolute -right-14 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle,#effcff_0%,rgba(239,252,255,0)_72%)] opacity-90 blur-2xl" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">Practice Set · {path.currentLevel}</p>
+          <h2 className="mt-3 text-balance font-display text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]">{path.name}</h2>
         </div>
-        <div className="mt-6">
-          <ProgressBar value={progress} />
-          <div className="mt-3 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
-            <span>{path.questionsDueForReview} {textByMode(mode, "review", "ทบทวน")}</span>
-            <span>{progress}%</span>
-          </div>
-          <Link href="/quiz" onClick={() => onStartQuiz(path.id)} className="button-primary mt-5 w-full">
-            Start Practice
-          </Link>
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-[var(--border)] bg-white/84 shadow-[0_10px_24px_rgba(23,23,23,0.075)]">
+          <Soft3DIcon name={learningPathIconMap[path.name]} size="md" decorative shadow={false} active />
+        </span>
+      </div>
+      <p className="font-subtitle mt-4 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p>
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Questions</p>
+          <p className="mt-1 font-display text-xl font-extrabold text-[var(--text-primary)]">{questionCount || 5}</p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Review</p>
+          <p className="mt-1 font-display text-xl font-extrabold text-[var(--text-primary)]">{path.questionsDueForReview}</p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Level</p>
+          <p className="mt-1 truncate font-display text-sm font-extrabold text-[var(--text-primary)]">{path.currentLevel}</p>
         </div>
       </div>
+      <div className="mt-5">
+        <ProgressBar value={progress} tone={progressToneForPath(path.id)} />
+        <div className="mt-2 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
+          <span>Readiness</span>
+          <span>{progress}%</span>
+        </div>
+      </div>
+      <a href={`/quiz?start=1&path=${path.id}`} onClick={() => onStartQuiz(path.id)} className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-5 text-sm font-extrabold text-white shadow-[0_10px_26px_rgba(23,23,23,0.16)] transition group-hover:scale-[1.01] hover:bg-[#303030] focus:outline-none focus:ring-2 focus:ring-black/60">
+        Start Practice
+        <Soft3DIcon name="actionNext" size="sm" decorative shadow={false} />
+      </a>
     </article>
   );
 }
@@ -1510,27 +1693,28 @@ function SettingsView({ settings, onUpdateSettings }: { settings: UserSettings; 
       <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
         <section className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-5">
           <h2 className="text-xl font-semibold text-white">Language display mode</h2>
-          <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">เลือกวิธีแสดงภาษาในแอป ค่าเริ่มต้นคือ TH + EN เพื่อให้เรียนคำศัพท์วิชาชีพเป็นภาษาอังกฤษพร้อมคำอธิบายไทย</p>
+          <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">เลือกวิธีแสดงภาษาในแอป ค่าเริ่มต้นคือ TH + EN เพื่อให้เรียนคำศัพท์วิชาชีพเป็นภาษาอังกฤษพร้อมคำอธิบายไทย</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {(["TH", "EN", "TH_EN"] as LanguageMode[]).map((mode) => (
-              <button
+              <a
+                href={`/settings?languageMode=${mode}`}
                 key={mode}
-                type="button"
+                onPointerDown={() => onUpdateSettings({ ...settings, languageMode: mode })}
                 onClick={() => onUpdateSettings({ ...settings, languageMode: mode })}
-                className={`min-h-16 rounded-2xl border px-4 text-left transition ${
+                className={`block min-h-16 rounded-2xl border px-4 py-3 text-left transition ${
                   settings.languageMode === mode ? "border-blue-300/70 bg-blue-400/15 text-white" : "border-white/10 bg-black/20 text-[var(--text-secondary)] hover:bg-white/[0.06]"
                 }`}
               >
                 <span className="block font-display text-lg font-semibold">{languageLabels[mode]}</span>
                 <span className="text-xs">{mode === "TH" ? "Thai first" : mode === "EN" ? "English only" : "English + Thai support"}</span>
-              </button>
+              </a>
             ))}
           </div>
         </section>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-5">
           <h2 className="text-xl font-semibold text-white">English learning preference</h2>
-          <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">ใช้เพื่อปรับความยากของคำศัพท์ ความยาว passage และรายละเอียดคำใบ้ในอนาคต</p>
+          <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">ใช้เพื่อปรับความยากของคำศัพท์ ความยาว passage และรายละเอียดคำใบ้ในอนาคต</p>
           <div className="mt-5 grid gap-4">
             <label className="grid gap-2 text-sm text-[var(--text-secondary)]">
               Current self-estimated level
@@ -1552,16 +1736,17 @@ function SettingsView({ settings, onUpdateSettings }: { settings: UserSettings; 
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
               {(["learn", "exam"] as const).map((ieltsMode) => (
-                <button
+                <a
+                  href={`/settings?ieltsMode=${ieltsMode}`}
                   key={ieltsMode}
-                  type="button"
+                  onPointerDown={() => onUpdateSettings({ ...settings, ieltsMode })}
                   onClick={() => onUpdateSettings({ ...settings, ieltsMode })}
-                  className={`min-h-14 rounded-2xl border px-4 text-left text-sm transition ${
+                  className={`block min-h-14 rounded-2xl border px-4 py-4 text-left text-sm transition ${
                     settings.ieltsMode === ieltsMode ? "border-violet-300/70 bg-violet-400/15 text-white" : "border-white/10 bg-black/20 text-[var(--text-secondary)]"
                   }`}
                 >
                   {ieltsMode === "learn" ? "IELTS Learn Mode" : "IELTS Exam Practice"}
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -1577,7 +1762,7 @@ function VocabularyCard({ vocabulary, onSave, saved = false }: { vocabulary: Voc
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display text-base font-extrabold text-[var(--text-primary)]">{vocabulary.word}</p>
-          <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">{vocabulary.thaiMeaning}</p>
+          <p className="font-subtitle mt-1 text-sm leading-7 text-[var(--text-secondary)]">{vocabulary.thaiMeaning}</p>
         </div>
         {onSave ? (
           <button type="button" onClick={() => onSave(vocabulary)} className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-white">
@@ -1585,15 +1770,41 @@ function VocabularyCard({ vocabulary, onSave, saved = false }: { vocabulary: Voc
           </button>
         ) : null}
       </div>
-      <p className="mt-2 text-xs text-[var(--text-muted)]">{vocabulary.partOfSpeech} • {vocabulary.skill}</p>
-      <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{vocabulary.simpleDefinition}</p>
+      <p className="font-subtitle mt-2 text-xs text-[var(--text-muted)]">{vocabulary.partOfSpeech} • {vocabulary.skill}</p>
+      <p className="font-subtitle mt-3 text-sm leading-6 text-[var(--text-secondary)]">{vocabulary.simpleDefinition}</p>
       <p className="mt-3 text-sm font-medium leading-6 text-[var(--text-primary)]">{vocabulary.exampleSentence}</p>
-      <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">{vocabulary.exampleTranslationTh}</p>
+      <p className="font-subtitle mt-1 text-sm leading-7 text-[var(--text-secondary)]">{vocabulary.exampleTranslationTh}</p>
     </div>
   );
 }
 
 function VisualMediaPreview({ media }: { media: NonNullable<LearningLesson["visualMedia"]>[number] }) {
+  if (media.src) {
+    return (
+      <figure className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-white shadow-[0_18px_48px_rgba(23,23,23,0.08)]">
+        <div className="relative aspect-[1200/760] w-full bg-[var(--surface)]">
+          <Image
+            src={media.src}
+            alt={media.altTh ?? media.altEn ?? media.titleEn}
+            fill
+            className="object-cover"
+            sizes="(min-width: 1280px) 760px, (min-width: 768px) 82vw, 100vw"
+          />
+        </div>
+        {media.items?.length ? (
+          <figcaption className="grid gap-2 border-t border-[var(--border)] bg-white p-4 sm:flex sm:flex-wrap">
+            {media.items.map((item, index) => (
+              <span key={`${item}-${index}`} className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-primary)]" />
+                {item}
+              </span>
+            ))}
+          </figcaption>
+        ) : null}
+      </figure>
+    );
+  }
+
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-white p-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -1673,17 +1884,20 @@ function FigmaGridCheatSheet() {
               ))}
             </div>
           </div>
-          <p className="mt-3 text-xs leading-6 text-[var(--text-secondary)]">Preview นี้แสดงจำนวน column โดยประมาณ เพื่อช่วยให้เห็น rhythm ของ grid ก่อนนำไปปรับใน Figma</p>
+          <p className="font-subtitle mt-3 text-xs leading-6 text-[var(--text-secondary)]">Preview นี้แสดงจำนวน column โดยประมาณ เพื่อช่วยให้เห็น rhythm ของ grid ก่อนนำไปปรับใน Figma</p>
         </div>
       </div>
     </div>
   );
 }
 
-function LessonBlock({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
+function LessonBlock({ id, title, step, children }: { id?: string; title: string; step?: number; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-28 mt-8 border-t border-[var(--border)] pt-6">
-      <h2 className="font-display text-lg font-extrabold tracking-tight text-[var(--text-primary)]">{title}</h2>
+      <div className="flex items-center gap-3">
+        {step ? <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-extrabold text-[var(--text-primary)]">{step}</span> : null}
+        <h2 className="font-display text-lg font-semibold tracking-normal text-[var(--text-primary)]">{title}</h2>
+      </div>
       <div className="mt-3 space-y-3 text-sm leading-7 text-[var(--text-secondary)]">{children}</div>
     </section>
   );
@@ -1725,9 +1939,9 @@ function VerificationNotice({ verification }: { verification: NonNullable<Learni
           <p className="font-display text-sm font-extrabold text-[var(--text-primary)]">
             {verification.verificationStatus === "archived" ? "Archived learning content" : "Educational verification note"}
           </p>
-          <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">{verification.disclaimer?.th}</p>
+          <p className="font-subtitle mt-1 text-sm leading-7 text-[var(--text-secondary)]">{verification.disclaimer?.th}</p>
           {verification.officialSourceNames?.length ? (
-            <p className="mt-2 text-xs font-semibold text-[var(--text-muted)]">
+            <p className="font-subtitle mt-2 text-xs font-semibold text-[var(--text-muted)]">
               Official sources to check: {verification.officialSourceNames.join(", ")}
               {verification.lastVerifiedAt ? ` · Last verified ${verification.lastVerifiedAt}` : ""}
             </p>
@@ -1738,11 +1952,21 @@ function VerificationNotice({ verification }: { verification: NonNullable<Learni
   );
 }
 
-function ProgressBar({ value }: { value: number }) {
+const progressToneClasses: Record<ProgressTone, string> = {
+  blue: "bg-[linear-gradient(90deg,#8cc8de_0%,#5f98b6_100%)]",
+  violet: "bg-[linear-gradient(90deg,#b9a8d9_0%,#8b78b8_100%)]",
+  mint: "bg-[linear-gradient(90deg,#9fd9c9_0%,#64ad9e_100%)]",
+  champagne: "bg-[linear-gradient(90deg,#d9c8a5_0%,#aa9872_100%)]",
+  graphite: "bg-[linear-gradient(90deg,#bfc5c8_0%,#7f898f_100%)]",
+};
+
+function ProgressBar({ value, variant = "solid", tone = "blue" }: { value: number; variant?: "solid" | "rainbow"; tone?: ProgressTone }) {
+  const barClassName = variant === "rainbow" ? "gradient-iridescent" : progressToneClasses[tone];
+
   return (
     <div className="h-2.5 overflow-hidden rounded-full bg-black/10">
       <div
-        className="h-full rounded-full gradient-iridescent transition-all duration-300"
+        className={`h-full rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] transition-all duration-300 ${barClassName}`}
         style={{ width: `${Math.max(4, Math.min(100, value))}%` }}
       />
     </div>
@@ -1752,7 +1976,7 @@ function ProgressBar({ value }: { value: number }) {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-white p-4">
-      <p className="text-xs text-[var(--text-muted)]">{label}</p>
+      <p className="font-subtitle text-xs text-[var(--text-muted)]">{label}</p>
       <p className="mt-2 font-display text-2xl font-extrabold text-[var(--text-primary)]">{value}</p>
     </div>
   );
@@ -1777,7 +2001,7 @@ function EmptyState({ title, description, action, href }: { title: string; descr
         <Soft3DIcon name="statusMastered" size="md" decorative shadow={false} active />
       </div>
       <h2 className="mt-5 text-xl font-bold text-[var(--text-primary)]">{title}</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
+      <p className="font-subtitle mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
       <Link href={href} className="button-primary mx-auto mt-5 w-fit">
         {action}
       </Link>

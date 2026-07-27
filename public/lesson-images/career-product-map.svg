@@ -1,0 +1,37 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="64" fill="#F8F8F6"/>
+  <rect x="56" y="56" width="1088" height="648" rx="44" fill="url(#bg)" stroke="#171717" stroke-opacity=".08"/>
+  <g filter="url(#shadow)">
+    <rect x="138" y="290" width="220" height="148" rx="32" fill="#FFFFFF"/>
+    <rect x="408" y="220" width="220" height="148" rx="32" fill="#FFFFFF"/>
+    <rect x="408" y="420" width="220" height="148" rx="32" fill="#FFFFFF"/>
+    <rect x="678" y="290" width="220" height="148" rx="32" fill="#FFFFFF"/>
+    <rect x="948" y="290" width="120" height="148" rx="32" fill="#171717"/>
+  </g>
+  <path d="M358 364H408M628 294L678 364M628 494L678 364M898 364H948" stroke="#171717" stroke-opacity=".35" stroke-width="10" stroke-linecap="round"/>
+  <g font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#171717">
+    <text x="248" y="354" text-anchor="middle">Design</text>
+    <text x="518" y="284" text-anchor="middle">Product</text>
+    <text x="518" y="484" text-anchor="middle">Data</text>
+    <text x="788" y="354" text-anchor="middle">Business</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="20" fill="#666766">
+    <text x="248" y="392" text-anchor="middle">User clarity</text>
+    <text x="518" y="322" text-anchor="middle">Priorities</text>
+    <text x="518" y="522" text-anchor="middle">Evidence</text>
+    <text x="788" y="392" text-anchor="middle">Impact</text>
+  </g>
+  <text x="1008" y="357" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">Better</text>
+  <text x="1008" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">Career</text>
+  <text x="600" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="#171717">High-value career skill stack</text>
+  <defs>
+    <linearGradient id="bg" x1="92" y1="76" x2="1098" y2="702" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".45" stop-color="#EFFFF9"/>
+      <stop offset="1" stop-color="#EEF5FF"/>
+    </linearGradient>
+    <filter id="shadow" x="100" y="190" width="1008" height="418" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#171717" flood-opacity=".1"/>
+    </filter>
+  </defs>
+</svg>
