@@ -5,9 +5,9 @@ const sessionKey = "skillquest-session";
 const settingsKey = "skillquest-settings";
 
 export const defaultProgress: ProgressState = {
-  totalXP: 420,
+  totalXP: 0,
   dailyGoal: 10,
-  currentStreak: 4,
+  currentStreak: 0,
   completedQuestionIds: [],
   answers: [],
   reviewQueue: [],
@@ -30,7 +30,20 @@ export function loadProgress(): ProgressState {
   if (!raw) return defaultProgress;
 
   try {
-    return { ...defaultProgress, ...JSON.parse(raw) };
+    const parsed = { ...defaultProgress, ...JSON.parse(raw) };
+    const hasRealActivity =
+      parsed.completedQuestionIds.length > 0 ||
+      parsed.answers.length > 0 ||
+      parsed.reviewQueue.length > 0 ||
+      parsed.savedVocabulary.length > 0 ||
+      parsed.savedNotes.length > 0 ||
+      Object.keys(parsed.lessons ?? {}).length > 0;
+
+    if (!hasRealActivity && parsed.totalXP === 420 && parsed.currentStreak === 4) {
+      return defaultProgress;
+    }
+
+    return parsed;
   } catch {
     return defaultProgress;
   }

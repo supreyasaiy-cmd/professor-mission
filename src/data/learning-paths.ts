@@ -11,8 +11,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Improve flow decisions and usability reasoning",
     currentGoalTh: "ฝึกคิดเหตุผลด้าน usability และตัดสินใจเรื่อง flow ให้ดีขึ้น",
     accent: "from-sky-400 via-indigo-400 to-violet-500",
-    questionsCompleted: 18,
-    questionsDueForReview: 3,
   },
   {
     id: "product-design",
@@ -24,8 +22,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Practice product trade-off thinking",
     currentGoalTh: "ฝึกคิด trade-off ของผลิตภัณฑ์อย่างเป็นระบบ",
     accent: "from-indigo-400 via-blue-400 to-cyan-300",
-    questionsCompleted: 11,
-    questionsDueForReview: 1,
   },
   {
     id: "creative-thinking",
@@ -37,8 +33,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Turn insights into sharper concepts",
     currentGoalTh: "เปลี่ยน insight ให้เป็น concept ที่ชัดและน่าสนใจขึ้น",
     accent: "from-fuchsia-400 via-violet-400 to-orange-300",
-    questionsCompleted: 24,
-    questionsDueForReview: 4,
   },
   {
     id: "art-direction",
@@ -50,8 +44,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Build clearer visual rationales",
     currentGoalTh: "ฝึกอธิบายเหตุผลของ visual direction ให้ชัดขึ้น",
     accent: "from-violet-400 via-purple-400 to-pink-300",
-    questionsCompleted: 9,
-    questionsDueForReview: 2,
   },
   {
     id: "ux-writing",
@@ -63,8 +55,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Make errors and empty states more useful",
     currentGoalTh: "ทำให้ error message และ empty state ช่วยผู้ใช้ได้จริง",
     accent: "from-emerald-300 via-cyan-300 to-blue-400",
-    questionsCompleted: 21,
-    questionsDueForReview: 5,
   },
   {
     id: "graphic-design",
@@ -76,8 +66,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Strengthen visual hierarchy",
     currentGoalTh: "ฝึกจัด Visual Hierarchy ให้ดูง่ายและมีลำดับชัดเจน",
     accent: "from-cyan-300 via-blue-400 to-purple-400",
-    questionsCompleted: 7,
-    questionsDueForReview: 0,
   },
   {
     id: "english-work",
@@ -89,8 +77,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Give clearer professional explanations",
     currentGoalTh: "อธิบายงานและความคิดเห็นเป็นภาษาอังกฤษให้ชัดขึ้น",
     accent: "from-blue-300 via-sky-400 to-cyan-300",
-    questionsCompleted: 15,
-    questionsDueForReview: 2,
   },
   {
     id: "ielts",
@@ -102,8 +88,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Target Band 7.0 as a personal goal",
     currentGoalTh: "ตั้งเป้า Band 7.0 เป็นเป้าหมายส่วนตัว ไม่ใช่ผลประเมินทางการ",
     accent: "from-purple-400 via-indigo-400 to-blue-400",
-    questionsCompleted: 16,
-    questionsDueForReview: 3,
   },
   {
     id: "communication",
@@ -115,8 +99,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Make updates more concise and useful",
     currentGoalTh: "ทำให้การอัปเดตงานกระชับและมีประโยชน์มากขึ้น",
     accent: "from-orange-300 via-rose-400 to-pink-400",
-    questionsCompleted: 10,
-    questionsDueForReview: 1,
   },
   {
     id: "critical-thinking",
@@ -128,8 +110,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Spot weak evidence before deciding",
     currentGoalTh: "จับหลักฐานที่ยังอ่อนก่อนตัดสินใจ",
     accent: "from-cyan-300 via-teal-300 to-emerald-300",
-    questionsCompleted: 13,
-    questionsDueForReview: 2,
   },
   {
     id: "designops",
@@ -141,8 +121,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Make design work easier to request, review, reuse, and measure",
     currentGoalTh: "ทำให้งานออกแบบถูก request, review, reuse และวัดผลได้ชัดขึ้น",
     accent: "from-slate-300 via-sky-300 to-indigo-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "ux-research",
@@ -154,8 +132,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Turn research questions into evidence-backed product decisions",
     currentGoalTh: "เปลี่ยน research question ให้เป็น product decision ที่มีหลักฐานรองรับ",
     accent: "from-cyan-200 via-blue-300 to-violet-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "ux-research-method",
@@ -167,8 +143,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Match the right research method to the product decision",
     currentGoalTh: "จับคู่ research method ให้ตรงกับ product decision ที่ต้องตัดสินใจ",
     accent: "from-sky-200 via-cyan-300 to-violet-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "agile-ux-ui",
@@ -180,8 +154,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Turn design work into sprint-ready product delivery",
     currentGoalTh: "ทำให้งานออกแบบพร้อมเข้าสู่ sprint และส่งมอบกับทีม product/dev ได้จริง",
     accent: "from-indigo-200 via-blue-300 to-emerald-200",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "design-system",
@@ -193,8 +165,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Create reusable UI decisions that scale across products",
     currentGoalTh: "สร้าง decision ของ UI ที่ reuse ได้และ scale ไปหลาย product",
     accent: "from-slate-200 via-violet-200 to-cyan-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "product-owner",
@@ -206,8 +176,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Turn business needs into clear backlog decisions",
     currentGoalTh: "เปลี่ยนความต้องการธุรกิจให้เป็น backlog และ decision ที่ชัดเจน",
     accent: "from-slate-300 via-blue-300 to-cyan-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "product-analytics",
@@ -219,8 +187,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Use data to explain product decisions and growth opportunities",
     currentGoalTh: "ใช้ข้อมูลอธิบาย product decision และโอกาสเติบโตให้ชัดขึ้น",
     accent: "from-red-300 via-rose-300 to-orange-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "ai-product-workflow",
@@ -232,8 +198,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Build safer AI-assisted work habits",
     currentGoalTh: "สร้าง workflow ใช้ AI ที่เร็วขึ้นแต่ยังตรวจสอบและปลอดภัย",
     accent: "from-violet-300 via-indigo-300 to-sky-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "career-portfolio",
@@ -245,8 +209,6 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Build evidence for better career opportunities",
     currentGoalTh: "สร้างหลักฐานผลงานเพื่อโอกาสงานและรายได้ที่ดีขึ้น",
     accent: "from-lime-200 via-mint-300 to-cyan-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "cx-communication",
@@ -258,21 +220,17 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Build communication that protects trust and improves customer satisfaction",
     currentGoalTh: "สร้างการสื่อสารที่รักษาความไว้วางใจและเพิ่ม customer satisfaction",
     accent: "from-emerald-200 via-cyan-300 to-yellow-100",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "stock-investing",
     name: "Stock Investing",
     nameTh: "Stock Investing",
-    description: "Learn investing basics with fictional companies and practice portfolios.",
-    descriptionTh: "เรียนพื้นฐานการลงทุนด้วยบริษัทสมมติและพอร์ตฝึกหัด ไม่ใช่คำแนะนำการลงทุนส่วนบุคคล",
+    description: "Learn investing basics through educational scenarios, risk concepts, and practice decision frameworks.",
+    descriptionTh: "เรียนพื้นฐานการลงทุนผ่านสถานการณ์เพื่อการศึกษา แนวคิดความเสี่ยง และกรอบตัดสินใจ ไม่ใช่คำแนะนำการลงทุนส่วนบุคคล",
     currentLevel: "Beginner",
     currentGoal: "Understand risk before making real financial decisions",
     currentGoalTh: "เข้าใจความเสี่ยงก่อนตัดสินใจทางการเงินจริง",
     accent: "from-emerald-200 via-sky-200 to-slate-300",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
   {
     id: "thai-tax-personal-finance",
@@ -284,7 +242,5 @@ export const learningPaths: LearningPath[] = [
     currentGoal: "Prepare safer questions and documents before filing or consulting a professional",
     currentGoalTh: "เตรียมคำถามและเอกสารให้พร้อมขึ้นก่อนยื่นภาษีหรือปรึกษาผู้เชี่ยวชาญ",
     accent: "from-indigo-200 via-sky-200 to-emerald-200",
-    questionsCompleted: 0,
-    questionsDueForReview: 0,
   },
 ];

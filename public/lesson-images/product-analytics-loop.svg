@@ -1,0 +1,21 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="56" fill="#F8F8F6"/>
+  <rect x="64" y="62" width="1072" height="636" rx="48" fill="#FFFFFF" stroke="#D9D9D6" stroke-width="2"/>
+  <text x="110" y="140" fill="#171717" font-family="Arial, sans-serif" font-size="46" font-weight="700">Product Analytics Loop</text>
+  <text x="112" y="178" fill="#666766" font-family="Arial, sans-serif" font-size="23">Start with the decision, not the chart.</text>
+  <g font-family="Arial, sans-serif">
+    <circle cx="600" cy="405" r="188" fill="#F5F5F3" stroke="#D9D9D6" stroke-width="2"/>
+    <circle cx="600" cy="405" r="92" fill="#171717"/>
+    <text x="548" y="397" fill="#FFFFFF" font-size="28" font-weight="700">User</text>
+    <text x="536" y="430" fill="#D7D7D4" font-size="20">value</text>
+    <rect x="208" y="312" width="220" height="82" rx="26" fill="#E7F8FF" stroke="#D9D9D6"/>
+    <text x="240" y="362" fill="#171717" font-size="24" font-weight="700">Metric</text>
+    <rect x="486" y="174" width="228" height="82" rx="26" fill="#F1EBFF" stroke="#D9D9D6"/>
+    <text x="522" y="224" fill="#171717" font-size="24" font-weight="700">Tracking plan</text>
+    <rect x="772" y="312" width="220" height="82" rx="26" fill="#E9FAF4" stroke="#D9D9D6"/>
+    <text x="806" y="362" fill="#171717" font-size="24" font-weight="700">Funnel</text>
+    <rect x="486" y="554" width="228" height="82" rx="26" fill="#FFF7D7" stroke="#D9D9D6"/>
+    <text x="532" y="604" fill="#171717" font-size="24" font-weight="700">Decision</text>
+    <path d="M432 344C470 250 520 222 486 215M714 215c74 25 122 67 158 97M882 394c-14 82-72 140-168 180M486 594c-94-22-166-92-178-200" stroke="#959694" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

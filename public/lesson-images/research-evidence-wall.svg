@@ -1,0 +1,26 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="56" fill="#F8F8F6"/>
+  <rect x="58" y="58" width="1084" height="644" rx="48" fill="#FFFFFF" stroke="#D9D9D6" stroke-width="2"/>
+  <circle cx="182" cy="158" r="82" fill="#DDF6FF"/>
+  <circle cx="982" cy="572" r="132" fill="#E9FAF4"/>
+  <text x="104" y="134" fill="#171717" font-family="Arial, sans-serif" font-size="46" font-weight="700">Research Evidence Wall</text>
+  <text x="106" y="172" fill="#666766" font-family="Arial, sans-serif" font-size="23">Move from raw notes to patterns and decisions.</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="112" y="250" width="210" height="150" rx="24" fill="#FFF7D7" stroke="#D9D9D6"/>
+    <text x="138" y="303" fill="#171717" font-size="24" font-weight="700">Observation</text>
+    <text x="138" y="336" fill="#666766" font-size="18">What users said or did</text>
+    <rect x="362" y="250" width="210" height="150" rx="24" fill="#E7F8FF" stroke="#D9D9D6"/>
+    <text x="388" y="303" fill="#171717" font-size="24" font-weight="700">Pattern</text>
+    <text x="388" y="336" fill="#666766" font-size="18">Repeated signal</text>
+    <rect x="612" y="250" width="210" height="150" rx="24" fill="#F1EBFF" stroke="#D9D9D6"/>
+    <text x="638" y="303" fill="#171717" font-size="24" font-weight="700">Insight</text>
+    <text x="638" y="336" fill="#666766" font-size="18">Meaning behind data</text>
+    <rect x="862" y="250" width="210" height="150" rx="24" fill="#E9FAF4" stroke="#D9D9D6"/>
+    <text x="888" y="303" fill="#171717" font-size="24" font-weight="700">Decision</text>
+    <text x="888" y="336" fill="#666766" font-size="18">What the team changes</text>
+    <path d="M330 325h24M580 325h24M830 325h24" stroke="#959694" stroke-width="5" stroke-linecap="round"/>
+    <rect x="164" y="506" width="872" height="92" rx="28" fill="#171717"/>
+    <text x="204" y="548" fill="#FFFFFF" font-size="26" font-weight="700">Research readout</text>
+    <text x="204" y="576" fill="#D7D7D4" font-size="18">Context + method + evidence + recommendation + next owner</text>
+  </g>
+</svg>

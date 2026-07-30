@@ -396,8 +396,8 @@ const stockVerification: ContentVerification = {
   lastVerifiedAt: "2026-07-25",
   officialSourceNames: ["The Securities and Exchange Commission, Thailand (SEC)", "The Stock Exchange of Thailand (SET)"],
   disclaimer: {
-    en: "Educational content only. Uses fictional companies and practice portfolios. Not financial advice, not a recommendation, and not a Buy/Sell/Hold rating.",
-    th: "เนื้อหานี้ใช้เพื่อการศึกษา ใช้บริษัทสมมติและพอร์ตฝึกหัด ไม่ใช่คำแนะนำการลงทุน ไม่ใช่คำแนะนำซื้อ/ขาย/ถือ",
+    en: "Educational content only. Uses practice scenarios and decision frameworks. Not financial advice, not a recommendation, and not a Buy/Sell/Hold rating.",
+    th: "เนื้อหานี้ใช้เพื่อการศึกษา ใช้สถานการณ์ฝึกคิดและกรอบตัดสินใจ ไม่ใช่คำแนะนำการลงทุน ไม่ใช่คำแนะนำซื้อ/ขาย/ถือ",
   },
 };
 
@@ -425,7 +425,7 @@ const archivedTaxVerification: ContentVerification = {
   },
 };
 
-function vocab(id: string, word: string, thaiMeaning: string, simpleDefinition: string, topic: string): VocabularyItem {
+function vocab(id: string, word: string, thaiMeaning: string, simpleDefinition: string, topic: string, skill = "UX/UI Design"): VocabularyItem {
   return {
     id,
     word,
@@ -434,7 +434,7 @@ function vocab(id: string, word: string, thaiMeaning: string, simpleDefinition: 
     simpleDefinition,
     exampleSentence: `${word} helps a design team make a clearer product decision.`,
     exampleTranslationTh: `${word} ช่วยให้ทีมออกแบบตัดสินใจเกี่ยวกับ product ได้ชัดขึ้น`,
-    skill: "UX/UI Design",
+    skill,
     topic,
   };
 }
@@ -462,16 +462,30 @@ const seedLessons: Record<string, UxLessonSeed> = {
   "Understand UX, Understand UI": {
     titleEn: "Understand UX, Understand UI",
     titleTh: "เข้าใจ UX และ UI",
-    summaryTh: "UX คือประสบการณ์และเหตุผลของการใช้งาน ส่วน UI คือหน้าตาและการโต้ตอบที่ผู้ใช้เห็น",
+    summaryTh: "บทนี้จะค่อย ๆ แยกให้เห็นว่า UX คือการออกแบบเส้นทางให้ผู้ใช้ทำเป้าหมายสำเร็จ ส่วน UI คือการทำให้เส้นทางนั้นมองเห็น อ่านง่าย และกดใช้งานได้จริง",
     professionalLevel: "Beginner",
-    estimatedMinutes: 8,
-    objectives: ["Explain UX and UI in simple English.", "Separate user experience problems from visual interface problems.", "Use UX/UI language in a design review."],
+    estimatedMinutes: 12,
+    objectives: [
+      "อธิบาย UX และ UI ด้วยภาษาง่าย ๆ ได้",
+      "แยกได้ว่าปัญหาหนึ่งควรแก้ที่ flow, information, copy, visual hierarchy หรือ interaction state",
+      "อ่านหน้าจอจริงแล้วบอกเหตุผลการปรับ design ได้ ไม่ใช่ตอบแค่ว่า “ทำให้สวยขึ้น”",
+    ],
     sections: [
+      section("first-picture", "Start With a Simple Picture", [
+        "ลองนึกถึงการสั่งกาแฟผ่านแอป ถ้าคุณหาเมนูไม่เจอ เลือกสาขาผิดง่าย หรือจ่ายเงินแล้วค่อยรู้ว่าสินค้าหมด นี่คือปัญหาประสบการณ์ผู้ใช้ หรือ UX",
+        "แต่ถ้าปุ่มเล็กเกินไป ตัวอักษรจาง สีของสถานะ active มองไม่ออก หรือช่องกรอกข้อมูลไม่มี focus state ที่ชัด นี่คือปัญหา interface หรือ UI",
+        "งานจริงมักไม่ได้แยกขาดจากกัน ปัญหาเดียวกันอาจมีทั้ง UX และ UI อยู่พร้อมกัน เราจึงต้องถามให้ถูกก่อนว่าจะเริ่มแก้ตรงไหน",
+      ], ["UX = เส้นทางและเหตุผล", "UI = หน้าจอและสัญญาณที่ผู้ใช้เห็น", "Good product = ทั้งสองอย่างช่วยกัน"]),
       section("meaning", "What It Means", [
-        "UX หรือ User Experience คือภาพรวมของประสบการณ์ผู้ใช้ ตั้งแต่เขาต้องการอะไร เจอปัญหาอะไร เข้าใจ flow ไหม และทำงานสำเร็จหรือไม่",
-        "UI หรือ User Interface คือสิ่งที่ผู้ใช้สัมผัสบนหน้าจอ เช่น ปุ่ม สี ตัวอักษร ระยะห่าง icon และ state ต่าง ๆ",
-        "สองอย่างนี้ทำงานร่วมกัน UI ที่สวยแต่ flow สับสนยังไม่ใช่ UX ที่ดี และ UX ที่คิดมาดีแต่ UI อ่านยากก็ยังใช้งานลำบาก",
+        "UX หรือ User Experience คือภาพรวมของประสบการณ์ผู้ใช้ระหว่างพยายามทำเป้าหมาย เช่น สมัครสมาชิก จ่ายเงิน จองคิว อ่านบทเรียน หรือหาข้อมูลสำคัญให้เจอ",
+        "UI หรือ User Interface คือสิ่งที่ผู้ใช้มองเห็นและแตะใช้งาน เช่น ปุ่ม สี icon card text field spacing typography state และ feedback หลังจากกด",
+        "จำง่าย ๆ คือ UX ถามว่า “ผู้ใช้ไปถึงเป้าหมายได้ไหมและรู้สึกอย่างไรระหว่างทาง” ส่วน UI ถามว่า “สิ่งที่เห็นบนหน้าจอช่วยให้เขาเข้าใจและลงมือได้ไหม”",
       ]),
+      section("diagnose", "How to Diagnose a Screen", [
+        "เวลาเห็นหน้าจอหนึ่ง อย่าเริ่มจากถามว่า “สวยไหม” ให้เริ่มจากคำถาม 5 ข้อ: ผู้ใช้ต้องการทำอะไร, ขั้นตอนต่อไปคืออะไร, ข้อมูลสำคัญอยู่ตรงไหน, ถ้าพลาดจะแก้อย่างไร, และหน้าจอนี้รองรับมือถือหรือ accessibility แค่ไหน",
+        "ถ้าผู้ใช้ไม่รู้ว่าต้องทำอะไรต่อ ให้ตรวจ hierarchy และ copy ถ้าผู้ใช้ไปผิดหน้า ให้ตรวจ information architecture และ label ถ้าผู้ใช้กดพลาด ให้ตรวจ touch target, state และ spacing",
+        "วิธีนี้ช่วยให้เราเสนอ design decision ได้มีเหตุผล เช่น “เพิ่ม field-level error ใกล้ช่อง email” ชัดกว่า “ทำ error ให้เด่นขึ้น”",
+      ], ["Goal", "Next action", "Information", "Recovery", "Accessibility"]),
       section("why", "Why It Matters", [
         "เมื่อแยก UX กับ UI ได้ คุณจะอธิบายงานได้แม่นขึ้น เช่น ปัญหานี้ต้องแก้ flow, label, hierarchy หรือ interaction state",
         "ในการทำงานจริง ทีมไม่ได้ต้องการแค่คำว่า “สวยขึ้น” แต่ต้องการเหตุผลว่า design ช่วยให้ผู้ใช้ไปต่อได้อย่างไร",
@@ -480,9 +494,25 @@ const seedLessons: Record<string, UxLessonSeed> = {
         "เริ่มจากถามว่า user goal คืออะไร จากนั้นดูว่า flow, information, content และ visual treatment ช่วยหรือขัดขวาง goal นั้น",
         "ถ้าผู้ใช้ไม่รู้จะกดอะไร นั่นอาจเป็น UX + UI problem พร้อมกัน เพราะทั้งลำดับความคิดและการแสดงผลยังไม่ชัด",
       ], ["UX asks: can users complete the goal?", "UI asks: can users see, understand, and interact with the screen clearly?"]),
+      section("before-after", "Before and After Thinking", [
+        "Before: “ปุ่มนี้ไม่สวย ลองเปลี่ยนสี” เป็นการมองที่ผิวของ UI เท่านั้น",
+        "After: “ผู้ใช้ไม่เห็น primary action เพราะ hierarchy ของ card แข่งกันเอง ปุ่มจึงควรชัดขึ้น และ secondary action ควรถูกลดน้ำหนัก” เป็นการเชื่อม UX กับ UI",
+        "ก่อนเสนอแก้ ให้เขียนเหตุผลหนึ่งประโยคเสมอว่า การแก้นี้ช่วยให้ผู้ใช้ตัดสินใจหรือทำงานสำเร็จเร็วขึ้นอย่างไร",
+      ], ["Problem", "Reason", "Design change", "Expected user benefit"]),
+      section("real-practice", "Based on Real UX Practice", [
+        "ในการตรวจงานจริง ให้ใช้ usability heuristics เป็น checklist เบื้องต้น เช่น ระบบบอกสถานะชัดไหม ผู้ใช้ย้อนกลับได้ไหม ป้องกัน error ได้ก่อนเกิดหรือไม่ และข้อความใช้ภาษาที่ผู้ใช้เข้าใจจริงไหม",
+        "จากนั้นตรวจ accessibility ขั้นพื้นฐาน เช่น contrast, touch target, keyboard/focus state และข้อความที่อ่านได้บน mobile เพราะ UI ที่สวยแต่เข้าถึงยากยังไม่ถือว่าใช้งานดี",
+      ], ["Visibility of system status", "User control and freedom", "Error prevention", "Recognition rather than recall", "Accessible text and contrast"]),
+      section("mini-exercise", "Try This on Any App", [
+        "เปิดหน้าแอปที่ใช้บ่อยหนึ่งหน้า แล้วลองชี้ 3 อย่าง: primary action คืออะไร, จุดที่ผู้ใช้อาจสับสนอยู่ตรงไหน, และถ้าผู้ใช้ทำผิด ระบบช่วยให้กลับมาได้อย่างไร",
+        "จากนั้นแยกคำตอบเป็นสองกลุ่ม ถ้าเกี่ยวกับลำดับขั้นตอน ความคาดหวัง หรือการตัดสินใจ ให้ใส่ในกลุ่ม UX ถ้าเกี่ยวกับการมองเห็น การอ่าน การแตะ หรือ state ให้ใส่ในกลุ่ม UI",
+        "นี่คือวิธีฝึกสายตา designer ให้เห็น “เหตุผลของหน้าจอ” ไม่ใช่เห็นแค่ความสวยของหน้าจอ",
+      ]),
     ],
     examples: [
       { titleEn: "Checkout Example", bodyTh: "ถ้าผู้ใช้ถึงหน้าจ่ายเงินแล้วเพิ่งรู้ว่าสินค้าหมด ปัญหาหลักคือ UX flow เพราะระบบควรบอกก่อน แต่ UI error state ก็ยังต้องชัดเพื่อช่วย recover" },
+      { titleEn: "Signup Form Example", bodyTh: "ถ้าผู้ใช้กรอก email ผิดแล้วระบบขึ้นแค่ “Something went wrong” ปัญหาคือ UI copy ไม่ช่วย recovery และ UX ของ form ทำให้ผู้ใช้ต้องเดาเองว่าควรแก้ตรงไหน" },
+      { titleEn: "Navigation Example", bodyTh: "ถ้าผู้ใช้เข้า Settings เพื่อหา invoice บ่อย ๆ อาจไม่ใช่ปัญหา icon แต่เป็นปัญหา label และ information architecture ที่ไม่ตรงกับ mental model ของผู้ใช้" },
     ],
     visualMedia: [
       {
@@ -495,6 +525,17 @@ const seedLessons: Record<string, UxLessonSeed> = {
         width: 1200,
         height: 760,
         items: ["User goal", "Flow decision", "Interface state", "Successful action"],
+      },
+      {
+        type: "image",
+        titleEn: "UX Usability Check",
+        descriptionTh: "ใช้ภาพนี้เป็น checklist ก่อนสรุปว่างาน UI ดีแล้ว เพราะ UX ที่ดีต้องเห็นสถานะ ป้องกัน error และช่วยให้ผู้ใช้ไปต่อได้",
+        src: "/lesson-images/ux-usability-checklist.svg",
+        altEn: "A usability checklist diagram showing system status, error prevention, user control, recognition, and accessible reading.",
+        altTh: "ภาพ checklist สำหรับตรวจ usability เช่น system status, error prevention, user control, recognition และ accessibility",
+        width: 1200,
+        height: 760,
+        items: ["System status", "Error prevention", "User control", "Recognition", "Accessibility"],
       },
     ],
     mistakes: ["Calling every design problem a UI problem.", "Polishing colors before checking whether the flow makes sense."],
@@ -511,8 +552,8 @@ const seedLessons: Record<string, UxLessonSeed> = {
     keyTakeaway: "UX gives the reason. UI makes the reason visible and usable.",
     keyTakeawayTh: "UX คือเหตุผลของประสบการณ์ ส่วน UI ทำให้เหตุผลนั้นมองเห็นและใช้งานได้จริง",
     miniCheck: check("Which statement best separates UX and UI?", "ข้อใดแยก UX และ UI ได้ชัดที่สุด?", "UX focuses on the experience; UI focuses on the interface users see and use.", "UI is always more important because users see it first.", "UX and UI mean exactly the same thing.", "คำตอบที่ดีต้องเห็นว่าทั้งสองเรื่องต่างบทบาทกัน แต่ทำงานร่วมกัน"),
-    relatedQuestionIds: ["ux-01", "ux-02", "img-ux-checkout-stock"],
-    references: ["Nielsen Norman Group usability principles", "WCAG readability and interaction guidance"],
+    relatedQuestionIds: ["ux-01", "ux-02", "ux-03", "ux-04", "ux-05", "ux-06", "ux-07", "ux-08", "ux-09", "img-ux-checkout-stock"],
+    references: ["https://www.nngroup.com/articles/ten-usability-heuristics/", "https://www.w3.org/WAI/WCAG22/quickref/"],
   },
   "Design Thinking": {
     titleEn: "Design Thinking",
@@ -1158,6 +1199,502 @@ const specificLessonCopy: Record<string, Partial<ReturnType<typeof guideForPath>
     vocab: "Email Tone",
     visualItems: ["Subject", "Context", "Request", "Deadline", "Thanks"],
   },
+  "art-direction:Mood and Tone": {
+    focus: "แปลงโจทย์แบรนด์หรือแคมเปญให้เป็นความรู้สึกทางภาพที่เลือกใช้ได้จริง เช่น calm, premium, energetic หรือ trustworthy",
+    outcome: "อธิบายได้ว่า mood คือความรู้สึกที่ต้องการให้คนรับรู้ ส่วน tone คือระดับและวิธีการแสดงออกของความรู้สึกนั้น",
+    practice: "เริ่มจาก keyword ของ brief แล้วเลือก reference, color, typography, spacing, imagery และ motion ที่สนับสนุน keyword เดียวกัน",
+    mistake: "เลือกภาพสวยหลายแบบมารวมกันโดยไม่เช็คว่าแต่ละภาพสื่ออารมณ์เดียวกันหรือช่วยโจทย์เดียวกันไหม",
+    vocab: "Mood and Tone",
+    visualItems: ["Brief keywords", "Audience feeling", "Reference filter", "Visual choices", "Direction rule"],
+  },
+};
+
+type RealLessonPack = {
+  objectives: string[];
+  sections: LessonSection[];
+  examples: LessonPracticalExample[];
+  mistakes: string[];
+  junior: string;
+  senior: string;
+  juniorTh: string;
+  seniorTh: string;
+  keyTakeaway: string;
+  keyTakeawayTh: string;
+  miniCheck: LessonMiniCheck;
+  vocabulary: Array<[string, string, string, string]>;
+  relatedQuestionIds: string[];
+  references: string[];
+};
+
+const realLessonPacks: Record<string, RealLessonPack> = {
+  "product-design:Product Outcomes": {
+    objectives: ["Separate output, outcome, and impact.", "Connect a design decision to a measurable user or business result.", "Write one outcome statement before proposing a feature."],
+    sections: [
+      section("outcome-not-output", "1. Outcome Is Not Output", [
+        "Output คือสิ่งที่ทีมส่งมอบ เช่น หน้าใหม่ ปุ่มใหม่ หรือ feature ใหม่ ส่วน outcome คือพฤติกรรมหรือผลลัพธ์ที่เปลี่ยนไปหลังผู้ใช้ได้ใช้สิ่งนั้น",
+        "Product Designer ที่ดีไม่หยุดแค่ “เราจะออกแบบหน้า onboarding” แต่ถามต่อว่า onboarding นี้ควรทำให้ผู้ใช้ทำอะไรได้ดีขึ้น เช่น activate เร็วขึ้น เข้าใจ value เร็วขึ้น หรือ drop-off ลดลง",
+      ], ["Output = thing shipped", "Outcome = behavior changed", "Impact = business or customer value"]),
+      section("write-outcome", "2. Write an Outcome Statement", [
+        "ใช้รูปแบบนี้ก่อนเริ่มงาน: For [user segment], we want to improve [behavior] so that [value] changes.",
+        "ตัวอย่าง: For new learners, we want to improve lesson-start confidence so that more users start their first quiz after reading a lesson.",
+        "ประโยคนี้ทำให้ทีมไม่ถกกันแค่หน้าตา แต่คุยเรื่องพฤติกรรมที่อยากเปลี่ยนจริง",
+      ]),
+      section("measure-it", "3. Choose a Signal", [
+        "เลือก metric หรือ signal ที่พอวัดได้ เช่น completion rate, time to first action, retry rate, support ticket, CSAT หรือ qualitative feedback",
+        "ไม่จำเป็นต้องเป็นตัวเลขใหญ่เสมอไป สำหรับ MVP ใช้ evidence เบื้องต้นได้ เช่น ผู้ใช้ 5 คนเข้าใจ next step มากขึ้นหรือไม่",
+      ]),
+      section("decision-check", "4. Decision Check", [
+        "ก่อนเลือก solution ให้ถามว่า solution นี้จะขยับ outcome ที่เขียนไว้ได้อย่างไร ถ้าตอบไม่ได้ แปลว่า feature อาจยังไม่ชัด",
+        "การคิดแบบ outcome-first ช่วยให้ designer พูดกับ product owner และ business team ได้มั่นใจขึ้น",
+      ]),
+    ],
+    examples: [
+      { titleEn: "Weak Framing", bodyTh: "ออกแบบ dashboard ใหม่ให้สวยขึ้น" },
+      { titleEn: "Better Framing", bodyTh: "ช่วยให้ learner เห็น next learning action ภายใน 5 วินาที เพื่อลดการออกจากหน้า Home โดยยังไม่เริ่มเรียน" },
+    ],
+    mistakes: ["Starting with feature ideas before defining the behavior to change.", "Choosing metrics that do not connect to the user's job.", "Calling every shipped screen an outcome."],
+    junior: "I designed the screen that was requested.",
+    senior: "I can explain what user behavior the design is meant to change.",
+    juniorTh: "ทำหน้าจอตามที่ได้รับมอบหมาย",
+    seniorTh: "อธิบายได้ว่างานออกแบบนี้ต้องการเปลี่ยนพฤติกรรมผู้ใช้อะไร",
+    keyTakeaway: "A product outcome describes the change you want, not just the thing you ship.",
+    keyTakeawayTh: "Product outcome คือผลลัพธ์ที่อยากให้เปลี่ยน ไม่ใช่แค่สิ่งที่ทีมส่งมอบ",
+    miniCheck: check("Which statement is an outcome?", "ข้อใดคือ outcome?", "Increase first-lesson completion from new learners.", "Create a prettier lesson card.", "Add a new gradient to the dashboard.", "Outcome ต้องบอกพฤติกรรมหรือผลลัพธ์ที่เปลี่ยน ไม่ใช่แค่ deliverable"),
+    vocabulary: [["Outcome", "ผลลัพธ์หรือพฤติกรรมที่เปลี่ยนหลังผู้ใช้ใช้งาน", "A measurable user or business change.", "Product Outcomes"], ["Output", "สิ่งที่ทีมส่งมอบ เช่น หน้าจอหรือฟีเจอร์", "A shipped deliverable.", "Product Outcomes"]],
+    relatedQuestionIds: [],
+    references: ["https://www.producttalk.org/2014/04/one-roadmap-many-outcomes/", "https://www.nngroup.com/articles/ux-metrics/"],
+  },
+  "creative-thinking:Insight to Idea": {
+    objectives: ["Turn an observation into an insight.", "Use tension to create a stronger concept.", "Write one idea with a clear reason."],
+    sections: [
+      section("observation-vs-insight", "1. Observation Is Not Insight", [
+        "Observation คือสิ่งที่เห็น เช่น ผู้ใช้เปิดบทเรียนแล้วเลื่อนผ่านเร็ว Insight คือเหตุผลหรือความตึงเครียดเบื้องหลัง เช่น ผู้ใช้ไม่แน่ใจว่าบทเรียนนี้จะช่วยงานจริงได้อย่างไร",
+        "Insight ที่ดีมักมีความขัดแย้งเล็ก ๆ เช่น อยากเรียน แต่กลัวเสียเวลา หรืออยากดู professional แต่ไม่อยากให้แอปดูเครียด",
+      ]),
+      section("find-tension", "2. Find the Tension", [
+        "ใช้คำถาม: ผู้ใช้ต้องการอะไร แต่ติดอะไรอยู่? ทีมอยากสื่ออะไร แต่คนอาจรู้สึกอย่างไร?",
+        "Tension ทำให้ idea มีแรง ไม่ใช่แค่ไอเดียที่ดูแปลกหรือสวย",
+      ], ["Want", "Barrier", "Emotion", "Opportunity"]),
+      section("idea-formula", "3. Idea Formula", [
+        "ใช้สูตร: Because [insight], we can [idea] so that [desired change].",
+        "ตัวอย่าง: Because learners want progress without feeling judged, we can show gentle review cards so that mistakes feel like practice, not failure.",
+      ]),
+      section("select-idea", "4. Select With Criteria", [
+        "เลือก idea ด้วย 3 เกณฑ์: ตรง insight, ทำได้จริง, และอธิบายง่าย",
+        "ถ้า idea ต้องอธิบายนานมากกว่าจะเข้าใจ อาจยังไม่ชัดพอสำหรับ campaign หรือ product experience",
+      ]),
+    ],
+    examples: [{ titleEn: "Insight to Concept", bodyTh: "Observation: ผู้ใช้กดออกหลังตอบผิด. Insight: เขาไม่อยากรู้สึกว่าเรียนไม่เก่ง. Idea: เปลี่ยน Review เป็นพื้นที่ฝึกซ้ำแบบ supportive พร้อมคำอธิบายสั้น ๆ" }],
+    mistakes: ["Treating a fact as an insight.", "Choosing the weirdest idea instead of the most relevant idea.", "Skipping criteria when selecting concepts."],
+    junior: "I brainstorm many ideas.",
+    senior: "I can trace each idea back to an insight and a user tension.",
+    juniorTh: "คิดไอเดียให้เยอะ",
+    seniorTh: "เชื่อมไอเดียกลับไปหา insight และ tension ได้",
+    keyTakeaway: "A strong idea is insight plus tension plus a clear change.",
+    keyTakeawayTh: "ไอเดียที่แข็งแรงมาจาก insight, tension และผลลัพธ์ที่อยากเปลี่ยน",
+    miniCheck: check("Which line is closest to an insight?", "ข้อใดใกล้เคียง insight ที่สุด?", "Learners want to improve but do not want mistakes to feel embarrassing.", "Users clicked the button 40 times.", "Make the page more colorful.", "Insight ต้องอธิบายแรงจูงใจหรือ tension ไม่ใช่แค่ตัวเลขหรือ solution"),
+    vocabulary: [["Insight", "ความเข้าใจเชิงลึกเกี่ยวกับแรงจูงใจหรือปัญหาที่อยู่เบื้องหลัง", "A meaningful interpretation of behavior or tension.", "Insight to Idea"], ["Tension", "ความขัดแย้งหรือแรงดึงระหว่างสิ่งที่อยากได้กับอุปสรรค", "A conflict that creates creative opportunity.", "Insight to Idea"]],
+    relatedQuestionIds: [],
+    references: ["https://www.designcouncil.org.uk/our-resources/framework-for-innovation/", "https://www.ideou.com/blogs/inspiration/how-to-brainstorm"],
+  },
+  "ux-writing:Button Labels": {
+    objectives: ["Write button labels that describe the action.", "Avoid vague labels when the result matters.", "Choose copy based on user context."],
+    sections: [
+      section("button-job", "1. A Button Label Is a Promise", [
+        "ปุ่มควรบอกผู้ใช้ว่ากดแล้วจะเกิดอะไรขึ้น ไม่ใช่บอกแค่ว่า action นี้เป็นปุ่ม",
+        "คำอย่าง Submit, Continue, Confirm ใช้ได้บางกรณี แต่ถ้าผู้ใช้ต้องตัดสินใจสำคัญ ควรเขียนให้เฉพาะเจาะจงกว่า เช่น Save changes, Send invite, Delete file",
+      ]),
+      section("action-object", "2. Use Action + Object", [
+        "สูตรง่ายที่สุดคือ verb + object เช่น Save changes, Download report, Start lesson, Review mistakes",
+        "ถ้าการกระทำมีผลลัพธ์ที่เสี่ยง เช่น ลบ ส่ง ยืนยัน หรือจ่ายเงิน คำบนปุ่มต้องชัดกว่าปกติ",
+      ], ["Save changes", "Send invite", "Start practice", "View progress"]),
+      section("context", "3. Match the User Context", [
+        "ผู้ใช้ที่กำลังแก้ profile ต้องการคำว่า Save changes มากกว่า Confirm เพราะเขาอยากรู้ว่าสิ่งที่แก้จะถูกบันทึก",
+        "ผู้ใช้ที่กำลังอ่านบทเรียนควรเห็น Start Practice หรือ Continue Lesson มากกว่าคำกว้าง ๆ อย่าง Go",
+      ]),
+      section("test-label", "4. Test the Label", [
+        "ลองถามคนอื่นว่า “ถ้ากดปุ่มนี้จะเกิดอะไรขึ้น?” ถ้าตอบไม่ตรงกัน แปลว่าปุ่มยังไม่ชัด",
+        "ปุ่มที่ดีช่วยลดความลังเลและลด error ก่อนเกิดขึ้น",
+      ]),
+    ],
+    examples: [{ titleEn: "Button Rewrite", bodyTh: "Weak: Confirm. Better: Save changes. Weak: Continue. Better: Continue lesson. Weak: Submit. Better: Send feedback." }],
+    mistakes: ["Using generic labels for high-impact actions.", "Making all buttons sound equally important.", "Choosing short copy even when clarity needs one more word."],
+    junior: "I choose the shortest label.",
+    senior: "I choose the label that makes the next result obvious.",
+    juniorTh: "เลือกคำที่สั้นที่สุด",
+    seniorTh: "เลือกคำที่ทำให้ผลลัพธ์หลังคลิกชัดที่สุด",
+    keyTakeaway: "A clear button label describes the action and the object.",
+    keyTakeawayTh: "ปุ่มที่ชัดควรบอกทั้ง action และสิ่งที่จะเกิดกับอะไร",
+    miniCheck: check("Which label is clearest for saving edited profile information?", "ปุ่มใดชัดที่สุดสำหรับบันทึกข้อมูลโปรไฟล์ที่แก้ไข?", "Save profile changes", "Confirm", "Continue", "ปุ่มควรบอก action และ object ให้ชัด"),
+    vocabulary: [["Button label", "ข้อความบนปุ่มที่บอกว่ากดแล้วจะเกิดอะไรขึ้น", "Text that communicates the action of a button.", "Button Labels"], ["Generic copy", "ข้อความกว้าง ๆ ที่ไม่บอกผลลัพธ์ชัดเจน", "Vague text that does not specify the result.", "Button Labels"]],
+    relatedQuestionIds: ["uxw-01", "ux-07"],
+    references: ["https://www.nngroup.com/articles/button-design/", "https://carbondesignsystem.com/guidelines/content/actionable-language/"],
+  },
+  "graphic-design:Layout Basics": {
+    objectives: ["Use alignment, spacing, and hierarchy to organize content.", "Separate margin, padding, and gutter.", "Check a layout before adding decoration."],
+    sections: [
+      section("layout-purpose", "1. Layout Helps People Scan", [
+        "Layout ไม่ใช่แค่การวางของให้เต็มหน้า แต่คือการจัดลำดับว่าควรมองอะไรก่อน หลัง และต่อไป",
+        "งานที่ดีควรตอบได้ว่า headline อยู่ตรงไหน information group ไหนเกี่ยวกัน และ action สำคัญอยู่ตรงไหน",
+      ]),
+      section("spacing-terms", "2. Spacing Terms", [
+        "Margin คือพื้นที่รอบนอกของกรอบหรือหน้ากระดาษ Padding คือพื้นที่ด้านในกล่องระหว่างขอบกับเนื้อหา Gutter คือช่องว่างระหว่าง column",
+        "ถ้า spacing ไม่สม่ำเสมอ งานจะดูไม่มั่นคง ถึงแม้สีและฟอนต์จะดีแล้ว",
+      ], ["Margin", "Padding", "Gutter", "Alignment"]),
+      section("hierarchy", "3. Build Hierarchy", [
+        "ใช้ size, weight, contrast, position และ whitespace เพื่อกำหนดลำดับสายตา",
+        "อย่าทำทุกอย่างให้เด่นพร้อมกัน เพราะเท่ากับไม่มีอะไรเด่นจริง",
+      ]),
+      section("layout-check", "4. Layout Check", [
+        "ตรวจ 4 ข้อก่อนส่งงาน: มี alignment เดียวกันไหม ระยะห่างซ้ำเป็นระบบไหม headline เด่นพอไหม และเนื้อหาอ่านเป็นกลุ่มหรือยัง",
+      ]),
+    ],
+    examples: [{ titleEn: "Layout Fix", bodyTh: "ถ้าการ์ดดูรก ให้เริ่มจากจัด alignment และ spacing ก่อน อย่าเพิ่งเพิ่ม icon หรือสีใหม่ เพราะ decoration ไม่ได้แก้ hierarchy" }],
+    mistakes: ["Using inconsistent spacing values.", "Centering everything without considering reading order.", "Adding decoration before fixing hierarchy."],
+    junior: "I fill the space with visual elements.",
+    senior: "I use spacing and hierarchy to guide reading order.",
+    juniorTh: "เติมองค์ประกอบให้หน้าไม่โล่ง",
+    seniorTh: "ใช้ spacing และ hierarchy นำสายตาให้อ่านง่าย",
+    keyTakeaway: "Good layout makes information easier to scan before it tries to look impressive.",
+    keyTakeawayTh: "Layout ที่ดีช่วยให้อ่านและสแกนง่ายก่อนพยายามทำให้ดูหวือหวา",
+    miniCheck: check("What should you fix first when a layout feels messy?", "ถ้า layout ดูรกควรเริ่มแก้อะไรก่อน?", "Alignment, spacing, and hierarchy.", "Add more illustrations.", "Use more bright colors.", "ปัญหา layout ส่วนใหญ่ควรเริ่มจาก alignment, spacing และ hierarchy"),
+    vocabulary: [["Margin", "พื้นที่รอบนอกกรอบหรือหน้ากระดาษ", "Outer space around a layout area.", "Layout Basics"], ["Padding", "พื้นที่ด้านในกล่องระหว่างขอบกับเนื้อหา", "Inner space between a container edge and content.", "Layout Basics"], ["Gutter", "ช่องว่างระหว่าง column", "Space between columns.", "Layout Basics"]],
+    relatedQuestionIds: ["img-graphic-hierarchy"],
+    references: ["https://m2.material.io/design/layout/understanding-layout.html", "https://www.interaction-design.org/literature/topics/visual-hierarchy"],
+  },
+  "ielts:Task 1 Overview": {
+    objectives: ["Write an overview for IELTS Writing Task 1.", "Identify the main trend without listing every number.", "Avoid unsupported detail in the overview."],
+    sections: [
+      section("overview-purpose", "1. What the Overview Does", [
+        "Overview คือประโยคสรุปภาพรวมของกราฟ แผนภูมิ แผนที่ หรือ process โดยไม่ต้องใส่ตัวเลขละเอียดทุกจุด",
+        "ใน IELTS Task 1 overview สำคัญมาก เพราะแสดงว่าคุณมอง pattern หลักออก ไม่ใช่แค่คัดลอกตัวเลข",
+      ]),
+      section("find-main-features", "2. Find Main Features", [
+        "ถาม 3 ข้อ: อะไรสูงสุด/ต่ำสุด? อะไรเพิ่มขึ้น/ลดลง? กลุ่มไหนคล้ายหรือต่างกันชัดเจน?",
+        "เลือก 2-3 features พอสำหรับ overview ถ้าใส่ทุกอย่างจะกลายเป็น detail paragraph",
+      ], ["Highest / lowest", "Increase / decrease", "Similar / different"]),
+      section("overview-language", "3. Useful Grammar", [
+        "ใช้ Overall, ... เพื่อเริ่ม overview ได้ เช่น Overall, sales increased in all regions except the north.",
+        "ใช้ comparative language เช่น the most significant, the least common, a steady increase, a sharp decline",
+      ]),
+      section("avoid-detail", "4. Avoid Too Much Detail", [
+        "อย่าใส่ตัวเลขเยอะใน overview เช่น 45%, 48%, 52% เพราะ overview ต้องสรุป pattern",
+        "ตัวเลขควรอยู่ใน body paragraph ที่อธิบายรายละเอียด",
+      ]),
+    ],
+    examples: [{ titleEn: "Overview Example", bodyTh: "Overall, the number of online learners increased throughout the period, while classroom attendance remained relatively stable." }],
+    mistakes: ["Listing every figure in the overview.", "Missing the overview completely.", "Writing an opinion instead of describing the data."],
+    junior: "I describe numbers one by one.",
+    senior: "I summarize the biggest pattern first, then support it with details.",
+    juniorTh: "อธิบายตัวเลขทีละจุด",
+    seniorTh: "สรุป pattern ใหญ่ก่อน แล้วค่อยใช้รายละเอียดสนับสนุน",
+    keyTakeaway: "A strong overview summarizes the main pattern, not every detail.",
+    keyTakeawayTh: "Overview ที่ดีสรุป pattern หลัก ไม่ใช่ไล่รายละเอียดทุกตัวเลข",
+    miniCheck: check("Which sentence works best as a Task 1 overview?", "ประโยคใดเหมาะเป็น overview มากที่สุด?", "Overall, both categories increased, but online sales grew more sharply.", "Sales were 12% in 2010.", "I think online sales are better.", "Overview ต้องสรุปภาพรวม ไม่ใช่ตัวเลขเดี่ยวหรือความเห็นส่วนตัว"),
+    vocabulary: [["Overview", "ประโยคสรุปภาพรวมหลักของ Task 1", "A summary of the main features in IELTS Writing Task 1.", "Task 1 Overview"], ["Trend", "ทิศทางการเปลี่ยนแปลง เช่น เพิ่ม ลด หรือคงที่", "A general direction of change.", "Task 1 Overview"]],
+    relatedQuestionIds: ["img-ielts-chart"],
+    references: ["https://takeielts.britishcouncil.org/take-ielts/prepare/free-ielts-english-practice-tests/writing", "https://ielts.org/take-a-test/preparation-resources/sample-test-questions"],
+  },
+  "communication:Concise Updates": {
+    objectives: ["Give a short update with context, status, and next step.", "Separate useful context from unnecessary detail.", "Write an update that helps someone decide."],
+    sections: [
+      section("why-concise", "1. Concise Does Not Mean Short Only", [
+        "Concise update คือ update ที่ตัดสิ่งไม่จำเป็นออก แต่ยังเหลือข้อมูลพอให้คนฟังตัดสินใจหรือไปต่อได้",
+        "ถ้าสั้นแต่ไม่บอกสถานะ ความเสี่ยง หรือสิ่งที่ต้องการ ก็ยังไม่ใช่ update ที่ดี",
+      ]),
+      section("update-structure", "2. Use C-S-A-N", [
+        "ใช้โครง Context, Status, Ask, Next step: บอกเรื่องอะไร ตอนนี้เป็นอย่างไร ต้องการอะไรจากอีกฝ่าย และจะเกิดอะไรต่อ",
+        "โครงนี้ใช้ได้ทั้ง Slack, meeting, email และ handoff note",
+      ], ["Context", "Status", "Ask", "Next step"]),
+      section("cut-noise", "3. Cut Noise", [
+        "ตัดประวัติที่ไม่ช่วย decision ออกก่อน เช่น รายละเอียดทุกขั้นตอนที่ลองมาแล้ว ถ้าไม่จำเป็น",
+        "เก็บเฉพาะสิ่งที่เปลี่ยน decision เช่น blocker, risk, deadline, owner หรือ evidence",
+      ]),
+      section("example-script", "4. Copy This Script", [
+        "Quick update: [context]. Current status: [status]. I need [ask] by [time] so that [next step].",
+        "ตัวอย่าง: Quick update: the quiz layout is ready. Current status: Thai copy is under review. I need confirmation by Friday so that we can deploy next week.",
+      ]),
+    ],
+    examples: [{ titleEn: "Better Update", bodyTh: "Quick update: the lesson page is ready. I found one issue with the review filter. I need a decision on the label by 15:00 so I can finalize the flow." }],
+    mistakes: ["Giving background for too long before the point.", "Not saying what decision or action is needed.", "Using vague status like 'almost done' without next step."],
+    junior: "I share everything I did.",
+    senior: "I share what the listener needs to decide or act.",
+    juniorTh: "เล่าทุกอย่างที่ทำมา",
+    seniorTh: "บอกเฉพาะสิ่งที่ช่วยให้ผู้ฟังตัดสินใจหรือทำต่อได้",
+    keyTakeaway: "A concise update keeps the decision moving.",
+    keyTakeawayTh: "Update ที่กระชับควรช่วยให้ decision เดินต่อได้",
+    miniCheck: check("Which update is most useful?", "Update แบบไหนใช้ได้จริงที่สุด?", "The flow is ready; I need copy approval by Friday to deploy.", "I worked on many things today.", "Almost done.", "Update ที่ดีต้องมี status, ask และ next step ชัดเจน"),
+    vocabulary: [["Ask", "สิ่งที่ต้องการให้อีกฝ่ายช่วย ตัดสินใจ หรือยืนยัน", "The request in a communication.", "Concise Updates"], ["Next step", "ขั้นตอนต่อไปหลังจาก update นี้", "The action that follows the update.", "Concise Updates"]],
+    relatedQuestionIds: [],
+    references: ["https://www.gov.uk/service-manual/design/communicating-with-users", "https://carbondesignsystem.com/guidelines/content/overview/"],
+  },
+  "critical-thinking:Assumptions": {
+    objectives: ["Identify assumptions before making a decision.", "Separate fact, assumption, and interpretation.", "Choose evidence that would test the assumption."],
+    sections: [
+      section("assumption-definition", "1. What Is an Assumption?", [
+        "Assumption คือสิ่งที่เราคิดว่าเป็นจริง แต่ยังไม่ได้พิสูจน์ เช่น ผู้ใช้ไม่กดเพราะปุ่มไม่เด่น หรือคนเรียนออกเพราะบทเรียนยาวเกินไป",
+        "Assumption ไม่ได้ผิดเสมอไป แต่ถ้าไม่แยกออกมา ทีมอาจตัดสินใจจากความรู้สึกแทนหลักฐาน",
+      ]),
+      section("fact-vs-assumption", "2. Fact vs Assumption vs Interpretation", [
+        "Fact: ผู้ใช้ 40% ออกจากหน้า quiz หลังตอบผิดครั้งแรก",
+        "Assumption: เขาออกเพราะรู้สึกผิดหวัง",
+        "Interpretation: หน้า feedback อาจต้อง supportive มากขึ้น",
+      ], ["Fact", "Assumption", "Interpretation"]),
+      section("test-it", "3. Test the Assumption", [
+        "ถามว่า evidence แบบไหนจะทำให้เราเชื่อหรือเปลี่ยนใจ เช่น session recording, usability test, survey, interview หรือ analytics event",
+        "เลือกวิธีทดสอบที่เล็กที่สุดก่อน ไม่จำเป็นต้องทำ research ใหญ่ทุกครั้ง",
+      ]),
+      section("decision", "4. Decision Rule", [
+        "ก่อนแก้ UI ให้เขียนประโยคนี้: We believe [assumption]. We will know this is true if [evidence]. If not, we will [alternative].",
+        "การเขียนแบบนี้ทำให้ทีมคิดเป็นระบบและลดการแก้ตามความรู้สึก",
+      ]),
+    ],
+    examples: [{ titleEn: "Assumption Test", bodyTh: "We believe learners leave after mistakes because feedback feels too harsh. We will know this is true if interviews mention embarrassment or confusion. If not, we will inspect loading speed or question difficulty instead." }],
+    mistakes: ["Treating an opinion as a fact.", "Looking only for evidence that confirms your preferred solution.", "Jumping to UI changes before testing the assumption."],
+    junior: "I decide from what feels obvious.",
+    senior: "I name the assumption and choose evidence to test it.",
+    juniorTh: "ตัดสินใจจากสิ่งที่ดูเหมือนชัด",
+    seniorTh: "ระบุ assumption และเลือกหลักฐานมาทดสอบ",
+    keyTakeaway: "Better decisions start by naming what you are assuming.",
+    keyTakeawayTh: "การตัดสินใจที่ดีขึ้นเริ่มจากการเรียก assumption ออกมาให้เห็น",
+    miniCheck: check("Which line is an assumption?", "ข้อใดคือ assumption?", "Users may leave because the feedback feels discouraging.", "40% of users leave after the first mistake.", "The page has a black button.", "Assumption คือสิ่งที่คาดว่าเป็นจริงแต่ยังต้องพิสูจน์"),
+    vocabulary: [["Assumption", "สิ่งที่คิดว่าเป็นจริงแต่ยังไม่ได้พิสูจน์", "Something believed to be true without enough evidence yet.", "Assumptions"], ["Evidence", "หลักฐานที่ช่วยยืนยันหรือหักล้าง assumption", "Information used to test a belief.", "Assumptions"]],
+    relatedQuestionIds: [],
+    references: ["https://www.nngroup.com/articles/problem-statements/", "https://www.nngroup.com/articles/ux-research-cheat-sheet/"],
+  },
+  "product-design:Problem Framing": {
+    objectives: ["Turn a vague request into a clear product problem.", "Define user, pain, context, and success signal.", "Avoid jumping to solutions too early."],
+    sections: [
+      section("problem-before-solution", "1. Start With the Problem", [
+        "Problem framing คือการทำให้ทีมเห็นตรงกันว่าเรากำลังแก้ปัญหาอะไร เพื่อใคร และทำไมปัญหานี้สำคัญก่อนจะเลือก solution",
+        "คำขออย่าง “ทำหน้า progress ให้สวยขึ้น” ยังไม่ใช่ problem ที่ชัด ต้องแปลงเป็น “ผู้เรียนไม่รู้ว่าควรเรียนต่อจากตรงไหน จึงไม่เริ่มบทถัดไป”",
+      ]),
+      section("problem-statement", "2. Write a Problem Statement", [
+        "ใช้โครง: [User] has difficulty [doing something] when [context] because [reason/evidence]. This matters because [impact].",
+        "ตัวอย่าง: Junior learners have difficulty choosing the next lesson on mobile because Home mixes progress and lesson browsing. This matters because they delay starting practice.",
+      ], ["User", "Difficulty", "Context", "Evidence", "Impact"]),
+      section("scope-the-problem", "3. Scope the Problem", [
+        "ปัญหาที่กว้างเกินไปทำให้ทีมแก้ไม่จบ เช่น “ผู้ใช้ไม่ engage” ควรหั่นให้เล็กลงเป็น “ผู้ใช้ไม่กด Start Practice หลังอ่านบทเรียนแรก”",
+        "ขอบเขตที่ดีทำให้ designer เลือก layout, copy, and interaction ได้แม่นขึ้น",
+      ]),
+      section("frame-then-ideate", "4. Frame Before Ideation", [
+        "หลังเขียน problem statement ให้ถามว่า evidence พอไหม ถ้ายังไม่พอ ให้เก็บข้อมูลเล็ก ๆ ก่อน เช่น usability note, click data หรือ interview 3-5 คน",
+        "เมื่อ problem ชัดแล้ว ค่อยคิดหลาย solution และเลือกด้วย impact, effort, confidence",
+      ]),
+    ],
+    examples: [{ titleEn: "Request to Problem", bodyTh: "Request: เพิ่ม progress card. Problem: ผู้เรียนไม่รู้ว่าตัวเองอยู่ระดับไหนและควรทำอะไรต่อ จึงกลับไปหน้า Learn ซ้ำ ๆ แทนที่จะเริ่มฝึก" }],
+    mistakes: ["Accepting a feature request as the problem.", "Writing a problem statement without user context.", "Defining success only as finishing the UI."],
+    junior: "I ask what screen to design.",
+    senior: "I clarify the user problem and success signal before designing.",
+    juniorTh: "ถามว่าต้องออกแบบหน้าไหน",
+    seniorTh: "ทำให้ปัญหาผู้ใช้และสัญญาณความสำเร็จชัดก่อนเริ่มออกแบบ",
+    keyTakeaway: "A clear problem frame makes better solutions easier to choose.",
+    keyTakeawayTh: "Problem frame ที่ชัดช่วยให้เลือก solution ได้ดีขึ้น",
+    miniCheck: check("Which problem frame is strongest?", "Problem frame ข้อใดชัดที่สุด?", "Learners cannot identify the next lesson after checking progress on mobile.", "Make the Home page nicer.", "Add a larger card.", "Problem frame ที่ดีต้องมี user, difficulty และ context"),
+    vocabulary: [["Problem framing", "การกำหนดปัญหาให้ชัดก่อนเลือกวิธีแก้", "Clarifying the user problem before proposing solutions.", "Problem Framing"], ["Success signal", "สัญญาณที่บอกว่าปัญหาถูกแก้ดีขึ้น", "Evidence that shows the problem improved.", "Problem Framing"]],
+    relatedQuestionIds: ["product-problem-framing-01"],
+    references: ["https://www.nngroup.com/articles/problem-statements/", "https://www.producttalk.org/2021/08/product-discovery/"],
+  },
+  "creative-thinking:Divergent Thinking": {
+    objectives: ["Generate multiple directions before judging.", "Use prompts to move beyond the first idea.", "Cluster ideas into stronger concept territories."],
+    sections: [
+      section("diverge-first", "1. Diverge Before You Decide", [
+        "Divergent thinking คือช่วงที่เปิดทางเลือกให้กว้างก่อนตัดสินว่าอะไรดีที่สุด เป้าหมายไม่ใช่คิดให้เพี้ยน แต่คือไม่ติดอยู่กับ idea แรกที่นึกออก",
+        "ในงาน creative หรือ product ถ้าเริ่มตัดสินเร็วเกินไป ทีมมักวนอยู่กับ solution เดิม ๆ",
+      ]),
+      section("prompt-lenses", "2. Use Idea Lenses", [
+        "ใช้ lens เพื่อบังคับสมองให้คิดหลายมุม เช่น Make it calmer, make it faster, make it more human, make it easier to trust, make it work with less text",
+        "แต่ละ lens ควรสร้าง idea อย่างน้อย 3 แบบ ก่อนเลือกว่าจะพัฒนาอันไหนต่อ",
+      ], ["Calmer", "Faster", "More human", "More trustworthy", "Less text"]),
+      section("quantity-then-pattern", "3. Quantity, Then Pattern", [
+        "เขียน idea ให้เยอะก่อน แล้วค่อย cluster เป็นกลุ่ม เช่น Supportive feedback, Visual progress, Guided next step",
+        "การ cluster ช่วยให้เห็น concept territory ไม่ใช่แค่รายการไอเดียกระจัดกระจาย",
+      ]),
+      section("judge-later", "4. Judge With Criteria", [
+        "หลังจาก diverge แล้วจึง convergent thinking: เลือก idea ด้วย relevance, feasibility, clarity และ emotional fit",
+        "Idea ที่ดีไม่จำเป็นต้องแปลกที่สุด แต่ต้องตอบ insight ได้ชัดที่สุด",
+      ]),
+    ],
+    examples: [{ titleEn: "Five-Minute Exercise", bodyTh: "ตั้งโจทย์: ทำให้ Review ไม่น่ากลัว. เขียน 10 idea ใน 5 นาที แล้วจัดกลุ่มเป็น tone, interaction, และ content support" }],
+    mistakes: ["Judging ideas while generating them.", "Stopping at the first acceptable idea.", "Confusing random ideas with useful creative range."],
+    junior: "I wait for one good idea.",
+    senior: "I create a range, cluster it, then select with criteria.",
+    juniorTh: "รอให้มีไอเดียดี ๆ อันเดียว",
+    seniorTh: "สร้างทางเลือกหลายแบบ จัดกลุ่ม แล้วเลือกด้วยเกณฑ์",
+    keyTakeaway: "Divergence gives you range; criteria turns that range into direction.",
+    keyTakeawayTh: "Divergence สร้างทางเลือก ส่วน criteria เปลี่ยนทางเลือกให้เป็น direction",
+    miniCheck: check("What should happen during divergent thinking?", "ช่วง divergent thinking ควรทำอะไร?", "Generate many possible directions before judging.", "Choose the safest idea immediately.", "Polish the final UI details.", "Divergent thinking คือการเปิดทางเลือกก่อนตัดสิน"),
+    vocabulary: [["Divergent thinking", "การคิดเปิดทางเลือกหลายแบบก่อนตัดสิน", "Generating many possible directions.", "Divergent Thinking"], ["Concept territory", "กลุ่มแนวคิดที่มีแกนร่วมกัน", "A cluster of ideas with a shared direction.", "Divergent Thinking"]],
+    relatedQuestionIds: ["creative-divergent-thinking-01"],
+    references: ["https://www.designcouncil.org.uk/our-resources/framework-for-innovation/", "https://www.ideou.com/blogs/inspiration/how-to-brainstorm"],
+  },
+  "ux-writing:Error Messages": {
+    objectives: ["Write error messages that help users recover.", "Explain problem, cause, and action in plain language.", "Use tone that does not blame the user."],
+    sections: [
+      section("error-job", "1. Error Messages Are Recovery Tools", [
+        "Error message ที่ดีไม่ได้แค่บอกว่ามีปัญหา แต่ช่วยให้ผู้ใช้รู้ว่าต้องทำอะไรต่อ",
+        "ข้อความอย่าง “Something went wrong” มักไม่พอ เพราะผู้ใช้ยังไม่รู้ว่าควรรอ ลองใหม่ แก้ข้อมูล หรือขอความช่วยเหลือ",
+      ]),
+      section("three-part-message", "2. Problem + Reason + Action", [
+        "โครงที่ใช้ได้จริงคือ: What happened + Why if useful + What to do next",
+        "ตัวอย่าง: We could not save your changes because the connection dropped. Check your internet and try again.",
+      ], ["What happened", "Why", "Recovery action"]),
+      section("tone-without-blame", "3. Tone Without Blame", [
+        "หลีกเลี่ยงคำที่ทำให้ผู้ใช้รู้สึกผิด เช่น You entered invalid data ถ้าปรับได้ให้เขียนว่า Please enter a valid email address",
+        "ถ้าปัญหาเกิดจากระบบ ให้รับผิดชอบด้วยน้ำเสียงสุภาพ เช่น We could not load the lesson right now.",
+      ]),
+      section("specific-next-step", "4. Give One Next Step", [
+        "ถ้า error มีหลายทางแก้ ให้เลือก action ที่ดีที่สุดก่อน เช่น Try again, Check email format, Contact support",
+        "อย่าให้ผู้ใช้ต้องเดาว่า “แล้วต้องทำอะไรต่อ” เพราะ error เป็นจุดที่คนเปราะบางที่สุดใน flow",
+      ]),
+    ],
+    examples: [{ titleEn: "Error Rewrite", bodyTh: "Weak: Error 403. Better: You do not have access to this lesson yet. Ask your admin or choose another lesson." }],
+    mistakes: ["Using technical codes without explanation.", "Blaming the user.", "Giving no recovery action."],
+    junior: "I tell users an error happened.",
+    senior: "I help users recover from the error.",
+    juniorTh: "บอกว่ามี error เกิดขึ้น",
+    seniorTh: "ช่วยให้ผู้ใช้แก้ปัญหาและไปต่อได้",
+    keyTakeaway: "An error message should reduce confusion at the exact moment confidence drops.",
+    keyTakeawayTh: "Error message ควรลดความสับสนในจังหวะที่ความมั่นใจของผู้ใช้ลดลง",
+    miniCheck: check("Which message is most helpful?", "ข้อความใดช่วยผู้ใช้ได้ดีที่สุด?", "We could not save your changes. Check your connection and try again.", "Error.", "Invalid action.", "ข้อความที่ดีบอกปัญหาและ action ถัดไป"),
+    vocabulary: [["Recovery action", "คำแนะนำให้ผู้ใช้แก้ปัญหาและไปต่อ", "The next action that helps a user recover.", "Error Messages"], ["Plain language", "ภาษาที่เข้าใจง่าย ไม่ซับซ้อน", "Clear language that users understand quickly.", "Error Messages"]],
+    relatedQuestionIds: ["img-ux-writing-error", "ux-writing-error-messages-01"],
+    references: ["https://www.nngroup.com/articles/error-message-guidelines/", "https://carbondesignsystem.com/guidelines/content/error-messages/"],
+  },
+  "graphic-design:Typography": {
+    objectives: ["Use typography to create hierarchy and readability.", "Choose font weight, size, and line height intentionally.", "Separate display text from long reading text."],
+    sections: [
+      section("type-has-job", "1. Typography Has a Job", [
+        "Typography ไม่ใช่แค่เลือกฟอนต์สวย แต่คือการทำให้คนอ่านเข้าใจลำดับความสำคัญและอ่านข้อความได้สบาย",
+        "ใน product UI เรามักแยก display/headline, subtitle, label และ body text ให้มีหน้าที่ต่างกัน",
+      ]),
+      section("hierarchy-system", "2. Build a Type Scale", [
+        "เริ่มจาก 4 ระดับ: Hero, section title, card title, body. แต่ละระดับควรต่างกันพอให้สแกนได้ แต่ไม่กระโดดจนเสียสมดุล",
+        "ใช้ font weight อย่างตั้งใจ: headline อาจ semibold, label medium, body regular เพื่อไม่ให้ทุกอย่างหนักเท่ากัน",
+      ], ["Hero", "Title", "Label", "Body"]),
+      section("reading-comfort", "3. Line Height and Measure", [
+        "เนื้อหายาวควรมี line-height ประมาณ 1.5-1.8 และความกว้างบรรทัดไม่ยาวเกินไป เพื่อให้อ่านต่อเนื่องได้",
+        "ภาษาไทยต้องระวังวรรณยุกต์และสระลอย อย่าบีบ line-height มากเกินไป",
+      ]),
+      section("font-pairing", "4. Pair Fonts by Role", [
+        "ใน Professor Mission ใช้ Google Sans สำหรับ English UI, Kanit สำหรับ Thai headings/subtitles และ Sarabun สำหรับเนื้อหาไทยยาว",
+        "หลักคือฟอนต์หัวข้อควรมี personality ส่วนเนื้อหายาวต้องอ่านง่ายและไม่เหนื่อย",
+      ]),
+    ],
+    examples: [{ titleEn: "Typography Check", bodyTh: "ถ้า headline สวยแต่ body อ่านยาก งานยังไม่ดีพอสำหรับ learning product เพราะผู้ใช้ต้องอ่านเพื่อเข้าใจ ไม่ใช่ดูแค่ภาพรวม" }],
+    mistakes: ["Using very heavy bold for every heading.", "Making long Thai text too tight.", "Using decorative type for body copy."],
+    junior: "I choose a font that looks cool.",
+    senior: "I assign each type style a learning and reading role.",
+    juniorTh: "เลือกฟอนต์ที่ดูเท่",
+    seniorTh: "กำหนดบทบาทของตัวอักษรแต่ละระดับให้ช่วยอ่านและเรียนรู้",
+    keyTakeaway: "Good typography makes learning feel easier before the user notices the font.",
+    keyTakeawayTh: "Typography ที่ดีทำให้การเรียนอ่านง่ายขึ้นก่อนที่ผู้ใช้จะทันสังเกตฟอนต์",
+    miniCheck: check("What improves long-form lesson readability?", "อะไรช่วยให้อ่านบทเรียนยาวได้ดีขึ้น?", "Comfortable line height and readable body font.", "Extra-heavy headline weight everywhere.", "Tiny body text to fit more content.", "เนื้อหายาวต้องใช้ line-height และ body font ที่อ่านสบาย"),
+    vocabulary: [["Type scale", "ชุดขนาดตัวอักษรที่จัดลำดับการใช้งาน", "A system of text sizes for hierarchy.", "Typography"], ["Line height", "ระยะห่างแนวตั้งระหว่างบรรทัด", "Vertical spacing between lines of text.", "Typography"]],
+    relatedQuestionIds: ["graphic-typography-01"],
+    references: ["https://m3.material.io/styles/typography/overview", "https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html"],
+  },
+  "ielts:Task 2 Position": {
+    objectives: ["Write a clear position for IELTS Writing Task 2.", "Keep the argument consistent across the essay.", "Use balanced language without weakening the answer."],
+    sections: [
+      section("position-purpose", "1. Position Means Your Answer", [
+        "Task 2 ต้องการคำตอบที่ชัดต่อคำถาม ไม่ใช่แค่พูดเรื่องเดียวกันแบบกว้าง ๆ",
+        "Position คือมุมยืนของคุณ เช่น agree, disagree, partly agree หรือ discuss both views but support one side",
+      ]),
+      section("answer-the-question", "2. Answer the Exact Question", [
+        "อ่านคำสั่งให้ชัดว่าเป็น opinion, discussion, advantage/disadvantage หรือ problem/solution เพราะแต่ละแบบต้องวาง position ต่างกัน",
+        "ถ้าถาม To what extent do you agree? ต้องบอกระดับการเห็นด้วย ไม่ใช่แค่เล่าข้อดีข้อเสีย",
+      ], ["Agree", "Disagree", "Partly agree", "Both views"]),
+      section("thesis-sentence", "3. Write a Thesis Sentence", [
+        "สูตร: I [position] because [reason 1] and [reason 2].",
+        "ตัวอย่าง: I partly agree because online learning increases access, but classroom practice is still important for feedback and discipline.",
+      ]),
+      section("stay-consistent", "4. Stay Consistent", [
+        "Body paragraph แต่ละย่อหน้าควร support position เดิม ถ้า introduction บอก partly agree แต่ body เห็นด้วยหมด essay จะดูไม่มั่นคง",
+        "Conclusion ควรย้ำ position เดิมด้วยคำใหม่ ไม่ใช่เปิดประเด็นใหม่",
+      ]),
+    ],
+    examples: [{ titleEn: "Position Example", bodyTh: "Question: Some people believe remote work improves productivity. Position: I partly agree because it supports focus work, but it can weaken collaboration when communication norms are unclear." }],
+    mistakes: ["Writing a general topic sentence instead of a position.", "Changing position between introduction and conclusion.", "Using balanced language until the answer becomes unclear."],
+    junior: "I write many related ideas.",
+    senior: "I choose one position and make every paragraph support it.",
+    juniorTh: "เขียนไอเดียที่เกี่ยวข้องหลายอย่าง",
+    seniorTh: "เลือก position เดียวและทำให้ทุกย่อหน้าสนับสนุนคำตอบนั้น",
+    keyTakeaway: "A clear position makes the essay easier to organize and easier to score.",
+    keyTakeawayTh: "Position ที่ชัดช่วยให้จัด essay ง่ายขึ้นและตอบโจทย์ได้ตรงขึ้น",
+    miniCheck: check("Which thesis gives the clearest position?", "Thesis ข้อใดมี position ชัดที่สุด?", "I partly agree because AI improves speed, but human judgment is still needed for sensitive decisions.", "Technology is very important today.", "There are many opinions about AI.", "Thesis ที่ดีต้องตอบทิศทางความเห็นและเหตุผลหลัก"),
+    vocabulary: [["Position", "จุดยืนหรือคำตอบหลักของ essay", "The main stance in an IELTS Task 2 essay.", "Task 2 Position"], ["Thesis sentence", "ประโยคที่สรุป position และเหตุผลหลัก", "A sentence that states your main argument.", "Task 2 Position"]],
+    relatedQuestionIds: ["ielts-task2-position-01"],
+    references: ["https://ielts.org/take-a-test/preparation-resources/sample-test-questions", "https://takeielts.britishcouncil.org/take-ielts/prepare/free-ielts-english-practice-tests/writing"],
+  },
+  "communication:Active Listening": {
+    objectives: ["Listen for meaning, emotion, and decision need.", "Use reflection and clarification before responding.", "Turn listening into better collaboration."],
+    sections: [
+      section("listening-is-active", "1. Listening Is a Skill", [
+        "Active listening ไม่ใช่แค่นั่งเงียบ แต่คือการจับสิ่งที่อีกฝ่ายพูด สิ่งที่เขากังวล และสิ่งที่เขาต้องการให้เกิดขึ้นต่อ",
+        "ในงาน product/design การฟังที่ดีช่วยลดการแก้งานผิดทิศและทำให้ stakeholder รู้สึกว่าเราเข้าใจจริง",
+      ]),
+      section("three-layers", "2. Listen in Three Layers", [
+        "Layer 1: Facts เขาพูดข้อมูลอะไร",
+        "Layer 2: Emotion เขากังวล มั่นใจ หรือไม่แน่ใจเรื่องอะไร",
+        "Layer 3: Decision เขาต้องการตัดสินใจหรือ action อะไรต่อ",
+      ], ["Fact", "Emotion", "Decision"]),
+      section("reflect-clarify", "3. Reflect, Then Clarify", [
+        "ใช้ประโยคสะท้อน: So the main concern is... หรือ It sounds like the risk is...",
+        "จากนั้นถามให้ชัด: Is the priority speed, accuracy, or stakeholder confidence?",
+      ]),
+      section("summarize-next-step", "4. Close With Next Step", [
+        "จบ conversation ด้วย summary สั้น ๆ: What I heard, what we decided, what I will do next",
+        "การฟังที่ดีต้องเปลี่ยนเป็น clarity ไม่ใช่จบด้วยความรู้สึกดีอย่างเดียว",
+      ]),
+    ],
+    examples: [{ titleEn: "Listening Script", bodyTh: "So the main concern is not the visual style, but whether learners understand what to do next. I will test the first-screen action clarity before changing the design." }],
+    mistakes: ["Preparing your reply while the other person is still explaining.", "Responding to emotion with only facts.", "Ending without a shared next step."],
+    junior: "I answer quickly to show I understand.",
+    senior: "I reflect the concern, clarify the decision, then respond.",
+    juniorTh: "รีบตอบเพื่อให้ดูว่าเข้าใจ",
+    seniorTh: "สะท้อนสิ่งที่ได้ยิน ถามให้ชัด แล้วค่อยตอบ",
+    keyTakeaway: "Active listening turns conversation into shared clarity.",
+    keyTakeawayTh: "Active listening เปลี่ยนบทสนทนาให้กลายเป็นความเข้าใจร่วมกัน",
+    miniCheck: check("Which response shows active listening?", "คำตอบใดแสดง active listening?", "It sounds like the main risk is learner confusion. Should we prioritize clarity before visual polish?", "I disagree, let's keep my design.", "Okay.", "Active listening ต้องสะท้อนประเด็นและถามเพื่อให้ชัดขึ้น"),
+    vocabulary: [["Reflection", "การทวนหรือสะท้อนสิ่งที่ได้ยินเพื่อเช็คความเข้าใจ", "Restating the meaning you heard.", "Active Listening"], ["Clarifying question", "คำถามที่ช่วยทำให้ประเด็นชัดขึ้น", "A question that reduces ambiguity.", "Active Listening"]],
+    relatedQuestionIds: ["communication-active-listening-01"],
+    references: ["https://www.gov.uk/service-manual/user-research/listening-skills", "https://www.nngroup.com/articles/facilitating-design-workshops/"],
+  },
+  "critical-thinking:Evidence Quality": {
+    objectives: ["Judge whether evidence is strong enough for a decision.", "Separate anecdote, pattern, and proof.", "Choose the next evidence needed to reduce risk."],
+    sections: [
+      section("evidence-purpose", "1. Evidence Reduces Decision Risk", [
+        "Evidence quality คือการดูว่าหลักฐานที่มีน่าเชื่อถือพอสำหรับ decision หรือยัง ไม่ใช่แค่มีข้อมูลบางอย่างแล้วถือว่าจบ",
+        "หลักฐานแต่ละแบบตอบคำถามไม่เหมือนกัน analytics บอกว่าเกิดอะไร interview บอกว่าทำไมอาจเกิด และ usability test บอกว่าผู้ใช้ติดตรงไหน",
+      ]),
+      section("quality-check", "2. Check Source, Fit, and Bias", [
+        "Source: ข้อมูลมาจากไหนและเก็บอย่างไร",
+        "Fit: หลักฐานตอบคำถามที่เราต้องตัดสินใจจริงไหม",
+        "Bias: เรากำลังเลือกดูเฉพาะข้อมูลที่สนับสนุนคำตอบที่ชอบหรือเปล่า",
+      ], ["Source", "Fit", "Bias"]),
+      section("signal-strength", "3. Anecdote vs Pattern", [
+        "Anecdote จากผู้ใช้หนึ่งคนมีประโยชน์ในการหา clue แต่ยังไม่พอสำหรับ decision ใหญ่",
+        "Pattern จากหลายแหล่ง เช่น analytics + interview + usability test ทำให้ความมั่นใจสูงขึ้น",
+      ]),
+      section("next-evidence", "4. Ask for the Next Evidence", [
+        "ถามเสมอว่า evidence อะไรจะเปลี่ยนใจเราได้ ถ้าตอบไม่ได้ แปลว่าเรากำลังปกป้อง solution มากกว่าหาความจริง",
+        "สำหรับงานเร็ว ใช้ evidence เล็ก ๆ แต่ตรงคำถาม เช่น test กับ 5 คน, ดู drop-off event, หรืออ่าน support tickets",
+      ]),
+    ],
+    examples: [{ titleEn: "Evidence Mix", bodyTh: "ถ้า analytics บอกว่าคนออกจาก quiz หลังตอบผิด ให้ดู session recording และถามผู้ใช้เพิ่มว่า feedback ทำให้สับสนหรือท้อหรือไม่" }],
+    mistakes: ["Treating one opinion as proof.", "Using data that does not answer the decision question.", "Ignoring contradictory evidence."],
+    junior: "I look for evidence that supports my idea.",
+    senior: "I look for evidence strong enough to change or confirm the decision.",
+    juniorTh: "หาหลักฐานที่สนับสนุนไอเดียของตัวเอง",
+    seniorTh: "หาหลักฐานที่แข็งแรงพอจะยืนยันหรือเปลี่ยน decision",
+    keyTakeaway: "Good evidence is relevant, trustworthy, and strong enough for the decision size.",
+    keyTakeawayTh: "หลักฐานที่ดีต้องตรงคำถาม น่าเชื่อถือ และแข็งแรงพอกับขนาดของ decision",
+    miniCheck: check("Which evidence is strongest for understanding why users abandon a quiz?", "หลักฐานใดแข็งแรงที่สุดในการเข้าใจว่าทำไมผู้ใช้เลิกทำ quiz?", "Analytics drop-off plus short interviews about the feedback moment.", "One teammate thinks the page is too dark.", "The button looks modern.", "ใช้หลายแหล่งที่ตอบทั้ง what และ why จะตัดสินใจได้ดีกว่า"),
+    vocabulary: [["Evidence quality", "คุณภาพและความเหมาะสมของหลักฐานต่อการตัดสินใจ", "How reliable and relevant evidence is for a decision.", "Evidence Quality"], ["Bias", "อคติหรือแนวโน้มที่ทำให้ตีความข้อมูลเอียง", "A tendency that can distort judgment.", "Evidence Quality"]],
+    relatedQuestionIds: ["critical-evidence-quality-01"],
+    references: ["https://www.nngroup.com/articles/which-ux-research-methods/", "https://www.nngroup.com/articles/analytics-user-experience/"],
+  },
 };
 
 function makePathLesson(path: LearningPath, title: string, index: number): LearningLesson {
@@ -1165,10 +1702,140 @@ function makePathLesson(path: LearningPath, title: string, index: number): Learn
   const topic = title;
   const id = `${path.id}-${slug}`;
   const guide = { ...guideForPath(path), ...specificLessonCopy[`${path.id}:${title}`] };
+  const realLessonPack = realLessonPacks[`${path.id}:${title}`];
+  const isClearUpdates = path.id === "english-work" && title === "Clear Updates";
+  const isMoodAndTone = path.id === "art-direction" && title === "Mood and Tone";
   const terminology = [
-    vocab(`${id}-concept`, guide.vocab, `คำศัพท์หลักเรื่อง ${guide.vocab}`, `A practical concept used in ${path.name}.`, topic),
-    vocab(`${id}-pattern`, "Next step", "ขั้นตอนต่อไปที่ชัดเจน", "The action someone should take after reading or listening.", topic),
+    vocab(`${id}-concept`, guide.vocab, `คำศัพท์หลักเรื่อง ${guide.vocab}`, `A practical concept used in ${path.name}.`, topic, path.name),
+    vocab(`${id}-pattern`, "Next step", "ขั้นตอนต่อไปที่ชัดเจน", "The action someone should take after reading or listening.", topic, path.name),
+    ...(realLessonPack?.vocabulary.map(([word, thaiMeaning, simpleDefinition, vocabTopic], vocabIndex) =>
+      vocab(`${id}-real-vocab-${vocabIndex + 1}`, word, thaiMeaning, simpleDefinition, vocabTopic, path.name),
+    ) ?? []),
+    ...(isMoodAndTone
+      ? [
+          vocab(`${id}-mood`, "Mood", "ความรู้สึกหลักที่งานภาพควรทำให้คนรับรู้ เช่น calm, premium, playful, serious", "The emotional impression a visual direction should create.", topic, path.name),
+          vocab(`${id}-tone`, "Tone", "ระดับน้ำเสียงหรือวิธีแสดง mood เช่น soft, bold, minimal, editorial, luxurious", "The way a mood is expressed through visual choices.", topic, path.name),
+          vocab(`${id}-reference-filter`, "Reference filter", "เกณฑ์คัด reference ว่าอะไรใช้ได้ อะไรไม่ควรใช้", "A rule for selecting only references that support the intended direction.", topic, path.name),
+          vocab(`${id}-visual-rationale`, "Visual rationale", "เหตุผลที่อธิบายว่าทำไมภาพ สี ตัวอักษร หรือ layout จึงเหมาะกับโจทย์", "The reason behind a visual decision.", topic, path.name),
+        ]
+      : []),
+    ...(isClearUpdates
+      ? [
+          vocab(`${id}-present-perfect`, "Present perfect", "โครง have/has + past participle ใช้บอกงานที่เสร็จแล้วและเกี่ยวกับตอนนี้", "A grammar structure for completed work that matters now.", topic, path.name),
+          vocab(`${id}-modal-verb`, "Modal verb", "คำช่วยอย่าง can, could, will, would, should ใช้ปรับความสุภาพหรือความชัด", "A helping verb that changes tone, certainty, or obligation.", topic, path.name),
+          vocab(`${id}-deadline`, "By + time/date", "ใช้บอก deadline ว่าต้องเสร็จไม่เกินเวลาไหน", "A deadline pattern for the latest completion time.", topic, path.name),
+        ]
+      : []),
   ];
+  const lessonSections = isClearUpdates
+    ? [
+        section("what-this-teaches", "What This Lesson Teaches", [
+          "บทนี้ไม่ได้ให้จำประโยคสำเร็จรูปอย่างเดียว แต่สอน grammar ที่ทำให้ status update ชัดขึ้น: tense, modal verb, preposition และ sentence order",
+          "เป้าหมายคือให้คุณเขียน update แบบคนทำงานจริงอ่านแล้วรู้ทันทีว่า งานเสร็จหรือยัง ติดอะไร ต้องการใครช่วย และจะอัปเดตอีกเมื่อไร",
+        ]),
+        section("grammar-tense", "Grammar 1: Tense for Work Status", [
+          "ใช้ Present perfect: have/has + V3 เมื่ออยากบอกว่างานเสร็จแล้วและผลลัพธ์สำคัญกับตอนนี้ เช่น “I have updated the wireframe.” แปลว่าอัปเดตแล้ว ตอนนี้พร้อมให้ดูหรือทำต่อได้",
+          "ใช้ Present continuous: am/is/are + V-ing เมื่องานกำลังทำอยู่ เช่น “I am checking the mobile layout.” แปลว่ากำลังตรวจอยู่ ยังไม่เสร็จ",
+          "ใช้ Past simple: V2 เมื่อเล่าเหตุการณ์ที่เกิดและจบไปแล้ว เช่น “I fixed the spacing issue yesterday.”",
+        ], ["I have updated the draft.", "I am checking the flow.", "I fixed the issue yesterday."]),
+        section("grammar-modals", "Grammar 2: Modal Verbs for Polite Requests", [
+          "ถ้าต้องขอให้คนช่วย ใช้ could หรือ would เพื่อให้สุภาพกว่า can ตรง ๆ เช่น “Could you review the flow by Friday?”",
+          "ถ้าต้องบอก commitment ใช้ will เช่น “I will send the revised version by 15:00.”",
+          "ถ้าต้องเสนอสิ่งที่ควรทำ ใช้ should เช่น “We should confirm the copy before handoff.”",
+        ], ["Could you review...?", "I will send...", "We should confirm..."]),
+        section("grammar-deadlines", "Grammar 3: Deadline Prepositions", [
+          "ใช้ by เมื่อต้องการบอกว่า “ไม่เกินเวลาไหน” เช่น “by Friday”, “by 15:00”, “by tomorrow morning”",
+          "ใช้ on กับวันหรือวันที่ เช่น “on Monday”, “on July 27”",
+          "ใช้ at กับเวลาชัดเจน เช่น “at 15:00” และใช้ in กับช่วงเวลา เช่น “in 30 minutes”",
+        ], ["by Friday = ไม่เกินวันศุกร์", "on Monday = ในวันจันทร์", "at 15:00 = ตอน 15:00"]),
+        section("update-pattern", "Grammar 4: Update Sentence Pattern", [
+          "ใช้โครงนี้เวลาต้อง update งาน: Quick update + I have/I'm + status + blocker/need + next step",
+          "ตัวอย่าง: “Quick update: I have revised the quiz screen. I am checking the Thai copy now. Could you review the flow by Friday?”",
+          "ประโยคนี้ดีเพราะมีครบ 4 อย่าง: งานที่เสร็จแล้ว, งานที่กำลังทำ, สิ่งที่ต้องการจากอีกฝ่าย, และ deadline",
+        ], ["Quick update", "Completed status", "Current action", "Request + deadline"]),
+        section("common-grammar-errors", "Common Grammar Errors", [
+          "อย่าเขียน “I already update the file.” ให้เขียน “I have already updated the file.” เพราะ already + งานที่เสร็จแล้วมักใช้ present perfect",
+          "อย่าเขียน “Please feedback me.” ให้เขียน “Could you give me feedback?” หรือ “Could you review this?”",
+          "อย่าเขียน “until Friday” ถ้าหมายถึง deadline ให้ใช้ “by Friday” เพราะ until หมายถึงทำต่อเนื่องไปจนถึงเวลานั้น",
+        ]),
+        section("practice-template", "Copy This Template", [
+          "Quick update: I have [finished/updated/revised] [work item].",
+          "I am currently [checking/fixing/preparing] [specific part].",
+          "Could you [review/confirm/share feedback on] [specific thing] by [time/date]?",
+        ]),
+      ]
+    : isMoodAndTone
+      ? [
+          section("definition", "1. Mood and Tone Are Not Decoration", [
+            "Mood คือความรู้สึกหลักที่งานควรสร้างในใจผู้ชม เช่น สงบ น่าเชื่อถือ พรีเมียม สดใส หรือกล้าทดลอง",
+            "Tone คือวิธีแสดง mood นั้นให้ชัดขึ้น เช่น ถ้า mood คือ premium tone อาจเป็น minimal, editorial, quiet luxury หรือ satin metallic ไม่ใช่แค่ใส่สีทอง",
+            "ในงานจริง mood and tone คือเครื่องมือช่วยตัดสินใจ ไม่ใช่หน้า collage สวย ๆ ถ้า reference ไม่ช่วยให้ทีมเลือกสี ภาพ type หรือ layout ได้ชัด แปลว่ายังไม่ใช่ direction ที่พร้อมใช้",
+          ], ["Mood = intended feeling", "Tone = expression level", "Direction = decision rule"]),
+          section("read-the-brief", "2. Start From the Brief", [
+            "ก่อนหา reference ให้ขีดคำสำคัญจาก brief ก่อน เช่น audience, product category, brand personality, business goal และ feeling ที่อยากให้เกิด",
+            "เปลี่ยนคำกว้างให้เป็นคู่เทียบ เช่น premium แต่ไม่ luxury hotel, creative แต่ไม่ childish, calm แต่ไม่ boring วิธีนี้ช่วยให้ทีมรู้ขอบเขตของทิศทาง",
+            "ถ้า brief บอกว่าแอปเรียนรู้ควร calm, focused และ modern reference ที่เสียงดัง สีจัด หรือเต็มไปด้วย effect จะไม่ผ่าน ถึงแม้ภาพจะสวยก็ตาม",
+          ], ["Audience", "Brand personality", "Feeling words", "Not-this boundary"]),
+          section("build-a-reference-filter", "3. Build a Reference Filter", [
+            "เลือก reference 6-9 ชิ้นพอ ไม่ต้องเยอะมาก เพราะจำนวนเยอะเกินไปทำให้ direction แตกและคุยยาก",
+            "ทุก reference ต้องตอบได้ว่าเอามาเพราะอะไร เช่น color temperature, typography mood, spacing rhythm, photography angle, material, lighting หรือ composition",
+            "แยก reference เป็น Use / Avoid / Adapt: ใช้ได้เลย, ไม่ควรใช้, หรือเอาเฉพาะบางคุณสมบัติ วิธีนี้ช่วยไม่ให้ทีม copy ภาพต้นทางโดยไม่เข้าใจเหตุผล",
+          ], ["Use", "Avoid", "Adapt"]),
+          section("translate-to-visual-rules", "4. Translate Feeling Into Visual Rules", [
+            "หลังเลือก direction ให้สรุปเป็น rule ที่ designer ใช้ต่อได้ เช่น color ควร low saturation, layout ใช้ whitespace เยอะ, type น้ำหนัก semibold, imagery ใช้ soft studio lighting",
+            "rule ที่ดีต้องตรวจงานได้ เช่น “ดูพรีเมียม” ยังไม่พอ แต่ “ใช้สีหลักไม่เกิน 3 สี, contrast นุ่ม, spacing กว้าง, ไม่มี neon glow” ตรวจได้ชัดกว่า",
+            "Mood board ที่ดีควรนำไปสู่ decision list: palette, typography, image style, icon style, surface, composition, motion และสิ่งที่ห้ามใช้",
+          ], ["Palette", "Typography", "Image style", "Surface", "Motion", "Avoid list"]),
+          section("present-the-direction", "5. Present With Rationale", [
+            "เวลานำเสนอ อย่าเริ่มจาก “ชอบภาพนี้” ให้เริ่มจากโจทย์ก่อน แล้วบอกว่า direction นี้ช่วยโจทย์อย่างไร",
+            "โครงเล่าที่ใช้ได้จริง: brief keyword -> audience feeling -> reference evidence -> visual rule -> example application",
+            "ถ้ามี stakeholder หลายคน ให้เตรียมเหตุผลแบบธุรกิจด้วย เช่น direction นี้ทำให้ product ดูเชื่อถือขึ้น ลด cognitive load หรือแยกตัวจากคู่แข่งอย่างไร",
+          ], ["Brief", "Feeling", "Evidence", "Rule", "Application"]),
+          section("workbook", "6. Practice Workbook", [
+            "ใช้แบบฝึกนี้กับโปรเจกต์ของตัวเองทันที: เขียน brief หนึ่งประโยค แล้วเลือก feeling words 3 คำเท่านั้น เช่น calm, focused, trustworthy",
+            "จากนั้นเขียน Not-this boundary 3 ข้อ เช่น not childish, not neon, not crowded เพื่อกันไม่ให้ direction หลุด",
+            "สุดท้ายเลือก reference 6 ชิ้น แล้วติด label ใต้แต่ละภาพว่าเอามาเพราะอะไร เช่น spacing, lighting, typography, material, color temperature หรือ composition",
+          ], ["Brief sentence", "3 feeling words", "3 avoid words", "6 references with reasons"]),
+          section("quality-checklist", "7. Direction Quality Checklist", [
+            "ก่อนส่ง moodboard ให้ตรวจ 5 ข้อนี้: หนึ่ง มี keyword จาก brief ชัด สอง มีเหตุผลใต้ reference สาม มี rule ที่นำไปออกแบบต่อได้ สี่ มี avoid list ห้า มีตัวอย่าง apply กับหน้าจอหรือชิ้นงานจริง",
+            "ถ้าเปิด moodboard แล้ว designer อีกคนยังไม่รู้ว่าจะเลือกสี ฟอนต์ ภาพ หรือ layout แบบไหน แปลว่ายังต้องสรุป direction ให้ชัดขึ้น",
+            "ถ้า stakeholder ถามว่า “ทำไมต้องเป็นแบบนี้” คุณควรตอบได้ด้วยโจทย์ ผู้ใช้ และ visual rationale ไม่ใช่ตอบว่าเพราะสวยหรือกำลังเป็นเทรนด์",
+          ], ["Brief match", "Reference rationale", "Reusable visual rules", "Avoid list", "Applied example"]),
+          section("presentation-template", "8. Presentation Template", [
+            "ใช้ script นี้เวลาพรีเซนต์: “The brief asks for [feeling]. The audience should feel [emotion]. This direction uses [visual choice] because [reason]. We will avoid [avoid list] so the product stays [desired quality].”",
+            "ตัวอย่าง: “The brief asks for calm premium learning. The audience should feel focused and supported. This direction uses soft cool gradients, generous spacing, and satin metallic icons because they feel modern without distracting from learning. We will avoid loud rainbow effects and childish badges.”",
+            "การพรีเซนต์แบบนี้ทำให้ moodboard กลายเป็น decision tool และลดการถกเถียงจากรสนิยมส่วนตัว",
+          ]),
+        ]
+    : realLessonPack
+      ? realLessonPack.sections
+    : [
+        section("what-it-means", "What It Means", [
+          `${title} ในสาย ${path.name} คือทักษะที่ช่วยให้การทำงานชัดขึ้น ไม่ใช่แค่คำศัพท์ที่ต้องจำ`,
+          guide.focus,
+        ]),
+        section("why-it-matters", "Why It Matters", [
+          guide.outcome,
+          "ในการทำงานจริง ความชัดเจนช่วยลดการถามซ้ำ ลดการตัดสินใจผิด และทำให้ทีมเดินต่อได้เร็วขึ้น",
+        ]),
+        section("how-to-use-it", "How To Use It", [
+          guide.practice,
+          "หลังเขียนหรือพูดเสร็จ ให้ตรวจว่าคนอ่านรู้ context, decision, owner และ next step หรือยัง",
+        ]),
+      ];
+  const practicalExamples = isClearUpdates
+    ? [
+        { titleEn: "Weak Update", bodyTh: "I working on it. Please feedback me until Friday." },
+        { titleEn: "Better Update", bodyTh: "Quick update: I have revised the lesson page. I am checking the quiz copy now. Could you review the flow by Friday?" },
+      ]
+    : isMoodAndTone
+      ? [
+          { titleEn: "Weak Direction", bodyTh: "โจทย์คือ premium learning app แต่ moodboard รวม neon, mascot, glass card หนัก ๆ และ gradient หลายสีพร้อมกัน เหตุผลที่ใช้คือ “ดูเท่” เท่านั้น ผลคือทีมไม่รู้ว่าควรเลือกอะไรต่อ" },
+          { titleEn: "Better Direction", bodyTh: "โจทย์คือ premium learning app. Direction: calm focus, quiet confidence, modern editorial. Visual rules: off-white surface, low-saturation cool gradient, generous spacing, semibold typography, soft metallic icon, no loud rainbow/no childish game badge. แบบนี้ทีมสามารถออกแบบหน้าต่อไปได้ต่อเนื่อง" },
+        ]
+    : realLessonPack
+      ? realLessonPack.examples
+    : [{ titleEn: "Workplace Example", bodyTh: `สถานการณ์ฝึก: คุณต้องใช้ ${title} เพื่ออธิบายงานให้ทีมเข้าใจเร็วขึ้น ลองเขียนเป็น 2 ประโยค: ประโยคแรกบอก context และประโยคที่สองบอก next step ที่ต้องการ` }];
 
   return {
     id,
@@ -1187,23 +1854,25 @@ function makePathLesson(path: LearningPath, title: string, index: number): Learn
     relatedTopic: topic,
     hasPractice: true,
     introductionTh: guide.focus,
-    objectives: [`Explain ${title} in simple English.`, "Apply the lesson to a realistic workplace situation.", "Write one clearer sentence, decision, or next step."],
-    sections: [
-      section("what-it-means", "What It Means", [
-        `${title} ในสาย ${path.name} คือทักษะที่ช่วยให้การทำงานชัดขึ้น ไม่ใช่แค่คำศัพท์ที่ต้องจำ`,
-        guide.focus,
-      ]),
-      section("why-it-matters", "Why It Matters", [
-        guide.outcome,
-        "ในการทำงานจริง ความชัดเจนช่วยลดการถามซ้ำ ลดการตัดสินใจผิด และทำให้ทีมเดินต่อได้เร็วขึ้น",
-      ]),
-      section("how-to-use-it", "How To Use It", [
-        guide.practice,
-        "หลังเขียนหรือพูดเสร็จ ให้ตรวจว่าคนอ่านรู้ context, decision, owner และ next step หรือยัง",
-      ]),
+    objectives: isClearUpdates
+      ? ["Use present perfect for completed work.", "Use present continuous for work in progress.", "Use could/would/will/should for polite workplace updates.", "Use by/on/at/in correctly for deadlines."]
+      : isMoodAndTone
+        ? ["Separate mood from tone in a visual direction.", "Turn brief keywords into visual rules.", "Select references with clear reasons.", "Present a moodboard with rationale instead of personal taste."]
+        : realLessonPack
+          ? realLessonPack.objectives
+      : [`Explain ${title} in simple English.`, "Apply the lesson to a realistic workplace situation.", "Write one clearer sentence, decision, or next step."],
+    sections: lessonSections,
+    practicalExamples,
+    visualMedia: [
+      {
+        type: "flow",
+        titleEn: isMoodAndTone ? "Mood and Tone Direction Flow" : "Workplace Thinking Flow",
+        descriptionTh: isMoodAndTone
+          ? "ใช้ลำดับนี้เปลี่ยน brief ให้เป็น visual direction ที่ทีมใช้ตัดสินใจได้จริง"
+          : "ใช้ flow นี้ตรวจว่าบทเรียนถูกนำไปใช้กับงานจริงครบหรือยัง",
+        items: guide.visualItems,
+      },
     ],
-    practicalExamples: [{ titleEn: "Workplace Example", bodyTh: `สถานการณ์ฝึก: คุณต้องใช้ ${title} เพื่ออธิบายงานให้ทีมเข้าใจเร็วขึ้น ลองเขียนเป็น 2 ประโยค: ประโยคแรกบอก context และประโยคที่สองบอก next step ที่ต้องการ` }],
-    visualMedia: [{ type: "flow", titleEn: "Workplace Thinking Flow", descriptionTh: "ใช้ flow นี้ตรวจว่าบทเรียนถูกนำไปใช้กับงานจริงครบหรือยัง", items: guide.visualItems }],
     explanation: `${title} helps make ${path.name} decisions clearer and easier to act on.`,
     explanationTh: guide.focus,
     terminology,
@@ -1211,22 +1880,100 @@ function makePathLesson(path: LearningPath, title: string, index: number): Learn
     workplaceExample: `Use ${title} to make a decision, update, or explanation easier to act on.`,
     workplaceExampleTh: guide.practice,
     diagram: guide.visualItems,
-    commonMistakes: [guide.mistake],
-    commonMistakesTh: [guide.mistake],
-    juniorThinking: "I know the topic name.",
-    seniorThinking: "I can use the topic to make the next action clearer.",
+    commonMistakes: isMoodAndTone
+      ? [
+          "Choosing references because they look beautiful, not because they support the brief.",
+          "Mixing too many moods in one board, such as premium, playful, futuristic, handmade, and corporate at once.",
+          "Presenting references without visual rules, so the team cannot apply the direction.",
+        ]
+      : realLessonPack
+        ? realLessonPack.mistakes
+      : [guide.mistake],
+    commonMistakesTh: isMoodAndTone
+      ? [
+          "เลือก reference เพราะสวย แต่ไม่ได้ช่วยโจทย์",
+          "รวมหลาย mood เกินไปจน direction ไม่ชัด",
+          "นำเสนอภาพโดยไม่มี rule ทำให้ทีมเอาไปใช้ต่อไม่ได้",
+        ]
+      : realLessonPack
+        ? realLessonPack.mistakes
+      : [guide.mistake],
+    juniorThinking: isMoodAndTone ? "I found beautiful images that match my taste." : realLessonPack ? realLessonPack.junior : "I know the topic name.",
+    seniorThinking: isMoodAndTone ? "I can explain which visual choices support the brief and which choices should be avoided." : realLessonPack ? realLessonPack.senior : "I can use the topic to make the next action clearer.",
     juniorVsSenior: {
-      junior: "I know the topic name.",
-      senior: "I can use the topic to make the next action clearer.",
-      juniorTh: "รู้ชื่อหัวข้อ",
-      seniorTh: "ใช้หัวข้อนี้ทำให้ decision หรือ next step ชัดขึ้นได้",
+      junior: isMoodAndTone ? "I found beautiful images that match my taste." : realLessonPack ? realLessonPack.junior : "I know the topic name.",
+      senior: isMoodAndTone ? "I can explain which visual choices support the brief and which choices should be avoided." : realLessonPack ? realLessonPack.senior : "I can use the topic to make the next action clearer.",
+      juniorTh: isMoodAndTone ? "หา reference ที่ตัวเองชอบหรือดูสวย" : realLessonPack ? realLessonPack.juniorTh : "รู้ชื่อหัวข้อ",
+      seniorTh: isMoodAndTone ? "อธิบายได้ว่า visual choice ไหนช่วยโจทย์ และอะไรควรหลีกเลี่ยง" : realLessonPack ? realLessonPack.seniorTh : "ใช้หัวข้อนี้ทำให้ decision หรือ next step ชัดขึ้นได้",
     },
-    keyTakeaway: `${title} is useful when it makes the next decision or action clearer.`,
-    keyTakeawayTh: `${title} มีประโยชน์เมื่อทำให้ decision หรือ action ต่อไปชัดขึ้น`,
-    miniCheck: check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
-    miniKnowledgeCheck: check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
-    relatedQuestionIds: [],
-    references: ["Supreya Atipongchai learning library"],
+    keyTakeaway: isMoodAndTone ? "Mood and tone become useful only when they turn feelings into repeatable visual decisions." : realLessonPack ? realLessonPack.keyTakeaway : `${title} is useful when it makes the next decision or action clearer.`,
+    keyTakeawayTh: isMoodAndTone ? "Mood and tone จะมีประโยชน์จริงเมื่อเปลี่ยนความรู้สึกให้เป็นกฎการออกแบบที่ใช้ซ้ำและตรวจได้" : realLessonPack ? realLessonPack.keyTakeawayTh : `${title} มีประโยชน์เมื่อทำให้ decision หรือ action ต่อไปชัดขึ้น`,
+    miniCheck: isMoodAndTone
+      ? {
+          question: "Which action makes a moodboard useful for real design work?",
+          questionTh: "การทำแบบใดทำให้ moodboard ใช้งานออกแบบจริงได้มากที่สุด?",
+          choices: [
+            {
+              id: "a",
+              text: "Add a reason and reusable visual rule for each reference.",
+              textTh: "ใส่เหตุผลและ rule ที่ใช้ซ้ำได้ให้แต่ละ reference",
+            },
+            {
+              id: "b",
+              text: "Collect as many beautiful images as possible.",
+              textTh: "รวบรวมภาพสวยให้เยอะที่สุด",
+            },
+            {
+              id: "c",
+              text: "Choose only trendy images from one source.",
+              textTh: "เลือกเฉพาะภาพที่กำลังเป็นเทรนด์จากแหล่งเดียว",
+            },
+          ],
+          correctChoiceId: "a",
+          explanation: "A useful moodboard turns references into decisions: what to use, what to avoid, and why.",
+          explanationTh: "Moodboard ที่ใช้ทำงานจริงต้องแปลง reference เป็น decision: อะไรควรใช้ อะไรควรเลี่ยง และเพราะอะไร",
+        }
+      : realLessonPack
+        ? realLessonPack.miniCheck
+        : check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
+    miniKnowledgeCheck: isMoodAndTone
+      ? {
+          question: "Which action makes a moodboard useful for real design work?",
+          questionTh: "การทำแบบใดทำให้ moodboard ใช้งานออกแบบจริงได้มากที่สุด?",
+          choices: [
+            {
+              id: "a",
+              text: "Add a reason and reusable visual rule for each reference.",
+              textTh: "ใส่เหตุผลและ rule ที่ใช้ซ้ำได้ให้แต่ละ reference",
+            },
+            {
+              id: "b",
+              text: "Collect as many beautiful images as possible.",
+              textTh: "รวบรวมภาพสวยให้เยอะที่สุด",
+            },
+            {
+              id: "c",
+              text: "Choose only trendy images from one source.",
+              textTh: "เลือกเฉพาะภาพที่กำลังเป็นเทรนด์จากแหล่งเดียว",
+            },
+          ],
+          correctChoiceId: "a",
+          explanation: "A useful moodboard turns references into decisions: what to use, what to avoid, and why.",
+          explanationTh: "Moodboard ที่ใช้ทำงานจริงต้องแปลง reference เป็น decision: อะไรควรใช้ อะไรควรเลี่ยง และเพราะอะไร",
+        }
+      : realLessonPack
+        ? realLessonPack.miniCheck
+        : check(`Which behavior shows good use of ${title}?`, `พฤติกรรมแบบใดแสดงว่าเข้าใจ ${title} ได้ดี?`, "Explain the decision with a clear reason.", "Use the term to sound advanced.", "Skip examples and move directly to visuals.", "แนวคิดที่ดีควรช่วยให้ตัดสินใจเรื่องงานได้จริง"),
+    relatedQuestionIds: isClearUpdates ? ["enw-grammar-01", "enw-grammar-02", "enw-grammar-03", "enw-grammar-04", "enw-grammar-05"] : isMoodAndTone ? ["img-art-direction-moodboards"] : realLessonPack ? realLessonPack.relatedQuestionIds : [],
+    references: isMoodAndTone
+      ? [
+          "https://www.nngroup.com/articles/mood-boards/",
+          "https://eyeondesign.aiga.org/all-advertising-looks-the-same-these-days-blame-the-moodboard/",
+          "https://styleguide.mailchimp.com/voice-and-tone/",
+        ]
+      : realLessonPack
+        ? realLessonPack.references
+      : ["Supreya Atipongchai learning library"],
     personalNoteEnabled: true,
   };
 }
@@ -1239,9 +1986,158 @@ function expandedSeedAlias(pathId: string, title: string) {
   return title;
 }
 
+const sourceGroundingByPath: Record<
+  string,
+  {
+    sourceNoteTh: string;
+    sourceNames: string[];
+    references: string[];
+    fieldChecklist: string[];
+  }
+> = {
+  "ux-research": {
+    sourceNoteTh:
+      "เนื้อหานี้สรุปจากแนวทาง UX Research ที่ใช้ในงานจริง: เริ่มจาก user need, ตั้ง research question, วางแผน session, วิเคราะห์ finding และสื่อสารผลให้ทีมตัดสินใจได้",
+    sourceNames: ["Nielsen Norman Group User Interviews 101", "Nielsen Norman Group Research Repositories 101", "GOV.UK Service Manual User Research"],
+    references: [
+      "https://www.nngroup.com/articles/user-interviews/",
+      "https://www.nngroup.com/articles/research-repositories/",
+      "https://www.gov.uk/service-manual/user-research",
+    ],
+    fieldChecklist: ["Research question", "Participant fit", "Neutral questions", "Evidence pattern", "Decision readout"],
+  },
+  "ux-research-method": {
+    sourceNoteTh:
+      "เนื้อหานี้เน้นการเลือก method ตามคำถาม ไม่เลือกจากความถนัดอย่างเดียว โดยแยก generative/evaluative และ qualitative/quantitative ให้ชัด",
+    sourceNames: ["Nielsen Norman Group Usability Testing 101", "Nielsen Norman Group Card Sorting vs. Tree Testing", "Nielsen Norman Group Surveys Guidance", "GOV.UK Service Manual User Research"],
+    references: [
+      "https://www.nngroup.com/articles/usability-testing-101/",
+      "https://www.nngroup.com/articles/card-sorting-tree-testing-differences/",
+      "https://www.nngroup.com/articles/should-you-run-a-survey/",
+      "https://www.gov.uk/service-manual/user-research",
+    ],
+    fieldChecklist: ["Decision to answer", "Method fit", "Bias risk", "Sample limits", "Synthesis plan"],
+  },
+  "agile-ux-ui": {
+    sourceNoteTh:
+      "เนื้อหานี้อิงแนวทาง Agile design ที่ให้ designer, product owner และ developer ทำงานร่วมกันเร็วขึ้นผ่าน feedback, prototype, acceptance criteria และ design QA",
+    sourceNames: ["Atlassian Agile Design", "Atlassian Agile Collaboration"],
+    references: [
+      "https://www.atlassian.com/agile/design",
+      "https://www.atlassian.com/agile/design/collaborative-design-in-agile-teams-video",
+    ],
+    fieldChecklist: ["Sprint context", "Design readiness", "Acceptance criteria", "Handoff notes", "UX QA"],
+  },
+  "design-system": {
+    sourceNoteTh:
+      "เนื้อหานี้สรุปจากแนวทาง design system จริง โดยให้ความสำคัญกับ token, component, documentation, accessibility และ governance ไม่ใช่แค่ UI kit",
+    sourceNames: ["Material Design 3 Design Tokens", "IBM Carbon Design System", "W3C WCAG 2.2 Quick Reference"],
+    references: [
+      "https://m3.material.io/foundations/design-tokens",
+      "https://carbondesignsystem.com/",
+      "https://www.w3.org/WAI/WCAG22/quickref/",
+    ],
+    fieldChecklist: ["Token purpose", "Component anatomy", "Interaction states", "Accessibility rule", "Governance owner"],
+  },
+  "product-analytics": {
+    sourceNoteTh:
+      "เนื้อหานี้สรุปจากแนวทาง Product Analytics จริง: เริ่มจาก metric ที่สะท้อนคุณค่าผู้ใช้ วาง event taxonomy ตรวจ data quality แล้วเล่า insight เป็น decision",
+    sourceNames: ["Amplitude North Star Metric", "Amplitude Product Analytics Guide"],
+    references: [
+      "https://amplitude.com/blog/product-north-star-metric",
+      "https://amplitude.com/guides/product-analytics",
+    ],
+    fieldChecklist: ["North Star value", "Event taxonomy", "Funnel or cohort", "Data quality", "Decision story"],
+  },
+  "cx-communication": {
+    sourceNoteTh:
+      "เนื้อหานี้เชื่อมการสื่อสารกับ trusted customer experience: เข้าใจอารมณ์ลูกค้า อธิบายปัญหาอย่างโปร่งใส เสนอทางเลือก และวัดผลด้วย CSAT, loyalty หรือ growth signal",
+    sourceNames: ["GOV.UK Service Manual", "IBM Carbon Content Guidelines"],
+    references: [
+      "https://www.gov.uk/service-manual",
+      "https://carbondesignsystem.com/guidelines/content/overview/",
+    ],
+    fieldChecklist: ["Customer emotion", "Clear explanation", "Recovery option", "Trust signal", "Satisfaction metric"],
+  },
+  "ux-ui": {
+    sourceNoteTh:
+      "เนื้อหานี้อิงจาก usability heuristics และ accessibility guideline เพื่อให้การออกแบบไม่หยุดที่ความสวย แต่ตรวจ flow, state, content และการเข้าถึงได้จริง",
+    sourceNames: ["Nielsen Norman Group 10 Usability Heuristics", "W3C WCAG 2.2 Quick Reference"],
+    references: [
+      "https://www.nngroup.com/articles/ten-usability-heuristics/",
+      "https://www.w3.org/WAI/WCAG22/quickref/",
+    ],
+    fieldChecklist: ["System status", "User control", "Error prevention", "Recognition over recall", "Accessible contrast"],
+  },
+};
+
+function sourceGroundingForPath(pathId: string) {
+  return sourceGroundingByPath[pathId];
+}
+
+function expandedRelatedQuestionIds(pathId: string, title: string) {
+  const fallbackByPath: Record<string, string[]> = {
+    "ux-research": ["ux-research-q-research-question-vs-business-question"],
+    "ux-research-method": ["ux-research-method-q-method-selection"],
+    "agile-ux-ui": ["agile-ux-ui-q-acceptance-criteria"],
+    "design-system": ["design-system-q-token-purpose"],
+    "product-analytics": ["product-analytics-q-north-star"],
+    "cx-communication": ["cx-communication-q-crisis-trust"],
+    "ai-product-workflow": ["ai-product-workflow-q-output-qa"],
+    "career-portfolio": ["career-portfolio-q-case-structure"],
+    "product-owner": ["product-owner-q-backlog-clarity"],
+    designops: ["designops-q-what-is-designops"],
+  };
+  const byTopic: Record<string, string[]> = {
+    "ux-research:Research Question vs Business Question": ["ux-research-q-research-question-vs-business-question"],
+    "ux-research:User Interviews": ["ux-research-q-user-interviews"],
+    "ux-research:Usability Test Plan": ["ux-research-q-usability-test-plan"],
+    "ux-research-method:Method Selection Matrix": ["ux-research-method-q-method-selection"],
+    "ux-research-method:Usability Testing Method": ["ux-research-method-q-usability-testing"],
+    "ux-research-method:Bias and Research Quality": ["ux-research-method-q-bias-quality"],
+    "agile-ux-ui:Sprint Planning for UX/UI": ["agile-ux-ui-q-sprint-planning"],
+    "agile-ux-ui:Handoff with Acceptance Criteria": ["agile-ux-ui-q-acceptance-criteria"],
+    "design-system:Foundation Tokens": ["design-system-q-token-purpose"],
+    "design-system:Component Anatomy": ["design-system-q-component-anatomy"],
+    "design-system:Accessibility in Design Systems": ["design-system-q-accessibility"],
+    "designops:Mapping a Design Workflow": ["designops-q-workflow-map"],
+    "designops:Managing Design Requests": ["designops-q-intake"],
+    "product-owner:Business Goals to Product Outcomes": ["product-owner-q-outcomes"],
+    "product-owner:Backlog, Epic and User Story": ["product-owner-q-backlog-clarity"],
+    "product-owner:Acceptance Criteria": ["product-owner-q-acceptance-criteria"],
+    "product-analytics:North Star Metric": ["product-analytics-q-north-star"],
+    "product-analytics:Event Tracking Plan": ["product-analytics-q-tracking-plan"],
+    "product-analytics:Funnel Analysis": ["product-analytics-q-funnel-analysis"],
+    "product-analytics:Data Quality Checks": ["product-analytics-q-data-quality"],
+    "product-analytics:Dashboard Design for Decisions": ["product-analytics-q-dashboard-decision"],
+    "cx-communication:Crisis, Confidence and Conversion": ["cx-communication-q-crisis-trust"],
+    "cx-communication:Customer Satisfaction Metrics: CSAT, Loyalty and Growth": ["cx-communication-q-csat-metrics"],
+    "cx-communication:Voice of Customer System": ["cx-communication-q-voc-system"],
+    "cx-communication:Service Recovery Playbook": ["cx-communication-q-service-recovery"],
+    "cx-communication:The Art of Communication": ["cx-communication-q-art-of-communication"],
+    "ai-product-workflow:AI Output QA Checklist": ["ai-product-workflow-q-output-qa"],
+    "ai-product-workflow:Safe Use of Company Data": ["ai-product-workflow-q-company-data"],
+    "ai-product-workflow:Human Judgment with AI": ["ai-product-workflow-q-human-judgment"],
+    "career-portfolio:Portfolio Case Study Structure": ["career-portfolio-q-case-structure"],
+    "career-portfolio:Writing Design Rationale": ["career-portfolio-q-design-rationale"],
+    "career-portfolio:Interview Story Bank": ["career-portfolio-q-interview-story"],
+  };
+
+  return byTopic[`${pathId}:${title}`] ?? fallbackByPath[pathId] ?? [`${pathId}-q-${slugify(title)}`];
+}
+
 function pathVerification(pathId: string, title: string): ContentVerification | undefined {
   if (pathId === "stock-investing") return stockVerification;
   if (pathId === "thai-tax-personal-finance") return title === "Archived Tax Year Example" ? archivedTaxVerification : taxVerification;
+  const sourceGrounding = sourceGroundingForPath(pathId);
+  if (sourceGrounding) {
+    return {
+      verificationStatus: "evergreen",
+      lastVerifiedAt: "2026-07-27",
+      officialSourceNames: sourceGrounding.sourceNames,
+      disclaimer: careerDisclaimer,
+    };
+  }
   if (["ux-research-method", "agile-ux-ui", "design-system", "product-owner", "product-analytics", "ai-product-workflow", "career-portfolio", "cx-communication"].includes(pathId)) {
     return {
       verificationStatus: "time-sensitive",
@@ -1878,7 +2774,70 @@ function expandedTopicCopy(pathId: string, title: string) {
     },
   };
 
-  return { ...base, ...copy[title] };
+  const pathDefaults: Record<string, Partial<typeof base>> = {
+    "ux-research": {
+      summaryTh: `${title} คือบทเรียน UX Research ที่ช่วยเปลี่ยนความสงสัยของทีมให้เป็นหลักฐานจากผู้ใช้และ decision ที่ใช้ทำงานต่อได้`,
+      what: `${title} ในงาน UX Research คือการหาหลักฐานอย่างมีวินัย โดยเริ่มจากคำถามที่ต้องตอบ ผู้ใช้ที่เกี่ยวข้อง วิธีเก็บข้อมูล และข้อจำกัดของหลักฐาน`,
+      why: "บทนี้สำคัญเพราะ researcher ที่ดีไม่ได้แค่เก็บข้อมูล แต่ช่วยลดความเสี่ยงของ product decision และทำให้ทีมเข้าใจผู้ใช้จาก pattern ไม่ใช่ opinion เดี่ยว",
+      how: "ใช้โครง research question → participant → method → evidence → synthesis → recommendation แล้วจดเสมอว่า finding นี้ตอบ decision อะไร",
+      example: `ในงานจริง ${title} อาจถูกใช้ก่อน redesign flow เพื่อหาว่าผู้ใช้ติดตรงไหน ทำไมติด และทีมควรแก้ hypothesis ใดก่อน`,
+      mistake: "สรุป insight จาก quote เดียว หรือถามคำถามนำจนได้คำตอบที่ทีมอยากได้อยู่แล้ว",
+      takeaway: `${title} มีคุณค่าเมื่อช่วยให้ทีมตัดสินใจจากหลักฐานที่น่าเชื่อถือขึ้น`,
+      vocab: title,
+    },
+    "ux-research-method": {
+      summaryTh: `${title} ช่วยเลือกวิธีวิจัยให้ตรงกับสิ่งที่ทีมต้องเรียนรู้ ไม่ใช้ method เดียวตอบทุกคำถาม`,
+      what: `${title} คือการจับคู่คำถามกับหลักฐานที่ต้องการ เช่น ต้องรู้เหตุผล ต้องวัดขนาดปัญหา หรือต้องทดสอบว่า task ทำได้จริงไหม`,
+      why: "การเลือก method ผิดทำให้ข้อมูลดูเหมือนมีประโยชน์แต่ตอบ decision ไม่ได้ และทำให้ทีมเสียเวลาโดยไม่ลดความเสี่ยงจริง",
+      how: "แยกก่อนว่าคำถามเป็น why, what, how many, where หรือ can users complete the task แล้วเลือก qualitative, quantitative, generative หรือ evaluative ให้เหมาะ",
+      example: `ถ้าใช้ ${title} กับ navigation ปัญหา card sorting อาจช่วยเข้าใจ mental model ส่วน tree testing ช่วยตรวจว่าโครงสร้างที่มีหาเจอจริงไหม`,
+      mistake: "เลือก method จากความง่ายหรือความคุ้นเคย โดยไม่ดูว่าหลักฐานตอบคำถามได้หรือไม่",
+      takeaway: `${title} ที่ดีเริ่มจาก decision ที่ต้องตอบ ไม่ใช่ชื่อ method ที่ดูมืออาชีพ`,
+      vocab: title,
+    },
+    "agile-ux-ui": {
+      summaryTh: `${title} ช่วยให้ UX/UI ทำงานเข้ากับ sprint ได้จริง โดยยังรักษาคุณภาพ flow, state, content และ handoff`,
+      what: `${title} ในทีม Agile คือการทำ design ให้พร้อมพอสำหรับการตัดสินใจและการ build ผ่าน prototype, acceptance criteria, edge cases และ QA notes`,
+      why: "ถ้า design แยกจาก sprint มากเกินไป ทีมจะรอ decision เกิด rework และปล่อย detail สำคัญตกหล่นระหว่าง build",
+      how: "ทำ discovery ล่วงหน้าเล็กน้อย sync กับ PO/dev บ่อย ๆ ส่งต่อด้วย state และ acceptance criteria แล้วตรวจ UX QA หลัง build",
+      example: `สำหรับ ${title} designer อาจเตรียม happy path, error, loading, empty, permission และ responsive state ก่อน sprint เริ่ม`,
+      mistake: "ส่ง Figma เป็นภาพนิ่งโดยไม่มีเงื่อนไขสำเร็จ interaction state หรือข้อจำกัดทางเทคนิค",
+      takeaway: `${title} ที่ดีทำให้ทีมส่งของได้เร็วขึ้นโดยไม่สูญเสียเหตุผลของ UX`,
+      vocab: title,
+    },
+    "design-system": {
+      summaryTh: `${title} ช่วยให้ UI scale ได้อย่างสม่ำเสมอ ผ่าน token, component, state, documentation และ governance`,
+      what: `${title} ใน design system คือ decision ที่ reusable ได้ ต้องบอก purpose, anatomy, usage rule, state, accessibility และวิธีส่งต่อให้ code`,
+      why: "ระบบที่ดีลด component ซ้ำ ลด design debt และทำให้หลายทีมสร้าง product ที่ดูและทำงานสอดคล้องกัน",
+      how: "เริ่มจาก audit ของที่มี ตั้งชื่อ token ตามหน้าที่ ทำ component ให้มี state ครบ แล้วเขียน documentation แบบ decision-first",
+      example: `ใน ${title} อาจกำหนด button anatomy, loading state, disabled rule, label guideline และ minimum touch target ให้ทีมใช้ร่วมกัน`,
+      mistake: "ทำ UI kit สวยแต่ไม่มี rule, owner, versioning หรือวิธีให้ทีม contribute",
+      takeaway: `${title} ที่ดีทำให้ทีมตัดสินใจซ้ำ ๆ ได้น้อยลงและรักษาคุณภาพได้มากขึ้น`,
+      vocab: title,
+    },
+    "product-analytics": {
+      summaryTh: `${title} ช่วยแปลงข้อมูลพฤติกรรมผู้ใช้ให้เป็น product decision ไม่ใช่แค่กราฟหรือ dashboard`,
+      what: `${title} ใน Product Analytics คือการนิยาม metric, tracking, segment, funnel, cohort หรือ experiment เพื่อเข้าใจ value และ friction ของผู้ใช้`,
+      why: "ข้อมูลมีค่าก็ต่อเมื่อมันตอบคำถาม เช่น metric เปลี่ยนเพราะอะไร กลุ่มไหนได้รับผลกระทบ และทีมควรทดลองอะไรต่อ",
+      how: "ตั้งคำถามก่อนดู dashboard ตรวจ event definition และ data quality แล้วเล่า insight ด้วย context, evidence, interpretation และ recommendation",
+      example: `ถ้าใช้ ${title} กับ learning app ให้ดู lesson_started, lesson_completed, quiz_completed และ review_returned เพื่อหา learning loop ที่ดีขึ้น`,
+      mistake: "สร้าง dashboard หลายหน้าแต่ไม่มี decision ที่ต้องตอบ หรือไม่ตรวจว่า event ถูกเก็บถูกต้องไหม",
+      takeaway: `${title} ที่ดีทำให้ทีมเห็น action จากข้อมูล ไม่ใช่แค่เห็นตัวเลข`,
+      vocab: title,
+    },
+    "cx-communication": {
+      summaryTh: `${title} ช่วยออกแบบการสื่อสารที่รักษา trust ลดความกังวล และพาลูกค้ากลับไปสู่ next step ที่ชัดเจน`,
+      what: `${title} ในงาน CX คือการเข้าใจบริบท อารมณ์ ความเสี่ยง และความคาดหวังของลูกค้า แล้วสื่อสารด้วยความชัดเจนและรับผิดชอบ`,
+      why: "การสื่อสารที่ดีมีผลต่อ customer satisfaction, loyalty และ conversion เพราะลูกค้าตัดสินใจจากความรู้สึกว่าแบรนด์เข้าใจและดูแลเขาได้ไหม",
+      how: "เริ่มจาก acknowledge emotion, explain simply, show ownership, offer options, set next update และวัดผลจาก CSAT/CES/NPS หรือ signal ที่เหมาะกับบริบท",
+      example: `ใน ${title} หากเกิด service issue ควรบอกว่าเกิดอะไรขึ้น ข้อมูลอะไรปลอดภัย ทีมกำลังทำอะไร และจะอัปเดตอีกเมื่อไร`,
+      mistake: "ใช้คำพูดถูกแต่แข็ง หรือบอกข้อมูลเยอะโดยไม่ให้ทางเลือกและ next step ที่ลูกค้าทำได้",
+      takeaway: `${title} ที่ดีทำให้ความชัดเจนกลายเป็นความไว้วางใจ`,
+      vocab: title,
+    },
+  };
+
+  return { ...base, ...pathDefaults[pathId], ...copy[title] };
 }
 
 function expandedTopicVisual(pathId: string, title: string): LessonVisualMedia {
@@ -1921,14 +2880,157 @@ function expandedTopicVisual(pathId: string, title: string): LessonVisualMedia {
   };
 }
 
+function expandedTopicExtraVisuals(pathId: string, title: string): LessonVisualMedia[] {
+  if (pathId === "ux-research" || pathId === "ux-research-method") {
+    return [
+      {
+        type: "image",
+        titleEn: "Evidence to Decision",
+        descriptionTh: "ภาพนี้ช่วยเรียงลำดับจาก note ดิบ ไปสู่ pattern, insight และ decision เพื่อให้ research ไม่จบแค่รายงาน",
+        src: "/lesson-images/research-evidence-wall.svg",
+        altEn: "A research evidence wall diagram moving from observation to pattern, insight, and decision.",
+        altTh: "ไดอะแกรม research evidence wall จาก observation ไปสู่ pattern, insight และ decision",
+        width: 1200,
+        height: 760,
+        items: ["Observation", "Pattern", "Insight", "Decision"],
+      },
+    ];
+  }
+
+  if (pathId === "agile-ux-ui") {
+    return [
+      {
+        type: "image",
+        titleEn: "Agile Handoff Board",
+        descriptionTh: "ภาพนี้ช่วยให้เห็นว่า handoff ที่ดีต้องมี flow, state, acceptance criteria และ UX QA ไม่ใช่แค่ส่งภาพหน้าจอ",
+        src: "/lesson-images/agile-handoff-board.svg",
+        altEn: "An agile UX/UI handoff board showing design, story, build, and UX QA.",
+        altTh: "บอร์ด Agile UX/UI handoff แสดง design, story, build และ UX QA",
+        width: 1200,
+        height: 760,
+        items: ["Design", "Story", "Build", "UX QA"],
+      },
+    ];
+  }
+
+  if (pathId === "design-system") {
+    return [
+      {
+        type: "image",
+        titleEn: "Design System Layers",
+        descriptionTh: "ภาพนี้ช่วยจำว่า design system มีหลายชั้น ตั้งแต่ token และ component ไปจนถึง documentation และ governance",
+        src: "/lesson-images/design-system-layers.svg",
+        altEn: "A layered diagram of design system foundations, components, documentation, and governance.",
+        altTh: "ไดอะแกรมชั้นของ design system ตั้งแต่ foundation, component, documentation และ governance",
+        width: 1200,
+        height: 760,
+        items: ["Tokens", "Components", "Documentation", "Governance"],
+      },
+    ];
+  }
+
+  if (pathId === "product-analytics") {
+    return [
+      {
+        type: "image",
+        titleEn: "Product Analytics Loop",
+        descriptionTh: "ภาพนี้ช่วยให้เห็นว่าการวิเคราะห์ product ต้องวนจาก metric ไป tracking, funnel และ decision โดยมี user value เป็นแกนกลาง",
+        src: "/lesson-images/product-analytics-loop.svg",
+        altEn: "A product analytics loop diagram connecting metric, tracking plan, funnel, decision, and user value.",
+        altTh: "ไดอะแกรม product analytics loop เชื่อม metric, tracking plan, funnel, decision และ user value",
+        width: 1200,
+        height: 760,
+        items: ["Metric", "Tracking", "Funnel", "Decision"],
+      },
+    ];
+  }
+
+  if (pathId === "cx-communication") {
+    return [
+      {
+        type: "image",
+        titleEn: "Trust Recovery Message",
+        descriptionTh: "ภาพนี้ช่วยเรียงโครงข้อความเวลาเกิดปัญหา ให้สื่อสารอย่างชัด สงบ และมี next step",
+        src: "/lesson-images/cx-trust-recovery.svg",
+        altEn: "A trust recovery message framework showing acknowledge, explain, and next update.",
+        altTh: "ไดอะแกรมโครงข้อความกู้ความเชื่อมั่น โดยเริ่มจาก acknowledge, explain และ next update",
+        width: 1200,
+        height: 760,
+        items: ["Acknowledge", "Explain", "Next update"],
+      },
+    ];
+  }
+
+  if (pathId === "ux-ui" && title !== "Understand UX, Understand UI") {
+    return [
+      {
+        type: "image",
+        titleEn: "UX Usability Check",
+        descriptionTh: "ใช้ภาพนี้ช่วยตรวจ flow, state และ accessibility ก่อนปรับ visual polish",
+        src: "/lesson-images/ux-usability-checklist.svg",
+        altEn: "A usability checklist diagram showing system status, error prevention, user control, recognition, and accessible reading.",
+        altTh: "ภาพ checklist สำหรับตรวจ usability เช่น system status, error prevention, user control, recognition และ accessibility",
+        width: 1200,
+        height: 760,
+        items: ["Status", "Prevention", "Control", "Recognition", "Access"],
+      },
+    ];
+  }
+
+  return [];
+}
+
 function makeExpandedLesson(path: LearningPath, title: string, index: number): LearningLesson {
   const alias = expandedSeedAlias(path.id, title);
   const copy = expandedTopicCopy(path.id, alias);
   const id = `${path.id}-${slugify(title)}`;
   const verification = pathVerification(path.id, title);
+  const sourceGrounding = sourceGroundingForPath(path.id);
   const terminology = [
     vocab(`${id}-vocab-main`, copy.vocab, `คำศัพท์หลักของ ${title}`, `A key concept used in ${path.name}.`, title),
-    vocab(`${id}-vocab-context`, "Scenario", "สถานการณ์สมมติสำหรับฝึกคิด", "A fictional practice situation used for learning.", title),
+    vocab(`${id}-vocab-context`, "Scenario", "สถานการณ์เพื่อการเรียนรู้", "A practice situation used for learning.", title),
+  ];
+  const sourceSection = sourceGrounding
+    ? [
+        section(
+          "source-grounding",
+          "Based on Real Practice",
+          [sourceGrounding.sourceNoteTh],
+          sourceGrounding.fieldChecklist,
+        ),
+      ]
+    : [];
+  const practiceChecklist = sourceGrounding?.fieldChecklist ?? ["Context", "Decision", "Evidence", "Risk", "Next step"];
+  const lessonSections = [
+    section("learning-goal", "1. Learning Goal", [
+      copy.summaryTh,
+      `หลังเรียนบทนี้ คุณควรอธิบาย ${copy.vocab} ได้แบบไม่ท่องจำ และบอกได้ว่า concept นี้ช่วย decision ใดในงานจริง`,
+    ], ["Understand", "Apply", "Explain"]),
+    section("what-it-means", "2. What It Means", [
+      copy.what,
+      `ให้จำ ${copy.vocab} ผ่านสถานการณ์ ไม่ใช่ผ่านคำแปลอย่างเดียว เพราะในการทำงานจริงคนจะถามว่า “ใช้เมื่อไร” มากกว่า “แปลว่าอะไร”`,
+    ]),
+    section("why-it-matters", "3. Why It Matters", [
+      copy.why,
+      "ทักษะนี้สำคัญเป็นพิเศษในสายงานรายได้สูง เพราะงานระดับ professional ต้องอธิบายเหตุผล ข้อจำกัด และผลกระทบของ decision ได้ ไม่ใช่ทำตามคำสั่งอย่างเดียว",
+    ]),
+    section("how-it-works", "4. How To Use It Step by Step", [
+      copy.how,
+      `ใช้ลำดับนี้ทุกครั้ง: ระบุ context → เลือก ${copy.vocab} ที่เกี่ยวข้อง → ตรวจ evidence → บอก risk หรือ trade-off → สรุป next step`,
+    ], practiceChecklist),
+    ...sourceSection,
+    section("workplace-scenario", "5. Workplace Scenario", [
+      copy.example,
+      "เวลาเจอสถานการณ์คล้ายกัน ให้เขียนคำตอบหนึ่งประโยคว่า “ฉันเลือกทำแบบนี้ เพราะหลักฐานหรือข้อจำกัดอะไร และคาดว่าจะช่วยอะไร”",
+    ]),
+    section("common-mistake", "6. Common Mistake", [
+      copy.mistake,
+      "วิธีแก้คืออย่าหยุดที่ชื่อ concept ให้ถามต่อว่า concept นี้เปลี่ยนการตัดสินใจ การออกแบบ การสื่อสาร หรือการวัดผลตรงไหน",
+    ]),
+    section("practice-task", "7. Practice Task", [
+      `เลือกโปรเจกต์หรือหน้าจอหนึ่งชิ้น แล้วใช้ ${copy.vocab} วิเคราะห์ 3 อย่าง: ปัญหาคืออะไร หลักฐานคืออะไร และ next step ที่ควรทำคืออะไร`,
+      "ถ้ายังตอบไม่ได้ ให้กลับไปดู checklist ของบทนี้ แล้วเติม context ให้ชัดขึ้นก่อนเริ่ม quiz",
+    ], ["Problem", "Evidence", "Next step"]),
   ];
 
   return {
@@ -1944,19 +3046,24 @@ function makeExpandedLesson(path: LearningPath, title: string, index: number): L
     summaryTh: copy.summaryTh,
     difficulty: path.currentLevel,
     professionalLevel: path.currentLevel,
-    readingMinutes: 8,
-    estimatedMinutes: 8,
+    readingMinutes: 10,
+    estimatedMinutes: 10,
     relatedTopic: title,
     hasPractice: true,
     introductionTh: copy.summaryTh,
-    objectives: [`Explain ${copy.vocab} in simple English.`, "Apply the concept to a fictional practice scenario.", "Identify one common mistake before practice."],
-    sections: [
-      section("what-it-means", "What It Means", [copy.what]),
-      section("why-it-matters", "Why It Matters", [copy.why]),
-      section("how-it-works", "How It Works", [copy.how]),
+    objectives: [
+      `Explain ${copy.vocab} in simple English.`,
+      "Apply the concept to a realistic workplace scenario.",
+      "Use a checklist to decide the next action.",
+      "Identify one common mistake before practice.",
+      ...(sourceGrounding ? ["Connect the lesson to a real industry reference or working checklist."] : []),
     ],
-    practicalExamples: [{ titleEn: "Practice Scenario", bodyTh: copy.example }],
-    visualMedia: [expandedTopicVisual(path.id, alias)],
+    sections: lessonSections,
+    practicalExamples: [
+      { titleEn: "Practice Scenario", bodyTh: copy.example },
+      { titleEn: "How to Answer Like a Professional", bodyTh: `ใช้โครงตอบ: Context คืออะไร → ใช้ ${copy.vocab} เพื่อดูอะไร → หลักฐานหรือข้อจำกัดคืออะไร → next step คืออะไร` },
+    ],
+    visualMedia: [expandedTopicVisual(path.id, alias), ...expandedTopicExtraVisuals(path.id, alias)],
     commonMistakes: [copy.mistake],
     commonMistakesTh: [copy.mistake],
     juniorThinking: `I know the term ${copy.vocab}.`,
@@ -1973,13 +3080,13 @@ function makeExpandedLesson(path: LearningPath, title: string, index: number): L
     vocabulary: terminology,
     workplaceExample: copy.example,
     workplaceExampleTh: copy.example,
-    diagram: ["Context", "Decision", "Risk", "Next step"],
+    diagram: practiceChecklist,
     keyTakeaway: copy.takeaway,
     keyTakeawayTh: copy.takeaway,
     miniCheck: check(`What is the safest way to use ${copy.vocab}?`, `ควรใช้ ${copy.vocab} อย่างไรให้ปลอดภัยและมีเหตุผล?`, "Use it with a clear scenario, evidence, and limits.", "Treat it as a guaranteed answer.", "Skip official or regulated sources.", "คำตอบที่ดีต้องเห็นบริบท ข้อจำกัด และไม่อ้างผลลัพธ์เกินจริง"),
     miniKnowledgeCheck: check(`What is the safest way to use ${copy.vocab}?`, `ควรใช้ ${copy.vocab} อย่างไรให้ปลอดภัยและมีเหตุผล?`, "Use it with a clear scenario, evidence, and limits.", "Treat it as a guaranteed answer.", "Skip official or regulated sources.", "คำตอบที่ดีต้องเห็นบริบท ข้อจำกัด และไม่อ้างผลลัพธ์เกินจริง"),
-    relatedQuestionIds: [`${path.id}-q-${slugify(title)}`],
-    references: verification?.officialSourceNames ?? ["Supreya Atipongchai curriculum"],
+    relatedQuestionIds: expandedRelatedQuestionIds(path.id, title),
+    references: sourceGrounding?.references ?? verification?.officialSourceNames ?? ["Supreya Atipongchai curriculum"],
     completionStatus: "ready-for-practice",
     contentVerification: verification,
     personalNoteEnabled: true,

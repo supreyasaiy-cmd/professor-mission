@@ -81,9 +81,9 @@ button {
   padding: 0.75rem 1.15rem;
   text-align: center;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 650;
   color: white;
-  box-shadow: 0 10px 24px rgba(23, 23, 23, 0.14);
+  box-shadow: 0 8px 20px rgba(23, 23, 23, 0.12);
   transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
 }
 
@@ -108,7 +108,7 @@ h6 {
 .button-primary:hover {
   transform: translateY(-1px);
   background: var(--black-button-hover);
-  box-shadow: 0 14px 34px rgba(23, 23, 23, 0.18);
+  box-shadow: 0 12px 28px rgba(23, 23, 23, 0.16);
 }
 
 .button-primary:focus-visible,
@@ -129,7 +129,7 @@ h6 {
   padding: 0.75rem 1rem;
   text-align: center;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 650;
   color: var(--text-primary);
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
@@ -140,7 +140,6 @@ h6 {
   transform: translateY(-1px);
 }
 
-.text-white,
 .text-cyan-100,
 .text-cyan-100\/85,
 .text-cyan-100\/90,
@@ -196,7 +195,7 @@ h6 {
 }
 
 .shadow-editorial {
-  box-shadow: 0 18px 48px rgba(23, 23, 23, 0.075), 0 1px 0 rgba(255, 255, 255, 0.86) inset;
+  box-shadow: 0 14px 36px rgba(23, 23, 23, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
 .gradient-iridescent {

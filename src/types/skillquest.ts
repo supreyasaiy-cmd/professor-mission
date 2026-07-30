@@ -50,8 +50,6 @@ export interface LearningPath {
   currentGoal: string;
   currentGoalTh: string;
   accent: string;
-  questionsCompleted: number;
-  questionsDueForReview: number;
 }
 
 export interface Choice {

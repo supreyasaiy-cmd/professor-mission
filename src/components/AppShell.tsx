@@ -53,6 +53,7 @@ function PrimaryNavLink({
   variant: "desktop" | "mobile";
 }) {
   const isDesktop = variant === "desktop";
+  const mobileSizeClass = showLabel ? "flex-[1.68]" : "flex-[0.72]";
 
   return (
     <Link
@@ -63,12 +64,12 @@ function PrimaryNavLink({
       onFocus={onShow}
       onMouseEnter={onShow}
       onMouseLeave={onHide}
-      className={`group relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold leading-none outline-none transition-[width,background-color,color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-black/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-        isDesktop ? "h-10" : "h-11 min-w-0"
+      className={`group relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold leading-none outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] focus-visible:ring-2 focus-visible:ring-black/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+        isDesktop ? "h-10" : `h-12 min-w-0 ${mobileSizeClass}`
       } ${
         showLabel
-          ? `${isDesktop ? "w-28" : "w-full"} bg-[#171717] text-white shadow-[0_10px_24px_rgba(23,23,23,0.16)]`
-          : `${isDesktop ? "w-14" : "w-full"} text-[var(--text-muted)] hover:bg-white/80 hover:text-[var(--text-primary)] focus-visible:bg-white/80`
+          ? `${isDesktop ? "w-28" : ""} bg-[#171717] text-white shadow-[0_10px_24px_rgba(23,23,23,0.16)]`
+          : `${isDesktop ? "w-14" : ""} text-[#8e9aa6] hover:bg-white/80 hover:text-[#5f83a3] focus-visible:bg-white/80`
       }`}
     >
       {isActive ? (
@@ -86,8 +87,8 @@ function PrimaryNavLink({
 
       <span
         aria-hidden="true"
-        className={`absolute inset-0 grid place-items-center whitespace-nowrap px-2 text-center text-sm transition-[opacity,transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          showLabel ? "translate-y-0 scale-100 opacity-100 blur-0" : "translate-y-1 scale-95 opacity-0 blur-[1px]"
+        className={`absolute inset-0 grid place-items-center whitespace-nowrap px-2 text-center text-sm transition-[opacity,transform,filter] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+          showLabel ? "translate-y-0 scale-100 opacity-100 blur-0" : "translate-y-2 scale-95 opacity-0 blur-[1px]"
         }`}
       >
         {item.label}
@@ -155,12 +156,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="w-full pb-[calc(5.75rem+env(safe-area-inset-bottom))] lg:pb-10">{children}</main>
+        <main className="w-full pb-[calc(7.25rem+env(safe-area-inset-bottom))] lg:pb-12">{children}</main>
 
-        <nav className="fixed bottom-2 left-3 right-3 z-[90] grid grid-cols-4 gap-1 rounded-[1.35rem] border border-[var(--border)] bg-white/88 p-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_12px_34px_rgba(23,23,23,0.12)] backdrop-blur-2xl sm:left-4 sm:right-4 lg:hidden" aria-label="Primary navigation">
+        <nav className="fixed bottom-2 left-3 right-3 z-[90] flex h-[3.65rem] items-center gap-1 rounded-[1.35rem] border border-[var(--border)] bg-white/88 p-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_12px_34px_rgba(23,23,23,0.12)] backdrop-blur-2xl sm:left-4 sm:right-4 lg:hidden" aria-label="Primary navigation">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
-            const showLabel = isActive || hoveredHref === item.href;
+            const showLabel = isActive;
             return (
               <PrimaryNavLink
                 key={item.href}
@@ -181,12 +182,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function HeaderRootTitle() {
   return (
-    <Link href="/" className="flex h-14 min-w-0 items-center gap-3 rounded-full px-1 text-left sm:gap-4">
-      <svg className="h-8 w-20 shrink-0 text-[var(--text-primary)] sm:h-9 sm:w-24" viewBox="0 0 112 44" fill="none" aria-hidden="true">
+    <Link href="/" className="flex h-14 min-w-0 items-center gap-2 rounded-full px-0 text-left sm:gap-4">
+      <svg className="h-8 w-16 shrink-0 text-[var(--text-primary)] sm:h-9 sm:w-24" viewBox="0 0 112 44" fill="none" aria-hidden="true">
         <path d="M7 21.5C23.5 24.8 41.7 26.2 62.5 23.4C72.7 22 82.4 19.5 93 17" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M82 9C88 11.5 95.2 15.8 101.5 21.2C94.3 25.1 87.8 29.8 81.8 35.2" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <span className="block truncate font-display text-base font-semibold tracking-normal text-[var(--text-primary)] sm:text-lg">Supreya&apos;s Class room</span>
+      <span className="block min-w-0 whitespace-nowrap font-display text-sm font-semibold tracking-normal text-[var(--text-primary)] sm:text-lg">Supreya&apos;s Class room</span>
     </Link>
   );
 }
@@ -280,11 +281,11 @@ function ProfileMenu({ pathname, align = "right" }: { pathname: string; align?: 
 
 export function PageShell({ children, eyebrow, title, summary }: { children: ReactNode; eyebrow: string; title: string; summary: string }) {
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-      <div className="mb-8 max-w-3xl">
+    <section className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-9 lg:px-8 lg:py-12">
+      <div className="mb-6 max-w-3xl sm:mb-8">
         <p className="font-display text-xs font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">{eyebrow}</p>
-        <h1 className="mt-4 text-balance font-display text-4xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl">{title}</h1>
-        <p className="font-subtitle mt-4 max-w-2xl text-base leading-8 text-[var(--text-secondary)]">{summary}</p>
+        <h1 className="mt-3 text-balance font-display text-3xl font-semibold leading-[1.16] tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl">{title}</h1>
+        <p className="font-subtitle mt-3 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base sm:leading-8">{summary}</p>
       </div>
       {children}
     </section>

@@ -1,0 +1,23 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="56" fill="#F8F8F6"/>
+  <rect x="60" y="58" width="1080" height="644" rx="48" fill="url(#paint0_linear)" stroke="#D9D9D6" stroke-width="2"/>
+  <text x="110" y="134" fill="#171717" font-family="Arial, sans-serif" font-size="46" font-weight="700">Design System Layers</text>
+  <text x="112" y="172" fill="#666766" font-family="Arial, sans-serif" font-size="23">A system is more than a UI kit.</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="210" y="500" width="780" height="88" rx="28" fill="#171717"/>
+    <text x="250" y="555" fill="#FFFFFF" font-size="28" font-weight="700">Governance and adoption</text>
+    <rect x="260" y="408" width="680" height="88" rx="28" fill="#E9FAF4" stroke="#D9D9D6"/>
+    <text x="300" y="463" fill="#171717" font-size="28" font-weight="700">Documentation and usage rules</text>
+    <rect x="310" y="316" width="580" height="88" rx="28" fill="#F1EBFF" stroke="#D9D9D6"/>
+    <text x="350" y="371" fill="#171717" font-size="28" font-weight="700">Components and states</text>
+    <rect x="360" y="224" width="480" height="88" rx="28" fill="#E7F8FF" stroke="#D9D9D6"/>
+    <text x="400" y="279" fill="#171717" font-size="28" font-weight="700">Tokens and foundations</text>
+  </g>
+  <defs>
+    <linearGradient id="paint0_linear" x1="60" y1="58" x2="1140" y2="702" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#F5FBFF"/>
+      <stop offset="1" stop-color="#F3FFF9"/>
+    </linearGradient>
+  </defs>
+</svg>

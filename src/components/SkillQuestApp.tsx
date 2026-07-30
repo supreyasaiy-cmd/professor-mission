@@ -31,6 +31,7 @@ import type { Soft3DIconName } from "./icons/icon-types";
 
 type View = "home" | "learn" | "learn-path" | "lesson" | "quiz" | "review" | "progress" | "settings";
 type InitialQuizStart = { choiceId?: string; currentIndex?: number; lessonId?: string; pathId?: string; submitted?: boolean };
+type ReviewFilter = "due" | "recent" | "frequent" | "ielts" | "ux-writing";
 
 const languageLabels: Record<LanguageMode, string> = {
   TH: "TH",
@@ -70,10 +71,55 @@ function questionVocabulary(question: Question): VocabularyItem[] {
 
 function progressForPath(path: LearningPath, progress: ProgressState) {
   const pathQuestions = questions.filter((question) => question.learningPath === path.name);
+  const pathLessons = lessonsForPath(path.id);
   const completed = pathQuestions.filter((question) => progress.completedQuestionIds.includes(question.id)).length;
-  const base = path.questionsCompleted;
-  const total = Math.max(pathQuestions.length + base, 1);
-  return Math.min(100, Math.round(((completed + base) / total) * 100));
+  const completedLessons = pathLessons.filter((lesson) => progress.lessons?.[lesson.id]?.completed).length;
+  const total = pathQuestions.length + pathLessons.length;
+  if (!total) return 0;
+  return Math.min(100, Math.round(((completed + completedLessons) / total) * 100));
+}
+
+function learningActivityDates(progress: ProgressState) {
+  const dates = [
+    ...progress.answers.map((answer) => answer.answeredAt),
+    ...Object.values(progress.lessons ?? {}).flatMap((lesson) => [lesson.startedAt, lesson.lastOpenedAt]).filter((date): date is string => Boolean(date)),
+  ];
+
+  return Array.from(new Set(dates.map((date) => new Date(date).toDateString())));
+}
+
+function learningStreak(progress: ProgressState) {
+  const activityDates = new Set(learningActivityDates(progress));
+  if (!activityDates.size) return 0;
+
+  let streak = 0;
+  const cursor = new Date();
+  while (activityDates.has(cursor.toDateString())) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
+function reviewCountForPath(path: LearningPath, progress: ProgressState) {
+  const pathQuestionIds = new Set(questions.filter((question) => question.learningPath === path.name).map((question) => question.id));
+  const pathLessonIds = new Set(lessonsForPath(path.id).map((lesson) => lesson.id));
+  const dueQuestions = progress.reviewQueue.filter((item) => pathQuestionIds.has(item.questionId)).length;
+  const dueLessons = Object.values(progress.lessons ?? {}).filter((lesson) => pathLessonIds.has(lesson.lessonId) && lesson.reviewFlag).length;
+  return dueQuestions + dueLessons;
+}
+
+function categoryForPath(pathId: string) {
+  if (["designops", "ux-research", "ux-research-method", "agile-ux-ui", "design-system", "product-owner", "product-analytics", "ai-product-workflow", "career-portfolio", "cx-communication"].includes(pathId)) {
+    return "Career Track";
+  }
+
+  if (pathId === "stock-investing" || pathId === "thai-tax-personal-finance") {
+    return "Life Skills";
+  }
+
+  return "Core Skill";
 }
 
 type ProgressTone = "blue" | "violet" | "mint" | "champagne" | "graphite";
@@ -120,7 +166,16 @@ function pathIdForQuestion(question: Question) {
   return learningPaths.find((path) => path.name === question.learningPath)?.id ?? learningPaths[0].id;
 }
 
-function createSession(pathId: string, lesson?: LearningLesson): QuizSessionState {
+function uniqueQuestions(items: Question[]) {
+  const seen = new Set<string>();
+  return items.filter((question) => {
+    if (seen.has(question.id)) return false;
+    seen.add(question.id);
+    return true;
+  });
+}
+
+function questionsForPractice(pathId: string, lesson?: LearningLesson, progress: ProgressState = defaultProgress) {
   const path = learningPaths.find((item) => item.id === pathId) ?? learningPaths[0];
   const pathQuestions = questions.filter((question) => question.learningPath === path.name);
   const explicitLessonQuestions = lesson?.relatedQuestionIds?.length
@@ -132,7 +187,33 @@ function createSession(pathId: string, lesson?: LearningLesson): QuizSessionStat
         return haystack.includes(lesson.relatedTopic.toLowerCase()) || question.lessonId === lesson.id || question.chapterId === lesson.id || question.topicId === lesson.slug;
       })
     : [];
-  const questionIds = (explicitLessonQuestions.length ? explicitLessonQuestions : lessonQuestions.length ? lessonQuestions : pathQuestions.length ? pathQuestions : questions).slice(0, 5).map((question) => question.id);
+  const candidates = uniqueQuestions([...explicitLessonQuestions, ...lessonQuestions, ...pathQuestions]);
+  const attemptCounts = progress.answers.reduce<Record<string, number>>((counts, answer) => {
+    counts[answer.questionId] = (counts[answer.questionId] ?? 0) + 1;
+    return counts;
+  }, {});
+  const reviewIds = new Set(progress.reviewQueue.map((item) => item.questionId));
+
+  return candidates
+    .map((question, index) => {
+      const attempts = attemptCounts[question.id] ?? 0;
+      const isCompleted = progress.completedQuestionIds.includes(question.id);
+      const isReview = reviewIds.has(question.id);
+
+      return {
+        question,
+        index,
+        score: attempts * 10 + (isCompleted ? 5 : 0) - (isReview ? 4 : 0),
+      };
+    })
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .slice(0, 5)
+    .map((item) => item.question);
+}
+
+function createSession(pathId: string, lesson?: LearningLesson, progress: ProgressState = defaultProgress): QuizSessionState {
+  const path = learningPaths.find((item) => item.id === pathId) ?? learningPaths[0];
+  const questionIds = questionsForPractice(path.id, lesson, progress).map((question) => question.id);
 
   return {
     pathId: path.id,
@@ -150,7 +231,7 @@ function createSessionFromStart(initialQuizStart?: InitialQuizStart) {
   if (!initialQuizStart) return null;
   const pathId = initialQuizStart.pathId ?? defaultProgress.activePathId ?? learningPaths[0].id;
   const lesson = initialQuizStart.lessonId ? lessonsForPath(pathId).find((item) => item.id === initialQuizStart.lessonId) : undefined;
-  const session = createSession(pathId, lesson);
+  const session = createSession(pathId, lesson, defaultProgress);
   const currentIndex = Math.max(0, Math.min(session.questionIds.length - 1, initialQuizStart.currentIndex ?? 0));
   const question = getQuestion(session.questionIds[currentIndex]);
   const submittedAnswer = initialQuizStart.submitted && initialQuizStart.choiceId && question
@@ -227,10 +308,11 @@ export function SkillQuestApp({
 
   const activePath = learningPaths.find((path) => path.id === (session?.pathId ?? progress.activePathId)) ?? learningPaths[0];
   const dueReview = progress.reviewQueue.length;
+  const currentStreak = learningStreak(progress);
 
   const startQuiz = useCallback((pathId = activePath.id, lessonId?: string) => {
     const lesson = lessonId ? lessonsForPath(pathId).find((item) => item.id === lessonId) : undefined;
-    const newSession = createSession(pathId, lesson);
+    const newSession = createSession(pathId, lesson, progress);
     const nextProgress = { ...progress, activePathId: pathId };
     setSelectedChoice("");
     setShowHint(false);
@@ -333,7 +415,7 @@ export function SkillQuestApp({
   }, []);
 
   if (initialView === "learn") {
-    return <LearningLibraryView progress={progress} settings={settings} />;
+    return <LearningLibraryView progress={progress} />;
   }
 
   if (initialView === "learn-path") {
@@ -396,6 +478,7 @@ export function SkillQuestApp({
       activePath={activePath}
       todayAnswered={todayAnswered}
       dueReview={dueReview}
+      currentStreak={currentStreak}
       hasSession={Boolean(session && !session.completed)}
       heroQuote={heroQuote}
       onStartQuiz={startQuiz}
@@ -409,6 +492,7 @@ function HomeView({
   activePath,
   todayAnswered,
   dueReview,
+  currentStreak,
   hasSession,
   heroQuote,
   onStartQuiz,
@@ -418,6 +502,7 @@ function HomeView({
   activePath: LearningPath;
   todayAnswered: number;
   dueReview: number;
+  currentStreak: number;
   hasSession: boolean;
   heroQuote: MotivationalQuote;
   onStartQuiz: (pathId?: string) => void;
@@ -425,7 +510,7 @@ function HomeView({
   const mode = settings.languageMode;
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-      <div className="relative mb-7 min-h-[21rem] overflow-hidden rounded-[2.25rem] px-4 py-12 text-center sm:min-h-[24rem] sm:px-8 sm:py-16 lg:min-h-[28rem] lg:py-20">
+      <div className="relative mb-7 min-h-[19rem] overflow-hidden rounded-[2.25rem] px-4 py-10 text-center sm:min-h-[24rem] sm:px-8 sm:py-16 lg:min-h-[28rem] lg:py-20">
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-62 saturate-[1.08] contrast-[1.05]"
           src="/media/home-hero-motion.mp4"
@@ -440,12 +525,12 @@ function HomeView({
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(20,20,20,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(20,20,20,0.03)_1px,transparent_1px)] bg-[size:56px_56px] opacity-45" />
         <div className="pointer-events-none absolute left-1/2 top-4 h-36 w-36 -translate-x-1/2 rounded-full gradient-iridescent opacity-45 blur-3xl" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto h-px max-w-4xl bg-gradient-to-r from-transparent via-black/20 to-transparent" />
-        <div className="relative mx-auto grid min-h-[15rem] max-w-5xl content-center sm:min-h-[17rem] lg:min-h-[20rem]">
+        <div className="relative mx-auto grid min-h-[13rem] max-w-5xl content-center sm:min-h-[17rem] lg:min-h-[20rem]">
           <p className="font-display text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--text-secondary)] sm:text-sm">Class Room</p>
-          <h1 className="mx-auto mt-6 max-w-5xl text-balance font-display text-4xl font-semibold leading-[1.6] tracking-normal text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
+          <h1 className="mx-auto mt-5 max-w-5xl text-balance font-display text-4xl font-semibold leading-[1.45] tracking-normal text-[var(--text-primary)] sm:text-6xl sm:leading-[1.48] lg:text-7xl">
             {heroQuote.english}
           </h1>
-          <p className="font-subtitle mx-auto mt-6 max-w-2xl text-pretty text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
+          <p className="font-subtitle mx-auto mt-5 max-w-2xl text-pretty text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
             {heroQuote.thai}
           </p>
         </div>
@@ -522,7 +607,7 @@ function HomeView({
             <ProgressSummaryRow icon="statusXp" label={textByMode(mode, "Current XP", "XP ปัจจุบัน")} value={String(progress.totalXP)} />
             <ProgressSummaryRow icon="statusMastered" label={textByMode(mode, "Current skill level", "ระดับทักษะปัจจุบัน")} value={activePath.currentLevel} />
             <ProgressSummaryRow icon="statusGoal" label={textByMode(mode, "Daily goal", "เป้าหมายวันนี้")} value={`${todayAnswered}/${progress.dailyGoal}`} />
-            <ProgressSummaryRow icon="statusStreak" label={textByMode(mode, "Learning streak", "เรียนต่อเนื่อง")} value={`${progress.currentStreak} วัน`} />
+            <ProgressSummaryRow icon="statusStreak" label={textByMode(mode, "Learning streak", "เรียนต่อเนื่อง")} value={`${currentStreak} วัน`} />
             <ProgressSummaryRow icon="statusReviewDue" label={textByMode(mode, "Due for review", "รอทบทวน")} value={String(dueReview)} />
           </div>
           <Link href="/progress" className="button-primary mt-6 w-full">
@@ -547,8 +632,21 @@ function HomeView({
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {learningPaths.map((path) => {
             const pathProgress = progressForPath(path, progress);
+            const pathLessons = lessonsForPath(path.id);
+            const completedLessons = pathLessons.filter((lesson) => progress.lessons?.[lesson.id]?.completed).length;
+            const inProgressLesson = pathLessons.find((lesson) => {
+              const state = progress.lessons?.[lesson.id];
+              return state && !state.completed && state.readingProgress > 0;
+            });
+            const nextLesson = inProgressLesson ?? pathLessons[completedLessons] ?? pathLessons[0];
+            const lessonHref = nextLesson ? `/learn/${path.id}/${nextLesson.slug}` : `/learn/${path.id}`;
             return (
-              <article key={path.id} className="grid min-h-28 grid-cols-[auto_1fr] gap-3 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-white)] p-4 shadow-[0_8px_22px_rgba(23,23,23,0.045)]">
+              <Link
+                key={path.id}
+                href={lessonHref}
+                aria-label={`Open ${path.name} lesson`}
+                className="group grid min-h-28 grid-cols-[auto_1fr] gap-3 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-white)] p-4 shadow-[0_8px_22px_rgba(23,23,23,0.045)] transition duration-300 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[0_14px_30px_rgba(23,23,23,0.075)] focus:outline-none focus:ring-2 focus:ring-black/70 focus:ring-offset-2 focus:ring-offset-white"
+              >
                 <span className="grid h-11 w-11 place-items-center">
                   <Soft3DIcon name={learningPathIconMap[path.name]} size="sm" decorative shadow={false} active />
                 </span>
@@ -558,6 +656,10 @@ function HomeView({
                     <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-extrabold text-[var(--text-primary)]">{path.currentLevel}</span>
                   </div>
                   <p className="font-subtitle mt-2 line-clamp-2 text-xs leading-5 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p>
+                  <div className="mt-3 flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] transition group-hover:text-[var(--text-primary)]">
+                    <span>{nextLesson ? "Start learning" : "Open course"}</span>
+                    <Soft3DIcon name="actionNext" size="xs" decorative shadow={false} className="transition duration-300 group-hover:translate-x-0.5" />
+                  </div>
                   <div className="mt-3">
                     <ProgressBar value={pathProgress} tone={progressToneForPath(path.id)} />
                     <div className="mt-1 flex justify-between text-[11px] font-semibold text-[var(--text-muted)]">
@@ -566,7 +668,7 @@ function HomeView({
                     </div>
                   </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>
@@ -575,30 +677,30 @@ function HomeView({
   );
 }
 
-function LearningLibraryView({ progress, settings }: { progress: ProgressState; settings: UserSettings }) {
-  const mode = settings.languageMode;
+function LearningLibraryView({ progress }: { progress: ProgressState }) {
   return (
     <PageShell
       eyebrow="Learn Mode"
       title="Build understanding before the quiz."
       summary="A calm reading library for concepts, examples, vocabulary, notes, and chapter progress."
     >
-      <div className="mb-5 overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[#fbfbf8] p-5 shadow-editorial sm:p-6">
-        <div className="grid gap-5 lg:grid-cols-[1fr_0.72fr] lg:items-end">
+      <div className="mb-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[#fbfbf8] p-4 shadow-editorial sm:mb-5 sm:p-6">
+        <div className="grid gap-4 lg:grid-cols-[1fr_0.72fr] lg:items-end">
           <div>
-            <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--text-muted)]">Reading Library</p>
-            <h2 className="mt-3 max-w-2xl text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
-              Choose a path, read the chapter, collect useful words.
+            <p className="font-display text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--text-muted)]">Course Library</p>
+            <h2 className="mt-3 max-w-2xl text-balance font-display text-2xl font-semibold leading-[1.18] tracking-tight text-[var(--text-primary)] sm:text-4xl">
+              Pick one course. Continue from the next useful lesson.
             </h2>
           </div>
-          <div className="font-subtitle grid gap-2 rounded-[1.75rem] border border-[var(--border)] bg-white p-4 text-sm leading-6 text-[var(--text-secondary)]">
-            <span><strong className="text-[var(--text-primary)]">Learn</strong> is for reading and sense-making.</span>
-            <span><strong className="text-[var(--text-primary)]">Practice</strong> is where you answer under focus.</span>
+          <div className="grid grid-cols-3 gap-2 rounded-[1.75rem] border border-[var(--border)] bg-white p-2 text-center">
+            <LibraryModePill label="Read" caption="Concept" />
+            <LibraryModePill label="Try" caption="Example" />
+            <LibraryModePill label="Apply" caption="Practice" />
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {learningPaths.map((path) => {
           const pathLessons = lessonsForPath(path.id);
           const completed = pathLessons.filter((lesson) => progress.lessons?.[lesson.id]?.completed).length;
@@ -608,45 +710,47 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
           });
           const currentLesson = inProgress ?? pathLessons[completed] ?? pathLessons[0];
           const percent = Math.round((completed / Math.max(pathLessons.length, 1)) * 100);
-          const category = ["designops", "ux-research", "ux-research-method", "agile-ux-ui", "design-system", "cx-communication"].includes(path.id) ? "Career & Design" : path.id === "stock-investing" || path.id === "thai-tax-personal-finance" ? "Money & Life" : null;
+          const category = categoryForPath(path.id);
           const safetyLabel = path.id === "stock-investing" ? "Not Financial Advice" : path.id === "thai-tax-personal-finance" ? "Not an Official Tax Calculation" : null;
 
           return (
-            <article key={path.id} className="group relative min-h-[24rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[#fffefb] p-5 shadow-[0_14px_36px_rgba(23,23,23,0.055)] transition hover:-translate-y-1 hover:border-[var(--border-strong)] sm:p-6">
-              <div className="absolute inset-y-6 left-0 w-1.5 rounded-r-full bg-[linear-gradient(180deg,#cbd5dc,#f1eee5)]" />
-              <div className={`absolute right-[-3rem] top-[-3rem] h-40 w-40 rounded-full bg-gradient-to-br ${path.accent} opacity-25 transition group-hover:scale-105`} />
-              <div className="relative grid min-h-[21rem] content-between">
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap gap-2">
-                        <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">Read Track · {path.currentLevel}</p>
-                        {category ? <Badge>{category}</Badge> : null}
-                        {safetyLabel ? <Badge icon="statusGoal">{safetyLabel}</Badge> : null}
-                      </div>
-                      <h2 className="mt-3 max-w-[13rem] text-balance font-display text-3xl font-extrabold leading-none tracking-tight text-[var(--text-primary)]">{path.name}</h2>
+            <article key={path.id} className="group relative overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[#fffefb] p-4 shadow-[0_10px_26px_rgba(23,23,23,0.04)] transition duration-300 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[0_16px_34px_rgba(23,23,23,0.07)] sm:p-5">
+              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${path.accent} opacity-70`} />
+              <div className={`absolute right-[-3.25rem] top-[-3.25rem] h-28 w-28 rounded-full bg-gradient-to-br ${path.accent} opacity-16 transition duration-500 group-hover:scale-105`} />
+              <div className="relative grid min-h-[13.25rem] content-between gap-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{category}</Badge>
+                      {safetyLabel ? <Badge icon="statusGoal">{safetyLabel}</Badge> : null}
                     </div>
-                    <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" alt={path.name} priority active />
+                    <h2 className="mt-3 max-w-[13rem] text-balance font-display text-2xl font-semibold leading-[1.16] tracking-normal text-[var(--text-primary)]">{path.name}</h2>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="rounded-full border border-[var(--border)] bg-white/74 px-3 py-1.5 text-xs font-bold text-[var(--text-primary)]">{path.currentLevel}</span>
+                      <span className="rounded-full border border-[var(--border)] bg-white/74 px-3 py-1.5 text-xs font-bold text-[var(--text-secondary)]">{pathLessons.length} lessons</span>
+                    </div>
                   </div>
-                  <p className="font-subtitle mt-5 text-sm leading-7 text-[var(--text-secondary)]">{textByMode(mode, path.description, path.descriptionTh)}</p>
-                  <div className="mt-5 grid gap-2 rounded-2xl border border-[var(--border)] bg-white/70 p-3 text-xs font-semibold text-[var(--text-secondary)]">
-                    <span>{pathLessons.length} reading chapters</span>
-                    <span>{completed} chapters completed</span>
-                    <span className="line-clamp-1">Next read: {currentLesson?.title ?? "Overview"}</span>
-                  </div>
+                  <Soft3DIcon name={learningPathIconMap[path.name]} size="md" alt={path.name} priority active />
                 </div>
-                <div className="mt-6">
-                  <ProgressBar value={percent} tone={progressToneForPath(path.id)} />
+
+                <div>
+                  <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/74 p-3">
+                    <p className="font-display text-[10px] font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Next</p>
+                    <p className="font-subtitle mt-1 line-clamp-1 text-sm font-semibold leading-6 text-[var(--text-secondary)]">{currentLesson?.titleEn ?? currentLesson?.title ?? "Overview"}</p>
+                  </div>
+                  <div className="mt-4">
+                    <ProgressBar value={percent} tone={progressToneForPath(path.id)} />
+                  </div>
                   <div className="mt-2 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
-                    <span>Reading progress</span>
+                    <span>{completed}/{pathLessons.length} done</span>
                     <span>{percent}%</span>
                   </div>
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <div className="mt-3 flex gap-2">
                     <Link href={`/learn/${path.id}/${currentLesson?.slug ?? ""}`} className="button-primary flex-1">
-                      Open Reader
+                      Continue
                     </Link>
                     <Link href={`/learn/${path.id}`} className="button-ghost flex-1">
-                      Chapter Map
+                      Course Map
                     </Link>
                   </div>
                 </div>
@@ -656,6 +760,24 @@ function LearningLibraryView({ progress, settings }: { progress: ProgressState; 
         })}
       </div>
     </PageShell>
+  );
+}
+
+function LibraryModePill({ label, caption }: { label: string; caption: string }) {
+  return (
+    <span className="rounded-full bg-[var(--surface)] px-2 py-2">
+      <span className="block font-display text-sm font-semibold text-[var(--text-primary)]">{label}</span>
+      <span className="font-subtitle block text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{caption}</span>
+    </span>
+  );
+}
+
+function StudyStep({ label, description }: { label: string; description: string }) {
+  return (
+    <span className="rounded-2xl border border-[var(--border)] bg-white/72 px-2.5 py-2.5 text-center sm:px-3 sm:py-3 sm:text-left">
+      <span className="block font-display text-sm font-semibold leading-5 text-[var(--text-primary)]">{label}</span>
+      <span className="font-subtitle mt-0.5 block text-[11px] font-semibold leading-4 text-[var(--text-secondary)] sm:text-xs">{description}</span>
+    </span>
   );
 }
 
@@ -669,6 +791,13 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
   const pathLessons = lessonsForPath(path.id);
   const completed = pathLessons.filter((lesson) => progress.lessons?.[lesson.id]?.completed).length;
   const modules = modulesForPath(path.id);
+  const inProgress = pathLessons.find((lesson) => {
+    const state = progress.lessons?.[lesson.id];
+    return state && !state.completed && state.readingProgress > 0;
+  });
+  const nextLesson = inProgress ?? pathLessons[completed] ?? pathLessons[0];
+  const pathPracticeCount = questionsForPractice(path.id).length;
+  const pathPercent = Math.round((completed / Math.max(pathLessons.length, 1)) * 100);
 
   return (
     <PageShell
@@ -677,15 +806,38 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
       summary={path.description}
     >
       <div className="mb-5 rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="font-subtitle text-sm font-semibold text-[var(--text-secondary)]">{completed}/{pathLessons.length} chapters completed</p>
-            <h2 className="mt-2 font-display text-2xl font-extrabold text-[var(--text-primary)]">{path.currentLevel} reading track</h2>
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="flex min-w-0 gap-4">
+            <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" decorative active />
+            <div className="min-w-0">
+              <p className="font-subtitle text-sm font-semibold text-[var(--text-secondary)]">{completed}/{pathLessons.length} lessons completed</p>
+              <h2 className="mt-2 text-balance font-display text-2xl font-semibold leading-tight text-[var(--text-primary)]">
+                {nextLesson ? `Continue: ${nextLesson.titleEn ?? nextLesson.title}` : `${path.currentLevel} reading track`}
+              </h2>
+              <p className="font-subtitle mt-2 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">
+                Read the lesson first, then practice only when a real question set is available.
+              </p>
+            </div>
           </div>
-          <Soft3DIcon name={learningPathIconMap[path.name]} size="lg" decorative active />
+          <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
+            {nextLesson ? (
+              <Link href={`/learn/${path.id}/${nextLesson.slug}`} className="button-primary justify-center">
+                Continue Lesson
+              </Link>
+            ) : null}
+            {pathPracticeCount > 0 ? (
+              <Link href={`/quiz?start=1&path=${path.id}`} className="button-ghost justify-center">
+                Start Practice
+              </Link>
+            ) : null}
+          </div>
         </div>
         <div className="mt-4">
-          <ProgressBar value={Math.round((completed / Math.max(pathLessons.length, 1)) * 100)} tone={progressToneForPath(path.id)} />
+          <ProgressBar value={pathPercent} tone={progressToneForPath(path.id)} />
+          <div className="mt-2 flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
+            <span>Course progress</span>
+            <span>{pathPercent}%</span>
+          </div>
         </div>
       </div>
 
@@ -699,33 +851,32 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
                     <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Module {String(module.number).padStart(2, "0")}</p>
-                    <h2 className="mt-2 text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">{module.titleEn}</h2>
-                    <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{module.descriptionTh}</p>
+                    <h2 className="mt-2 text-balance font-display text-2xl font-semibold leading-tight tracking-normal text-[var(--text-primary)] sm:text-3xl">{module.titleEn}</h2>
+                    <p className="font-subtitle mt-2 max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">{module.descriptionTh}</p>
                   </div>
                   <Badge icon="statusCompleted">{moduleCompleted}/{moduleLessons.length} completed</Badge>
                 </div>
                 <div className="mt-5 grid gap-3">
                   {moduleLessons.map((lesson) => {
                     const state = progress.lessons?.[lesson.id];
-                    const status = state?.completed ? "completed" : state?.reviewFlag ? "review-recommended" : state?.readingProgress ? "in-progress" : "ready-for-practice";
+                    const lessonPracticeCount = questionsForPractice(path.id, lesson).length;
+                    const status = state?.completed ? "Done" : state?.reviewFlag ? "Review" : state?.readingProgress ? "Continue" : "Start";
                     return (
                       <Link
                         key={lesson.id}
                         href={`/learn/${path.id}/${lesson.slug}`}
-                        className="group flex flex-col gap-3 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:bg-white sm:flex-row sm:items-center sm:justify-between"
+                        className="group grid gap-3 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"
                       >
+                        <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-sm font-bold text-[var(--text-primary)] shadow-[inset_0_0_0_1px_var(--border)]">{lesson.number}</span>
                         <span className="min-w-0">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <Badge>Lesson {lesson.number}</Badge>
-                            <Badge>{lesson.professionalLevel ?? lesson.difficulty}</Badge>
-                            <Badge>{lesson.estimatedMinutes ?? lesson.readingMinutes} min</Badge>
-                            <Badge icon="navigationPractice">Practice ready</Badge>
-                            {state?.bookmarked ? <Badge icon="actionBookmark">Bookmarked</Badge> : null}
-                          </span>
-                          <span className="mt-3 block font-display text-xl font-extrabold text-[var(--text-primary)]">{lesson.titleEn ?? lesson.title}</span>
-                          <span className="font-subtitle mt-1 block text-sm leading-7 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.titleTh}</span>
+                          <span className="block truncate font-display text-lg font-semibold tracking-normal text-[var(--text-primary)]">{lesson.titleEn ?? lesson.title}</span>
+                          <span className="font-subtitle mt-1 block line-clamp-1 text-sm leading-6 text-[var(--text-secondary)]">{lesson.summaryTh ?? lesson.titleTh}</span>
                         </span>
-                        <span className="shrink-0 text-sm font-extrabold text-[var(--text-primary)]">{status}</span>
+                        <span className="flex flex-wrap items-center gap-2 sm:justify-end">
+                          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[var(--text-secondary)] shadow-[inset_0_0_0_1px_var(--border)]">{lesson.estimatedMinutes ?? lesson.readingMinutes} min</span>
+                          {lessonPracticeCount > 0 ? <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[var(--text-secondary)] shadow-[inset_0_0_0_1px_var(--border)]">{lessonPracticeCount} Q</span> : null}
+                          <span className="rounded-full bg-[#171717] px-3 py-1.5 text-xs font-bold text-white">{status}</span>
+                        </span>
                       </Link>
                     );
                   })}
@@ -738,7 +889,8 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
         <div className="grid gap-4">
           {pathLessons.map((lesson) => {
             const state = progress.lessons?.[lesson.id];
-            const status = state?.completed ? "completed" : state?.reviewFlag ? "review-recommended" : state?.readingProgress ? "in-progress" : "not-started";
+            const lessonPracticeCount = questionsForPractice(path.id, lesson).length;
+            const status = state?.completed ? "Done" : state?.reviewFlag ? "Review" : state?.readingProgress ? "Continue" : "Start";
             return (
               <article key={lesson.id} className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -748,7 +900,7 @@ function LearningPathDetailView({ progress, learningPathSlug }: { progress: Prog
                       <Badge>{lesson.difficulty}</Badge>
                       <Badge>{lesson.readingMinutes} min read</Badge>
                       <Badge>{status}</Badge>
-                      {lesson.hasPractice ? <Badge icon="navigationPractice">Practice ready</Badge> : null}
+                      {lessonPracticeCount > 0 ? <Badge icon="navigationPractice">{lessonPracticeCount} questions</Badge> : null}
                     </div>
                     <h2 className="mt-4 text-balance font-display text-2xl font-extrabold text-[var(--text-primary)]">{lesson.title}</h2>
                     <p className="font-subtitle mt-2 text-sm leading-7 text-[var(--text-secondary)]">{lesson.titleTh}</p>
@@ -814,14 +966,18 @@ function LessonReadingView({
   const miniCorrect = currentLesson.miniCheck ? miniChoice === currentLesson.miniCheck.correctChoiceId : false;
   const savedNote = state?.note ?? progress.savedNotes?.find((item) => item.lessonId === currentLesson.id)?.text ?? "";
   const readingSections = currentLesson.sections ?? [];
+  const visualCount = currentLesson.visualMedia?.length ?? 0;
+  const afterVisualStep = (currentLesson.sections?.length ?? 1) + 2 + visualCount;
   const contents = [
     { id: "lesson-brief", label: "Lesson Brief" },
     { id: "learning-objectives", label: "Learning Objectives" },
     ...readingSections.map((item) => ({ id: item.id, label: item.titleEn })),
     ...(currentLesson.visualMedia?.length ? [{ id: "visual-model", label: "Visual Model" }] : []),
     { id: "workplace-example", label: "Workplace Example" },
-    { id: "mini-check", label: "Mini Check" },
+    ...(currentLesson.references?.length ? [{ id: "lesson-references", label: "References" }] : []),
+    ...(currentLesson.miniCheck ? [{ id: "mini-check", label: "Mini Check" }] : []),
   ];
+  const lessonPracticeCount = questionsForPractice(currentPath.id, currentLesson).length;
 
   function markComplete() {
     onUpdateLessonProgress(currentLesson.id, {
@@ -873,10 +1029,51 @@ function LessonReadingView({
             <Badge>{lesson.professionalLevel ?? lesson.difficulty}</Badge>
             <Badge>{lesson.estimatedMinutes ?? lesson.readingMinutes} min read</Badge>
             <Badge>{state?.completed ? "completed" : state?.readingProgress ? "in-progress" : "not-started"}</Badge>
-            <Badge icon="navigationPractice">Practice ready</Badge>
+            {lessonPracticeCount > 0 ? <Badge icon="navigationPractice">{lessonPracticeCount} questions</Badge> : null}
             {state?.bookmarked ? <Badge icon="actionBookmark">Bookmarked</Badge> : null}
             {currentLesson.contentVerification ? <VerificationBadges verification={currentLesson.contentVerification} /> : null}
           </div>
+
+          <section className="mt-6 rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(135deg,#ffffff_0%,#f6fbfc_55%,#f5f2ff_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] sm:p-5">
+            <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+              <div>
+                <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Study Plan</p>
+                <h2 className="mt-2 font-display text-xl font-semibold leading-snug text-[var(--text-primary)]">
+                  {state?.completed
+                    ? adjacent.next
+                      ? `Move to ${adjacent.next.titleEn ?? adjacent.next.title}`
+                      : lessonPracticeCount > 0
+                        ? "Finish with a short practice round."
+                        : "This course section is complete."
+                    : "Read this lesson, then mark it as read."}
+                </h2>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row md:flex-col">
+                {!state?.completed ? (
+                  <button type="button" className="button-primary justify-center" onClick={markComplete}>
+                    Mark as Read
+                  </button>
+                ) : adjacent.next ? (
+                  <Link href={`/learn/${path.id}/${adjacent.next.slug}`} className="button-primary justify-center">
+                    Next Lesson
+                  </Link>
+                ) : lessonPracticeCount > 0 ? (
+                  <a href={`/quiz?start=1&path=${path.id}&lesson=${lesson.id}`} className="button-primary justify-center" onClick={() => onStartQuiz(path.id, lesson.id)}>
+                    Start Practice
+                  </a>
+                ) : (
+                  <Link href={`/learn/${path.id}`} className="button-primary justify-center">
+                    Course Map
+                  </Link>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2 md:col-span-2">
+                <StudyStep label="Read" description="Core idea" />
+                <StudyStep label="See" description="Visual" />
+                <StudyStep label="Apply" description="Check" />
+              </div>
+            </div>
+          </section>
 
           <section id="lesson-brief" className="mt-7 scroll-mt-28 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
             <p className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-muted)]">Lesson Brief</p>
@@ -891,10 +1088,12 @@ function LessonReadingView({
           {currentLesson.contentVerification ? <VerificationNotice verification={currentLesson.contentVerification} /> : null}
 
           <details className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 md:hidden">
-            <summary className="cursor-pointer font-display text-sm font-extrabold text-[var(--text-primary)]">Contents</summary>
+            <summary className="flex min-h-11 cursor-pointer items-center font-display text-sm font-semibold text-[var(--text-primary)]">
+              Contents
+            </summary>
             <div className="mt-3 grid gap-2 text-sm text-[var(--text-secondary)]">
               {contents.map((item, index) => (
-                <a key={item.id} href={`#${item.id}`} className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2">
+                <a key={item.id} href={`#${item.id}`} className="flex min-h-11 items-center gap-3 rounded-2xl bg-white px-3 py-2">
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-bold text-[var(--text-primary)]">{index + 1}</span>
                   <span>{item.label}</span>
                 </a>
@@ -910,14 +1109,8 @@ function LessonReadingView({
             </ul>
           </LessonBlock>
 
-          <LessonBlock title="Read In This Order" step={2}>
-            <p className="font-subtitle text-sm leading-7 text-[var(--text-secondary)]">
-              อ่านทีละส่วนตามลำดับนี้ก่อน แล้วค่อยดูภาพประกอบเพื่อจับ mental model จากนั้นปิดท้ายด้วยตัวอย่างงานจริงและ mini check
-            </p>
-          </LessonBlock>
-
           {currentLesson.sections?.map((item, index) => (
-            <LessonBlock key={item.id} id={item.id} title={item.titleEn} step={index + 3}>
+            <LessonBlock key={item.id} id={item.id} title={item.titleEn} step={index + 2}>
               {item.bodyTh.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               {item.bullets?.length ? (
                 <ul className="grid gap-2">
@@ -926,20 +1119,20 @@ function LessonReadingView({
               ) : null}
             </LessonBlock>
           )) ?? (
-            <LessonBlock title="Simple Explanation" step={3}>
+            <LessonBlock title="Simple Explanation" step={2}>
               {showEnglish(mode) ? <p>{lesson.explanation}</p> : null}
               {showThai(mode) ? <p>{lesson.explanationTh}</p> : null}
             </LessonBlock>
           )}
 
           {currentLesson.visualMedia?.map((media, index) => (
-            <LessonBlock key={media.titleEn} id={index === 0 ? "visual-model" : undefined} title={media.titleEn} step={(currentLesson.sections?.length ?? 1) + 3 + index}>
+            <LessonBlock key={media.titleEn} id={index === 0 ? "visual-model" : undefined} title={media.titleEn} step={(currentLesson.sections?.length ?? 1) + 2 + index}>
               <p className="font-subtitle">{media.descriptionTh}</p>
               {media.type === "figma-grid-cheat-sheet" ? <FigmaGridCheatSheet /> : <VisualMediaPreview media={media} />}
             </LessonBlock>
           ))}
 
-          <LessonBlock id="workplace-example" title="Workplace Example" step={(currentLesson.sections?.length ?? 1) + 4}>
+          <LessonBlock id="workplace-example" title="Workplace Example" step={afterVisualStep}>
             {currentLesson.practicalExamples?.length ? (
               <div className="grid gap-3">
                 {currentLesson.practicalExamples.map((example) => (
@@ -1006,8 +1199,10 @@ function LessonReadingView({
             </div>
           </LessonBlock>
 
+          {lesson.references?.length ? <LessonReferences references={lesson.references} /> : null}
+
           {lesson.miniCheck ? (
-            <LessonBlock id="mini-check" title="Mini Knowledge Check" step={(currentLesson.sections?.length ?? 1) + 8}>
+            <LessonBlock id="mini-check" title="Mini Knowledge Check" step={afterVisualStep + 5}>
               <p className="font-semibold text-[var(--text-primary)]">{lesson.miniCheck.question}</p>
               {showThai(mode) ? <p>{lesson.miniCheck.questionTh}</p> : null}
               <div className="mt-4 grid gap-3">
@@ -1050,11 +1245,23 @@ function LessonReadingView({
               placeholder="Write a short note in Thai or English..."
             />
             <div className="mt-3 flex flex-wrap gap-3">
-              <button type="button" className="button-primary" onClick={() => onSaveNote(lesson.id, noteDraft || savedNote)}>
-                Save Note
+              <button
+                type="button"
+                className="grid min-h-12 min-w-12 place-items-center rounded-full border border-[var(--border)] bg-[#171717] text-white shadow-[0_8px_20px_rgba(23,23,23,0.12)] transition hover:-translate-y-0.5 hover:bg-[#303030] focus:outline-none focus:ring-2 focus:ring-black/60"
+                onClick={() => onSaveNote(lesson.id, noteDraft || savedNote)}
+                aria-label="Save note"
+                title="Save note"
+              >
+                <Soft3DIcon name="actionNote" size="sm" decorative shadow={false} active />
               </button>
-              <button type="button" className="button-ghost" onClick={saveAllVocabulary}>
-                Save Vocabulary
+              <button
+                type="button"
+                className="grid min-h-12 min-w-12 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--text-primary)] shadow-[0_8px_20px_rgba(23,23,23,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-black/10"
+                onClick={saveAllVocabulary}
+                aria-label="Save vocabulary"
+                title="Save vocabulary"
+              >
+                <Soft3DIcon name="actionSave" size="sm" decorative shadow={false} active />
               </button>
               <button type="button" className="button-ghost" onClick={addToReview}>
                 Add to Review
@@ -1069,10 +1276,11 @@ function LessonReadingView({
             </button>
             {adjacent.previous ? <Link href={`/learn/${path.id}/${adjacent.previous.slug}`} className="button-ghost">Previous Lesson</Link> : null}
             {adjacent.next ? <Link href={`/learn/${path.id}/${adjacent.next.slug}`} className="button-ghost">Next Lesson</Link> : null}
-            <button type="button" className="button-ghost" onClick={markComplete}>Mark as Read</button>
-            <a href={`/quiz?start=1&path=${path.id}&lesson=${lesson.id}`} className="button-primary" onClick={() => onStartQuiz(path.id, lesson.id)}>
-              Start Lesson Practice
-            </a>
+            {lessonPracticeCount > 0 ? (
+              <a href={`/quiz?start=1&path=${path.id}&lesson=${lesson.id}`} className="button-primary" onClick={() => onStartQuiz(path.id, lesson.id)}>
+                Start Lesson Practice
+              </a>
+            ) : null}
           </div>
         </article>
 
@@ -1086,6 +1294,22 @@ function LessonReadingView({
             <p>Bookmarked: {state?.bookmarked ? "Yes" : "No"}</p>
             <p>Review flag: {state?.reviewFlag ? "Added" : "Not added"}</p>
             <p>Saved words: {state?.savedVocabularyIds?.length ?? 0}</p>
+          </div>
+          <div className="mt-5 grid gap-2 border-t border-[var(--border)] pt-5">
+            {!state?.completed ? (
+              <button type="button" className="button-primary w-full" onClick={markComplete}>
+                Mark as Read
+              </button>
+            ) : adjacent.next ? (
+              <Link href={`/learn/${path.id}/${adjacent.next.slug}`} className="button-primary w-full">
+                Next Lesson
+              </Link>
+            ) : null}
+            {lessonPracticeCount > 0 ? (
+              <a href={`/quiz?start=1&path=${path.id}&lesson=${lesson.id}`} className="button-ghost w-full" onClick={() => onStartQuiz(path.id, lesson.id)}>
+                Start Practice
+              </a>
+            ) : null}
           </div>
           {currentLesson.sections?.length ? (
             <div className="mt-6 hidden border-t border-[var(--border)] pt-5 xl:block">
@@ -1139,30 +1363,32 @@ function QuizView({
 }) {
   const mode = settings.languageMode;
   if (!session) {
+    const practiceReadyPaths = learningPaths.filter((path) => questionsForPractice(path.id).length > 0);
+
     return (
       <PageShell
         eyebrow="Practice Mode"
         title="Train one decision at a time."
         summary="A focused quiz space for answering, checking feedback, and sending weak spots to Review."
       >
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/72 p-4 text-[var(--text-primary)] shadow-[0_24px_70px_rgba(23,23,23,0.11),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl sm:p-6 lg:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,#d9f4ff_0%,rgba(217,244,255,0)_68%)] opacity-75 blur-2xl" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/72 p-4 text-[var(--text-primary)] shadow-editorial backdrop-blur-2xl sm:p-6 lg:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,#d9f4ff_0%,rgba(217,244,255,0)_68%)] opacity-75 blur-2xl" />
           <div className="pointer-events-none absolute bottom-[-9rem] left-10 h-64 w-64 rounded-full bg-[radial-gradient(circle,#e5dcff_0%,rgba(229,220,255,0)_70%)] opacity-55 blur-2xl" />
           <div className="pointer-events-none absolute left-[-7rem] top-1/3 h-52 w-52 rounded-full bg-[radial-gradient(circle,#ddffef_0%,rgba(221,255,239,0)_72%)] opacity-60 blur-2xl" />
-          <div className="relative mb-6 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="relative mb-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <p className="font-display text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--text-muted)]">Quiz Launchpad</p>
-              <h2 className="mt-3 max-w-2xl text-balance font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)] sm:text-4xl">
-                Pick a path and enter a short practice round.
+              <h2 className="mt-3 max-w-2xl text-balance font-display text-2xl font-semibold leading-[1.18] tracking-tight text-[var(--text-primary)] sm:text-4xl">
+                Choose a ready set. Practice with real questions.
               </h2>
             </div>
-            <div className="font-subtitle rounded-[1.75rem] border border-[var(--border)] bg-white/70 px-4 py-3 text-sm text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-              Submit once · Learn from feedback · Review mistakes
+            <div className="font-subtitle rounded-[1.5rem] border border-[var(--border)] bg-white/70 px-4 py-3 text-sm text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              {practiceReadyPaths.length} ready sets · Feedback after every answer
             </div>
           </div>
           <div className="relative grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {learningPaths.slice(0, 6).map((path) => (
-              <PracticeLaunchCard key={path.id} path={path} progress={progressForPath(path, progress)} settings={settings} onStartQuiz={onStartQuiz} />
+            {practiceReadyPaths.map((path) => (
+              <PracticeLaunchCard key={path.id} path={path} progress={progressForPath(path, progress)} reviewCount={reviewCountForPath(path, progress)} settings={settings} onStartQuiz={onStartQuiz} />
             ))}
           </div>
         </section>
@@ -1230,7 +1456,21 @@ function QuizView({
   }
 
   const currentQuestion = getQuestion(session.questionIds[session.currentIndex]);
-  if (!currentQuestion) return null;
+  if (!currentQuestion) {
+    return (
+      <PageShell
+        eyebrow="Practice Mode"
+        title="This course does not have quiz questions yet."
+        summary="The learning content is available now. Quiz questions will appear here after they are authored for this course."
+      >
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-editorial">
+          <Link href={`/learn/${session.pathId}`} className="button-primary w-fit">
+            Open Course
+          </Link>
+        </div>
+      </PageShell>
+    );
+  }
   const isIelts = currentQuestion.learningPath === "IELTS Preparation";
   const isExam = isIelts && settings.ieltsMode === "exam";
   const canShowThai = showThai(mode) && showTranslations && !isExam;
@@ -1445,6 +1685,17 @@ function ReviewView({
   onClearReviewItem: (questionId: string) => void;
 }) {
   const mode = settings.languageMode;
+  const [activeFilter, setActiveFilter] = useState<ReviewFilter>("due");
+  const [reviewNowIso, setReviewNowIso] = useState("");
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setReviewNowIso(new Date().toISOString());
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   const reviewQuestions = progress.reviewQueue
     .map((item) => ({ item, question: getQuestion(item.questionId) }))
     .filter((entry): entry is { item: NonNullable<typeof entry.item>; question: Question } => Boolean(entry.question));
@@ -1453,6 +1704,28 @@ function ReviewView({
       .filter((lesson) => progress.lessons?.[lesson.id]?.reviewFlag)
       .map((lesson) => ({ path, lesson })),
   );
+  const latestAnsweredAt = reviewQuestions.reduce((latest, entry) => (entry.item.lastAnsweredAt > latest ? entry.item.lastAnsweredAt : latest), "");
+  const filterOptions = [
+    { id: "due", label: "ครบกำหนด" },
+    { id: "recent", label: "เพิ่งตอบผิด" },
+    { id: "frequent", label: "ผิดบ่อย" },
+    { id: "ielts", label: "IELTS" },
+    { id: "ux-writing", label: "UX Writing" },
+  ] satisfies { id: ReviewFilter; label: string }[];
+  const filteredReviewQuestions = reviewQuestions.filter(({ item, question }) => {
+    if (activeFilter === "due") return !reviewNowIso || item.nextReviewAt <= reviewNowIso;
+    if (activeFilter === "recent") return item.lastAnsweredAt === latestAnsweredAt;
+    if (activeFilter === "frequent") return item.incorrectAttempts > 1;
+    if (activeFilter === "ielts") return question.learningPath === "IELTS Preparation";
+    return question.learningPath === "UX Writing";
+  });
+  const filteredReviewLessons = reviewLessons.filter(({ path }) => {
+    if (activeFilter === "ielts") return path.name === "IELTS Preparation";
+    if (activeFilter === "ux-writing") return path.name === "UX Writing";
+    if (activeFilter === "frequent") return false;
+    return true;
+  });
+  const hasFilteredItems = filteredReviewQuestions.length > 0 || filteredReviewLessons.length > 0;
 
   return (
     <section className="relative isolate mx-auto w-full max-w-[1600px] overflow-hidden bg-[#03130c] px-4 py-8 text-[#eaf7ea] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-6 sm:py-10 lg:rounded-[2.5rem] lg:px-8 lg:py-14">
@@ -1484,15 +1757,32 @@ function ReviewView({
             <aside className="rounded-3xl border border-white/18 bg-white/10 p-4 shadow-[0_20px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl">
               <p className="text-sm font-semibold text-[#f7fff8]">{textByMode(mode, "Filters", "ตัวกรอง")}</p>
               <div className="mt-3 flex flex-wrap gap-2 lg:flex-col">
-                {["ครบกำหนด", "เพิ่งตอบผิด", "ผิดบ่อย", "IELTS", "UX Writing"].map((filter) => (
-                  <span key={filter} className="rounded-full border border-white/16 bg-white/8 px-3 py-2 text-xs font-semibold text-[#c9d8cd]">
-                    {filter}
-                  </span>
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    aria-pressed={activeFilter === filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`rounded-full border px-3 py-2 text-left text-xs font-semibold transition duration-300 focus:outline-none focus:ring-2 focus:ring-[#b9f7cf] focus:ring-offset-2 focus:ring-offset-[#03130c] ${
+                      activeFilter === filter.id
+                        ? "border-[#b9f7cf]/55 bg-[#eaffd8] text-[#062315] shadow-[0_10px_28px_rgba(44,255,134,0.16)]"
+                        : "border-white/16 bg-white/8 text-[#c9d8cd] hover:border-white/28 hover:bg-white/14 hover:text-[#f7fff8]"
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
                 ))}
               </div>
             </aside>
             <div className="space-y-4">
-              {reviewLessons.map(({ path, lesson }) => (
+              {!hasFilteredItems ? (
+                <div className="rounded-[2rem] border border-white/18 bg-white/90 p-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+                  <Soft3DIcon name="statusCompleted" size="sm" decorative shadow={false} active className="mx-auto" />
+                  <h2 className="mt-3 font-display text-lg font-semibold text-[var(--text-primary)]">No items in this filter</h2>
+                  <p className="font-subtitle mt-2 text-sm leading-6 text-[var(--text-secondary)]">Try another filter or start a new practice round.</p>
+                </div>
+              ) : null}
+              {filteredReviewLessons.map(({ path, lesson }) => (
                 <article key={lesson.id} className="rounded-[2rem] border border-white/18 bg-white/90 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.2)] backdrop-blur-xl">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge>{path.name}</Badge>
@@ -1505,13 +1795,13 @@ function ReviewView({
                     <Link href={`/learn/${path.id}/${lesson.slug}`} className="button-primary">
                       Open Lesson
                     </Link>
-                    <button type="button" onPointerDown={() => onClearReviewItem(lesson.id)} onClick={() => onClearReviewItem(lesson.id)} className="button-ghost">
+                    <button type="button" onClick={() => onClearReviewItem(lesson.id)} className="button-ghost">
                       Mark Reviewed
                     </button>
                   </div>
                 </article>
               ))}
-              {reviewQuestions.map(({ item, question }) => (
+              {filteredReviewQuestions.map(({ item, question }) => (
                 <article key={question.id} className="rounded-[2rem] border border-white/18 bg-white/90 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.2)] backdrop-blur-xl">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge>{question.learningPath}</Badge>
@@ -1524,7 +1814,7 @@ function ReviewView({
                     <a href={`/quiz?start=1&path=${pathIdForQuestion(question)}`} onClick={() => onStartQuiz(pathIdForQuestion(question))} className="button-primary">
                       Practice Again
                     </a>
-                    <button type="button" onPointerDown={() => onClearReviewItem(question.id)} onClick={() => onClearReviewItem(question.id)} className="button-ghost">
+                    <button type="button" onClick={() => onClearReviewItem(question.id)} className="button-ghost">
                       Mark Reviewed
                     </button>
                   </div>
@@ -1600,9 +1890,11 @@ function ReviewBackgroundArt() {
 
 function ProgressView({ progress, settings }: { progress: ProgressState; settings: UserSettings }) {
   const mode = settings.languageMode;
+  const currentStreak = learningStreak(progress);
   const accuracy = useMemo(() => {
     const correct = progress.answers.filter((answer) => answer.isCorrect).length;
-    return Math.round((correct / Math.max(progress.answers.length, 1)) * 100);
+    if (!progress.answers.length) return 0;
+    return Math.round((correct / progress.answers.length) * 100);
   }, [progress.answers]);
 
   return (
@@ -1613,12 +1905,12 @@ function ProgressView({ progress, settings }: { progress: ProgressState; setting
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={textByMode(mode, "Total XP", "XP ทั้งหมด")} value={String(progress.totalXP)} icon="statusXp" />
-        <StatCard label={textByMode(mode, "Current streak", "เรียนต่อเนื่อง")} value={`${progress.currentStreak} วัน`} icon="statusStreak" />
+        <StatCard label={textByMode(mode, "Current streak", "เรียนต่อเนื่อง")} value={`${currentStreak} วัน`} icon="statusStreak" />
         <StatCard label={textByMode(mode, "Accuracy", "ความแม่นยำ")} value={`${accuracy}%`} icon="statusAccuracy" />
         <StatCard label={textByMode(mode, "Review queue", "คิวทบทวน")} value={String(progress.reviewQueue.length)} icon="statusReviewDue" />
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        {learningPaths.slice(0, 6).map((path) => (
+        {learningPaths.map((path) => (
           <div key={path.id} className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-editorial">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
@@ -1637,37 +1929,39 @@ function ProgressView({ progress, settings }: { progress: ProgressState; setting
   );
 }
 
-function PracticeLaunchCard({ path, progress, settings, onStartQuiz }: { path: LearningPath; progress: number; settings: UserSettings; onStartQuiz: (pathId: string) => void }) {
+function PracticeLaunchCard({ path, progress, reviewCount, settings, onStartQuiz }: { path: LearningPath; progress: number; reviewCount: number; settings: UserSettings; onStartQuiz: (pathId: string) => void }) {
   const mode = settings.languageMode;
   const questionCount = questions.filter((question) => question.learningPath === path.name).length;
+  const hasQuestions = questionCount > 0;
 
   return (
-    <article className="group relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/72 p-4 text-[var(--text-primary)] shadow-[0_16px_42px_rgba(23,23,23,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/86 sm:p-5">
+    <article className="group relative overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/72 p-4 text-[var(--text-primary)] shadow-[0_12px_32px_rgba(23,23,23,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-white/86 sm:p-5">
       <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
       <div className="pointer-events-none absolute -right-14 -top-16 h-36 w-36 rounded-full bg-[radial-gradient(circle,#effcff_0%,rgba(239,252,255,0)_72%)] opacity-90 blur-2xl" />
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">Practice Set · {path.currentLevel}</p>
-          <h2 className="mt-3 text-balance font-display text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]">{path.name}</h2>
+          <h2 className="mt-2 text-balance font-display text-2xl font-semibold leading-tight tracking-tight text-[var(--text-primary)]">{path.name}</h2>
         </div>
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-[var(--border)] bg-white/84 shadow-[0_10px_24px_rgba(23,23,23,0.075)]">
           <Soft3DIcon name={learningPathIconMap[path.name]} size="md" decorative shadow={false} active />
         </span>
       </div>
-      <p className="font-subtitle mt-4 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p>
-      <div className="mt-5 grid grid-cols-3 gap-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Questions</p>
-          <p className="mt-1 font-display text-xl font-extrabold text-[var(--text-primary)]">{questionCount || 5}</p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Review</p>
-          <p className="mt-1 font-display text-xl font-extrabold text-[var(--text-primary)]">{path.questionsDueForReview}</p>
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-white/64 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-          <p className="font-subtitle text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">Level</p>
-          <p className="mt-1 truncate font-display text-sm font-extrabold text-[var(--text-primary)]">{path.currentLevel}</p>
-        </div>
+      <p className="font-subtitle mt-3 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">{textByMode(mode, path.currentGoal, path.currentGoalTh)}</p>
+      <a href={hasQuestions ? `/quiz?start=1&path=${path.id}` : `/learn/${path.id}`} onClick={() => hasQuestions ? onStartQuiz(path.id) : undefined} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-5 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(23,23,23,0.14)] transition group-hover:scale-[1.01] hover:bg-[#303030] focus:outline-none focus:ring-2 focus:ring-black/60">
+        {hasQuestions ? "Start Practice" : "Open Course"}
+        <Soft3DIcon name="actionNext" size="sm" decorative shadow={false} />
+      </a>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="rounded-full border border-[var(--border)] bg-white/66 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)]">
+          <strong className="font-display text-[var(--text-primary)]">{questionCount}</strong> questions
+        </span>
+        <span className="rounded-full border border-[var(--border)] bg-white/66 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)]">
+          <strong className="font-display text-[var(--text-primary)]">{reviewCount}</strong> review
+        </span>
+        <span className="rounded-full border border-[var(--border)] bg-white/66 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)]">
+          {path.currentLevel}
+        </span>
       </div>
       <div className="mt-5">
         <ProgressBar value={progress} tone={progressToneForPath(path.id)} />
@@ -1676,10 +1970,6 @@ function PracticeLaunchCard({ path, progress, settings, onStartQuiz }: { path: L
           <span>{progress}%</span>
         </div>
       </div>
-      <a href={`/quiz?start=1&path=${path.id}`} onClick={() => onStartQuiz(path.id)} className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-5 text-sm font-extrabold text-white shadow-[0_10px_26px_rgba(23,23,23,0.16)] transition group-hover:scale-[1.01] hover:bg-[#303030] focus:outline-none focus:ring-2 focus:ring-black/60">
-        Start Practice
-        <Soft3DIcon name="actionNext" size="sm" decorative shadow={false} />
-      </a>
     </article>
   );
 }
@@ -1769,8 +2059,18 @@ function VocabularyCard({ vocabulary, onSave, saved = false }: { vocabulary: Voc
           <p className="font-subtitle mt-1 text-sm leading-7 text-[var(--text-secondary)]">{vocabulary.thaiMeaning}</p>
         </div>
         {onSave ? (
-          <button type="button" onClick={() => onSave(vocabulary)} className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-white">
-            {saved ? "Saved" : "Save"}
+          <button
+            type="button"
+            onClick={() => onSave(vocabulary)}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-black/10 ${
+              saved
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700 shadow-[0_8px_18px_rgba(52,116,96,0.12)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] shadow-[0_8px_18px_rgba(23,23,23,0.06)] hover:bg-white"
+            }`}
+            aria-label={saved ? `Saved ${vocabulary.word}` : `Save ${vocabulary.word}`}
+            title={saved ? "Saved" : "Save"}
+          >
+            <Soft3DIcon name={saved ? "statusCompleted" : "actionSave"} size="sm" decorative shadow={false} active={saved} />
           </button>
         ) : null}
       </div>
@@ -1791,7 +2091,7 @@ function VisualMediaPreview({ media }: { media: NonNullable<LearningLesson["visu
             src={media.src}
             alt={media.altTh ?? media.altEn ?? media.titleEn}
             fill
-            className="object-cover"
+            className="object-contain"
             sizes="(min-width: 1280px) 760px, (min-width: 768px) 82vw, 100vw"
           />
         </div>
@@ -1895,11 +2195,52 @@ function FigmaGridCheatSheet() {
   );
 }
 
+function LessonReferences({ references }: { references: string[] }) {
+  const uniqueReferences = Array.from(new Set(references)).filter(Boolean);
+
+  if (!uniqueReferences.length) return null;
+
+  return (
+    <LessonBlock id="lesson-references" title="References">
+      <details className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center font-display text-sm font-semibold text-[var(--text-primary)] [&::-webkit-details-marker]:hidden">
+          Source notes and further reading
+        </summary>
+        <p className="font-subtitle mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+          แหล่งข้อมูลเหล่านี้ใช้เป็นฐานในการสรุปบทเรียน ให้ใช้เพื่อเรียนรู้แนวคิดหลัก แล้วตรวจบริบทจริงของบริษัทหรือโปรเจกต์ก่อนนำไปใช้เสมอ
+        </p>
+        <div className="mt-4 grid gap-2">
+          {uniqueReferences.map((reference) => {
+            const isUrl = reference.startsWith("http://") || reference.startsWith("https://");
+            const label = isUrl ? reference.replace(/^https?:\/\//, "").replace(/\/$/, "") : reference;
+
+            return isUrl ? (
+              <a
+                key={reference}
+                href={reference}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold leading-6 text-[var(--text-primary)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(23,23,23,0.08)]"
+              >
+                {label}
+              </a>
+            ) : (
+              <div key={reference} className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold leading-6 text-[var(--text-primary)]">
+                {reference}
+              </div>
+            );
+          })}
+        </div>
+      </details>
+    </LessonBlock>
+  );
+}
+
 function LessonBlock({ id, title, step, children }: { id?: string; title: string; step?: number; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-28 mt-8 border-t border-[var(--border)] pt-6">
+    <section id={id} className="scroll-mt-28 mt-6 rounded-[2rem] border border-[var(--border)] bg-white/74 p-4 shadow-[0_10px_26px_rgba(23,23,23,0.035)] sm:p-5">
       <div className="flex items-center gap-3">
-        {step ? <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-extrabold text-[var(--text-primary)]">{step}</span> : null}
+        {step ? <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)]">{step}</span> : null}
         <h2 className="font-display text-lg font-semibold tracking-normal text-[var(--text-primary)]">{title}</h2>
       </div>
       <div className="mt-3 space-y-3 text-sm leading-7 text-[var(--text-secondary)]">{children}</div>

@@ -1,0 +1,49 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="56" fill="#F8F8F6"/>
+  <rect x="42" y="42" width="1116" height="676" rx="44" fill="url(#bg)" stroke="#D9D9D6" stroke-width="2"/>
+  <circle cx="956" cy="142" r="164" fill="#DDF6FF" opacity=".75"/>
+  <circle cx="910" cy="536" r="204" fill="#ECE6FF" opacity=".68"/>
+  <path d="M90 178H1110M90 322H1110M90 466H1110M90 610H1110" stroke="#151515" stroke-opacity=".07" stroke-width="2"/>
+  <text x="96" y="120" fill="#171717" font-family="Arial, sans-serif" font-size="48" font-weight="700">UX Usability Check</text>
+  <text x="98" y="158" fill="#666766" font-family="Arial, sans-serif" font-size="23">Use this before polishing UI details.</text>
+  <g font-family="Arial, sans-serif">
+    <g transform="translate(110 220)">
+      <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
+      <circle cx="48" cy="46" r="22" fill="#DDF6FF"/>
+      <path d="M37 45l8 9 17-20" stroke="#5F98B6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">System status</text>
+      <text x="88" y="68" fill="#666766" font-size="17">Can users see what is happening?</text>
+    </g>
+    <g transform="translate(450 220)">
+      <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
+      <circle cx="48" cy="46" r="22" fill="#EFEAFF"/>
+      <path d="M60 34L38 56M38 34l22 22" stroke="#8B78B8" stroke-width="5" stroke-linecap="round"/>
+      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">Error prevention</text>
+      <text x="88" y="68" fill="#666766" font-size="17">Can the flow prevent mistakes?</text>
+    </g>
+    <g transform="translate(790 220)">
+      <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
+      <circle cx="48" cy="46" r="22" fill="#E9FAF4"/>
+      <path d="M37 48h25M50 35v25" stroke="#64AD9E" stroke-width="5" stroke-linecap="round"/>
+      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">User control</text>
+      <text x="88" y="68" fill="#666766" font-size="17">Can users undo or recover?</text>
+    </g>
+    <g transform="translate(196 420)">
+      <rect width="380" height="116" rx="32" fill="#FFFFFF" stroke="#D9D9D6"/>
+      <text x="32" y="45" fill="#171717" font-size="28" font-weight="700">Recognition first</text>
+      <text x="32" y="78" fill="#666766" font-size="18">Show choices, labels, and context so users do not need to remember everything.</text>
+    </g>
+    <g transform="translate(626 420)">
+      <rect width="380" height="116" rx="32" fill="#FFFFFF" stroke="#D9D9D6"/>
+      <text x="32" y="45" fill="#171717" font-size="28" font-weight="700">Accessible reading</text>
+      <text x="32" y="78" fill="#666766" font-size="18">Check contrast, focus state, touch target, and Thai text wrapping.</text>
+    </g>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="42" y1="42" x2="1158" y2="718" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#F2FBFF"/>
+      <stop offset="1" stop-color="#F7F2FF"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,18 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="56" fill="#F8F8F6"/>
+  <rect x="62" y="60" width="1076" height="640" rx="48" fill="#FFFFFF" stroke="#D9D9D6" stroke-width="2"/>
+  <circle cx="948" cy="154" r="126" fill="#E9FAF4"/>
+  <text x="108" y="140" fill="#171717" font-family="Arial, sans-serif" font-size="46" font-weight="700">Trust Recovery Message</text>
+  <text x="110" y="178" fill="#666766" font-family="Arial, sans-serif" font-size="23">Calm communication lowers anxiety and gives a next step.</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="128" y="258" width="944" height="110" rx="34" fill="#171717"/>
+    <text x="170" y="306" fill="#FFFFFF" font-size="27" font-weight="700">1. Acknowledge what happened</text>
+    <text x="170" y="340" fill="#D7D7D4" font-size="18">Name the issue without hiding it.</text>
+    <rect x="128" y="392" width="944" height="110" rx="34" fill="#F1EBFF" stroke="#D9D9D6"/>
+    <text x="170" y="440" fill="#171717" font-size="27" font-weight="700">2. Explain what is safe and what the team is doing</text>
+    <text x="170" y="474" fill="#666766" font-size="18">Give useful confidence, not empty reassurance.</text>
+    <rect x="128" y="526" width="944" height="110" rx="34" fill="#E7F8FF" stroke="#D9D9D6"/>
+    <text x="170" y="574" fill="#171717" font-size="27" font-weight="700">3. Set the next update or action</text>
+    <text x="170" y="608" fill="#666766" font-size="18">Customers trust a clear next step.</text>
+  </g>
+</svg>
