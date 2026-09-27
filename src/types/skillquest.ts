@@ -7,6 +7,7 @@ export type LearningPathName =
   | "Graphic Design"
   | "English for Work"
   | "IELTS Preparation"
+  | "TOEIC Preparation"
   | "Communication"
   | "Critical Thinking"
   | "DesignOps"
@@ -140,6 +141,18 @@ export interface LessonVisualMedia {
   items?: string[];
 }
 
+export interface LessonVideo {
+  id: string;
+  titleEn: string;
+  sourceName: string;
+  youtubeId: string;
+  watchUrl: string;
+  durationLabel?: string;
+  whyWatchTh: string;
+  noticeTh: string[];
+  afterWatchPromptTh: string;
+}
+
 export interface JuniorVsSeniorThinking {
   junior: string;
   senior: string;
@@ -157,6 +170,7 @@ export interface LearningLesson extends LessonChapter {
   sections?: LessonSection[];
   practicalExamples?: LessonPracticalExample[];
   visualMedia?: LessonVisualMedia[];
+  videos?: LessonVideo[];
   juniorVsSenior?: JuniorVsSeniorThinking;
   vocabulary?: VocabularyItem[];
   personalNoteEnabled?: boolean;

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Soft3DIcon } from "./icons/soft-3d-icon";
 import type { Soft3DIconName } from "./icons/icon-types";
+import { uiCopy, type UiCopyKey } from "@/lib/ui-copy";
 
 const navItems = [
   { href: "/", label: "Home", icon: "navigationHome" },
@@ -14,12 +15,13 @@ const navItems = [
   { href: "/review", label: "Review", icon: "navigationReview" },
 ] satisfies { href: string; label: string; icon: Soft3DIconName }[];
 
+/** These four were hardcoded Thai, so they stayed Thai even in English mode. */
 const profileItems = [
-  { href: "/progress", label: "ความก้าวหน้าของฉัน", icon: "navigationProgress" },
-  { href: "/review", label: "โน้ตและคำศัพท์", icon: "actionNote" },
-  { href: "/settings", label: "ภาษาและเป้าหมายการเรียน", icon: "actionTranslation" },
-  { href: "/settings", label: "ตั้งค่า", icon: "navigationSettings" },
-] satisfies { href: string; label: string; icon: Soft3DIconName }[];
+  { href: "/progress", key: "myProgress", icon: "navigationProgress" },
+  { href: "/review", key: "notesAndWords", icon: "actionNote" },
+  { href: "/settings", key: "languageAndGoals", icon: "actionTranslation" },
+  { href: "/settings", key: "settings", icon: "navigationSettings" },
+] satisfies { href: string; key: UiCopyKey; icon: Soft3DIconName }[];
 
 const navRootPaths = new Set(navItems.map((item) => item.href));
 
@@ -64,30 +66,30 @@ function PrimaryNavLink({
       onFocus={onShow}
       onMouseEnter={onShow}
       onMouseLeave={onHide}
-      className={`group relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold leading-none outline-none transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] focus-visible:ring-2 focus-visible:ring-black/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+      className={`group relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold leading-none outline-none transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] ${
         isDesktop ? "h-10" : `h-12 min-w-0 ${mobileSizeClass}`
       } ${
         showLabel
-          ? `${isDesktop ? "w-28" : ""} bg-[#171717] text-white shadow-[0_10px_24px_rgba(23,23,23,0.16)]`
-          : `${isDesktop ? "w-14" : ""} text-[#8e9aa6] hover:bg-white/80 hover:text-[#5f83a3] focus-visible:bg-white/80`
+          ? `${isDesktop ? "w-28" : ""} on-accent bg-[var(--accent)] text-[var(--text-on-accent)] shadow-[var(--elev-2)]`
+          : `${isDesktop ? "w-14" : ""} text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] focus-visible:bg-[var(--surface-2)]`
       }`}
     >
       {isActive ? (
-        <span className="pointer-events-none absolute top-[7px] left-1/2 h-1 w-7 -translate-x-1/2 rounded-full bg-[linear-gradient(90deg,#d9f4ff,#c7c9ff,#e5dcff)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-8 group-focus-visible:w-8" />
+        <span className="pointer-events-none absolute top-[7px] left-1/2 h-1 w-7 -translate-x-1/2 rounded-full bg-[var(--text-on-accent)]/45 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-8 group-focus-visible:w-8" />
       ) : null}
 
       <span
         aria-hidden="true"
-        className={`absolute inset-0 grid place-items-center transition-[opacity,transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`absolute inset-0 grid place-items-center transition-[opacity,transform,filter] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           showLabel ? "scale-75 opacity-0 blur-[1px]" : "scale-100 opacity-100 blur-0"
         }`}
       >
-        <Soft3DIcon name={item.icon} size="navLg" decorative shadow={false} active={isActive} />
+        <Soft3DIcon name={item.icon} size="navLg" decorative active={isActive} />
       </span>
 
       <span
         aria-hidden="true"
-        className={`absolute inset-0 grid place-items-center whitespace-nowrap px-2 text-center text-sm transition-[opacity,transform,filter] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+        className={`absolute inset-0 grid place-items-center whitespace-nowrap px-2 text-center text-sm transition-[opacity,transform,filter] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
           showLabel ? "translate-y-0 scale-100 opacity-100 blur-0" : "translate-y-2 scale-95 opacity-0 blur-[1px]"
         }`}
       >
@@ -106,17 +108,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const showRootTitle = navRootPaths.has(pathname);
 
   return (
-    <div className={`min-h-screen overflow-x-hidden text-[var(--text-primary)] ${isReviewPage ? "bg-[#03130c]" : "bg-[var(--background)]"}`}>
-      <div className={`pointer-events-none fixed inset-0 overflow-hidden ${isReviewPage ? "opacity-0" : "opacity-100"}`}>
-        <div className="absolute left-[-12rem] top-[-14rem] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,#ff9bd5_0%,rgba(255,155,213,0)_68%)] opacity-50 blur-2xl" />
-        <div className="absolute right-[-12rem] top-10 h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,#83e8ff_0%,rgba(131,232,255,0)_68%)] opacity-55 blur-2xl" />
-        <div className="absolute bottom-[-18rem] left-1/3 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,#ddff56_0%,rgba(221,255,86,0)_68%)] opacity-35 blur-2xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(20,20,20,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(20,20,20,0.045)_1px,transparent_1px)] bg-[size:56px_56px] opacity-35" />
+    <div className={`min-h-screen overflow-x-hidden text-[var(--text-primary)] bg-[var(--background)]`}>
+      {/* Ambient light, not decoration: two low-alpha sources on the mint/amber
+          axis so the ground reads as lit rather than flat. The two-axis grid
+          that used to sit here was removed — nothing on this page is a
+          measurement surface, so it was pure ornament. */}
+      <div className={`pointer-events-none fixed inset-0 overflow-hidden ${isReviewPage ? "opacity-60" : "opacity-100"}`}>
+        <div className="absolute left-[-14rem] top-[-16rem] h-[38rem] w-[38rem] rounded-full bg-[radial-gradient(circle,rgba(127,227,196,0.13)_0%,rgba(127,227,196,0)_70%)] blur-3xl" />
+        <div className="absolute right-[-12rem] top-[6rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(143,180,255,0.10)_0%,rgba(143,180,255,0)_70%)] blur-3xl" />
+        <div className="absolute bottom-[-20rem] left-1/3 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(255,181,92,0.07)_0%,rgba(255,181,92,0)_70%)] blur-3xl" />
       </div>
 
       <div className="relative mx-auto min-h-screen w-full max-w-[1600px]">
         <header className="sticky top-0 z-[90] px-3 py-3 sm:px-4 lg:hidden">
-          <div className="flex min-h-[4.25rem] items-center justify-between rounded-full border border-[var(--border)] bg-white/88 px-4 shadow-[0_10px_28px_rgba(23,23,23,0.075)] backdrop-blur-2xl">
+          <div className="flex min-h-[4.25rem] items-center justify-between rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-4 shadow-[var(--elev-2)] backdrop-blur-2xl">
             <div className={showBackButton ? "grid h-14 w-14 shrink-0 place-items-center" : "hidden"}>
               {showBackButton && backHref ? <BackIconLink href={backHref} /> : null}
             </div>
@@ -128,7 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         <header className="sticky top-0 z-[90] hidden px-6 py-5 lg:block">
-          <div className="mx-auto flex min-h-[4.25rem] max-w-7xl items-center justify-between rounded-full border border-[var(--border)] bg-white/78 px-5 shadow-[0_12px_34px_rgba(23,23,23,0.07)] backdrop-blur-2xl">
+          <div className="mx-auto flex min-h-[4.25rem] max-w-7xl items-center justify-between rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-5 shadow-[var(--elev-3)] backdrop-blur-2xl">
             <div className={showBackButton ? "flex h-14 w-[13rem] shrink-0 items-center" : "flex h-14 min-w-[13rem] shrink-0 items-center"}>
               {showBackButton && backHref ? <BackIconLink href={backHref} /> : null}
               {showRootTitle ? <HeaderRootTitle /> : null}
@@ -156,9 +161,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="w-full pb-[calc(7.25rem+env(safe-area-inset-bottom))] lg:pb-12">{children}</main>
+        <main className="w-full overflow-x-hidden pb-[calc(7.25rem+env(safe-area-inset-bottom))] lg:pb-12">{children}</main>
 
-        <nav className="fixed bottom-2 left-3 right-3 z-[90] flex h-[3.65rem] items-center gap-1 rounded-[1.35rem] border border-[var(--border)] bg-white/88 p-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_12px_34px_rgba(23,23,23,0.12)] backdrop-blur-2xl sm:left-4 sm:right-4 lg:hidden" aria-label="Primary navigation">
+        <nav className="fixed bottom-2 left-3 right-3 z-[90] flex h-[3.65rem] items-center gap-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-2)] p-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[var(--elev-3)] backdrop-blur-2xl sm:left-4 sm:right-4 lg:hidden" aria-label="Primary navigation">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const showLabel = isActive;
@@ -196,10 +201,10 @@ function BackIconLink({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      aria-label="Go back"
-      className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] shadow-[0_8px_18px_rgba(23,23,23,0.07)] transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_12px_24px_rgba(23,23,23,0.1)] focus:outline-none focus:ring-2 focus:ring-black/70 focus:ring-offset-2 focus:ring-offset-white"
+      aria-label={uiCopy.goBack.en}
+      className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--elev-2)] transition duration-200 hover:bg-[var(--surface-2)] hover:shadow-[var(--elev-2)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-[var(--background)]"
     >
-      <Soft3DIcon name="actionPrevious" size="sm" decorative shadow={false} className="pointer-events-none" />
+      <Soft3DIcon name="actionPrevious" size="sm" decorative className="pointer-events-none" />
     </Link>
   );
 }
@@ -241,17 +246,17 @@ function ProfileMenu({ pathname, align = "right" }: { pathname: string; align?: 
         ref={summaryRef}
         aria-haspopup="menu"
         aria-controls="profile-menu"
-        className="grid h-14 w-14 cursor-pointer list-none place-items-center rounded-full border border-[var(--border-strong)] bg-white shadow-[0_8px_22px_rgba(23,23,23,0.11)] transition hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-[0_12px_28px_rgba(23,23,23,0.13)] focus:outline-none focus:ring-2 focus:ring-black [&::-webkit-details-marker]:hidden"
+        className="grid h-14 w-14 cursor-pointer list-none place-items-center rounded-full border border-[var(--border-strong)] bg-[var(--surface-2)] shadow-[var(--elev-2)] transition hover:border-[var(--border-strong)] hover:shadow-[var(--elev-2)] focus:outline-none focus:ring-2 focus:ring-black [&::-webkit-details-marker]:hidden"
       >
         <span className="sr-only">Open profile menu</span>
-        <Soft3DIcon name="brandMission" size="brand" decorative shadow={false} priority className="pointer-events-none translate-y-px" />
+        <Soft3DIcon name="brandMission" size="sm" decorative className="pointer-events-none" />
       </summary>
 
       <div
         id="profile-menu"
         role="menu"
         aria-label="Profile menu"
-        className={`absolute top-[4.5rem] z-50 hidden w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-white p-2 shadow-[0_18px_48px_rgba(23,23,23,0.13)] group-open:block ${
+        className={`absolute top-[4.5rem] z-50 hidden w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-2)] p-2 shadow-[var(--elev-3)] group-open:block ${
           align === "left" ? "left-0" : "right-0"
         }`}
       >
@@ -260,7 +265,7 @@ function ProfileMenu({ pathname, align = "right" }: { pathname: string; align?: 
             const isActive = pathname === item.href && index !== 1;
             return (
               <Link
-                key={`${item.href}-${item.label}`}
+                key={`${item.href}-${item.key}`}
                 href={item.href}
                 role="menuitem"
                 onClick={() => closeMenu()}
@@ -268,8 +273,8 @@ function ProfileMenu({ pathname, align = "right" }: { pathname: string; align?: 
                   isActive ? "bg-[var(--surface)] text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                <Soft3DIcon name={item.icon} size="sm" decorative shadow={false} active={isActive} />
-                {item.label}
+                <Soft3DIcon name={item.icon} size="sm" decorative active={isActive} />
+                {uiCopy[item.key].en}
               </Link>
             );
           })}
@@ -281,10 +286,10 @@ function ProfileMenu({ pathname, align = "right" }: { pathname: string; align?: 
 
 export function PageShell({ children, eyebrow, title, summary }: { children: ReactNode; eyebrow: string; title: string; summary: string }) {
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-9 lg:px-8 lg:py-12">
-      <div className="mb-6 max-w-3xl sm:mb-8">
-        <p className="font-display text-xs font-extrabold uppercase tracking-[0.2em] text-[var(--text-muted)]">{eyebrow}</p>
-        <h1 className="mt-3 text-balance font-display text-3xl font-semibold leading-[1.16] tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl">{title}</h1>
+    <section className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-5 sm:px-6 sm:py-9 lg:px-8 lg:py-12">
+      <div className="mb-6 min-w-0 max-w-3xl sm:mb-8">
+        <p className="eyebrow">{eyebrow}</p>
+        <h1 className="mt-3 max-w-full text-balance break-words font-display text-2xl font-semibold leading-[1.18] tracking-tight text-[var(--text-primary)] sm:text-5xl sm:leading-[1.16] lg:text-6xl">{title}</h1>
         <p className="font-subtitle mt-3 max-w-2xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base sm:leading-8">{summary}</p>
       </div>
       {children}
@@ -294,14 +299,14 @@ export function PageShell({ children, eyebrow, title, summary }: { children: Rea
 
 export function StatCard({ label, value, icon }: { label: string; value: string; icon: Soft3DIconName }) {
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white/80 p-5 shadow-editorial backdrop-blur-xl">
+    <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-2)] p-5 shadow-editorial backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">
         <p className="font-subtitle text-sm font-medium text-[var(--text-secondary)]">{label}</p>
         <span className="grid h-9 w-9 place-items-center">
-          <Soft3DIcon name={icon} size="sm" decorative shadow={false} active />
+          <Soft3DIcon name={icon} size="sm" decorative active />
         </span>
       </div>
-      <p className="mt-4 font-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">{value}</p>
+      <p className="mt-4 font-display text-3xl font-bold tracking-tight text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

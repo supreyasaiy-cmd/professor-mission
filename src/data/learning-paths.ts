@@ -90,6 +90,17 @@ export const learningPaths: LearningPath[] = [
     accent: "from-purple-400 via-indigo-400 to-blue-400",
   },
   {
+    id: "toeic",
+    name: "TOEIC Preparation",
+    nameTh: "TOEIC Preparation",
+    description: "Build workplace English grammar, vocabulary, listening strategy, and reading speed for TOEIC.",
+    descriptionTh: "ฝึก grammar, vocabulary, listening strategy และ reading speed ภาษาอังกฤษสำหรับการทำงานและข้อสอบ TOEIC",
+    currentLevel: "B1",
+    currentGoal: "Improve TOEIC-style workplace English step by step",
+    currentGoalTh: "พัฒนาภาษาอังกฤษแบบ TOEIC และภาษาอังกฤษที่ใช้ในงานอย่างเป็นลำดับ",
+    accent: "from-sky-300 via-blue-300 to-violet-300",
+  },
+  {
     id: "communication",
     name: "Communication",
     nameTh: "Communication",

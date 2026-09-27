@@ -11,32 +11,38 @@
       <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
       <circle cx="48" cy="46" r="22" fill="#DDF6FF"/>
       <path d="M37 45l8 9 17-20" stroke="#5F98B6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">System status</text>
-      <text x="88" y="68" fill="#666766" font-size="17">Can users see what is happening?</text>
+      <text x="88" y="41" fill="#171717" font-size="24" font-weight="700">System status</text>
+      <text x="88" y="67" fill="#666766" font-size="16">Users see what happens</text>
     </g>
     <g transform="translate(450 220)">
       <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
       <circle cx="48" cy="46" r="22" fill="#EFEAFF"/>
       <path d="M60 34L38 56M38 34l22 22" stroke="#8B78B8" stroke-width="5" stroke-linecap="round"/>
-      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">Error prevention</text>
-      <text x="88" y="68" fill="#666766" font-size="17">Can the flow prevent mistakes?</text>
+      <text x="88" y="41" fill="#171717" font-size="24" font-weight="700">Error prevention</text>
+      <text x="88" y="67" fill="#666766" font-size="16">Flow prevents mistakes</text>
     </g>
     <g transform="translate(790 220)">
       <rect width="300" height="92" rx="28" fill="#FFFFFF" stroke="#D9D9D6"/>
       <circle cx="48" cy="46" r="22" fill="#E9FAF4"/>
       <path d="M37 48h25M50 35v25" stroke="#64AD9E" stroke-width="5" stroke-linecap="round"/>
-      <text x="88" y="42" fill="#171717" font-size="26" font-weight="700">User control</text>
-      <text x="88" y="68" fill="#666766" font-size="17">Can users undo or recover?</text>
+      <text x="88" y="41" fill="#171717" font-size="24" font-weight="700">User control</text>
+      <text x="88" y="67" fill="#666766" font-size="16">Undo or recover easily</text>
     </g>
     <g transform="translate(196 420)">
       <rect width="380" height="116" rx="32" fill="#FFFFFF" stroke="#D9D9D6"/>
       <text x="32" y="45" fill="#171717" font-size="28" font-weight="700">Recognition first</text>
-      <text x="32" y="78" fill="#666766" font-size="18">Show choices, labels, and context so users do not need to remember everything.</text>
+      <text x="32" y="78" fill="#666766" font-size="18">
+        <tspan x="32" dy="0">Show choices, labels, and context.</tspan>
+        <tspan x="32" dy="24">Do not make users remember.</tspan>
+      </text>
     </g>
     <g transform="translate(626 420)">
       <rect width="380" height="116" rx="32" fill="#FFFFFF" stroke="#D9D9D6"/>
       <text x="32" y="45" fill="#171717" font-size="28" font-weight="700">Accessible reading</text>
-      <text x="32" y="78" fill="#666766" font-size="18">Check contrast, focus state, touch target, and Thai text wrapping.</text>
+      <text x="32" y="78" fill="#666766" font-size="18">
+        <tspan x="32" dy="0">Check contrast, focus, and touch target.</tspan>
+        <tspan x="32" dy="24">Make Thai text wrap cleanly.</tspan>
+      </text>
     </g>
   </g>
   <defs>
