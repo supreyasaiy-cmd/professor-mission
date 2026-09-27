@@ -63,6 +63,7 @@ export const learningPathIconMap: Record<LearningPathName, Soft3DIconName> = {
   "UX Writing": "skillUxWriting",
   "Graphic Design": "skillGraphicDesign",
   "IELTS Preparation": "skillIelts",
+  "TOEIC Preparation": "skillEnglishWork",
   "English for Work": "skillEnglishWork",
   Communication: "skillCommunication",
   "Critical Thinking": "skillCriticalThinking",

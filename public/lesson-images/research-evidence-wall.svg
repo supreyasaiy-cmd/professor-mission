@@ -8,19 +8,19 @@
   <g font-family="Arial, sans-serif">
     <rect x="112" y="250" width="210" height="150" rx="24" fill="#FFF7D7" stroke="#D9D9D6"/>
     <text x="138" y="303" fill="#171717" font-size="24" font-weight="700">Observation</text>
-    <text x="138" y="336" fill="#666766" font-size="18">What users said or did</text>
+    <text x="138" y="336" fill="#666766" font-size="18">Said or did</text>
     <rect x="362" y="250" width="210" height="150" rx="24" fill="#E7F8FF" stroke="#D9D9D6"/>
     <text x="388" y="303" fill="#171717" font-size="24" font-weight="700">Pattern</text>
     <text x="388" y="336" fill="#666766" font-size="18">Repeated signal</text>
     <rect x="612" y="250" width="210" height="150" rx="24" fill="#F1EBFF" stroke="#D9D9D6"/>
     <text x="638" y="303" fill="#171717" font-size="24" font-weight="700">Insight</text>
-    <text x="638" y="336" fill="#666766" font-size="18">Meaning behind data</text>
+    <text x="638" y="336" fill="#666766" font-size="18">Meaning</text>
     <rect x="862" y="250" width="210" height="150" rx="24" fill="#E9FAF4" stroke="#D9D9D6"/>
     <text x="888" y="303" fill="#171717" font-size="24" font-weight="700">Decision</text>
-    <text x="888" y="336" fill="#666766" font-size="18">What the team changes</text>
+    <text x="888" y="336" fill="#666766" font-size="18">Team action</text>
     <path d="M330 325h24M580 325h24M830 325h24" stroke="#959694" stroke-width="5" stroke-linecap="round"/>
     <rect x="164" y="506" width="872" height="92" rx="28" fill="#171717"/>
     <text x="204" y="548" fill="#FFFFFF" font-size="26" font-weight="700">Research readout</text>
-    <text x="204" y="576" fill="#D7D7D4" font-size="18">Context + method + evidence + recommendation + next owner</text>
+    <text x="204" y="576" fill="#D7D7D4" font-size="18">Context + evidence + recommendation + owner</text>
   </g>
 </svg>

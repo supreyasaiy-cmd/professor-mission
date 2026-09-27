@@ -8,6 +8,7 @@ import type {
   LessonMiniCheck,
   LessonPracticalExample,
   LessonSection,
+  LessonVideo,
   LessonVisualMedia,
   VocabularyItem,
 } from "@/types/skillquest";
@@ -22,6 +23,7 @@ type UxLessonSeed = {
   sections: LessonSection[];
   examples: LessonPracticalExample[];
   visualMedia?: LessonVisualMedia[];
+  videos?: LessonVideo[];
   mistakes: string[];
   mistakesTh: string[];
   junior: string;
@@ -367,18 +369,122 @@ const expandedPathTopics = {
   ],
 } as const;
 
+/**
+ * Chapters for the expanded courses.
+ *
+ * These used to be generated one-module-per-lesson, which meant the module
+ * heading, its Thai blurb and the lesson itself all printed the same words.
+ * Each entry below groups a run of consecutive topics under a chapter that
+ * says what you can do once you finish it. `count` is how many topics the
+ * chapter takes, in order, and the totals are asserted at build time.
+ */
+type ModuleGroup = { titleEn: string; titleTh: string; descriptionTh: string; count: number };
+
+const expandedModuleGroups: Record<keyof typeof expandedPathTopics, ModuleGroup[]> = {
+  designops: [
+    { titleEn: "Understand the Work", titleTh: "เข้าใจงานและจัดลำดับ", descriptionTh: "DesignOps ช่วยอะไร วาดเส้นทางงาน รับ request แล้วเลือกว่าอะไรทำก่อน", count: 4 },
+    { titleEn: "Capacity and Craft", titleTh: "วางกำลังคนและจัดระเบียบ", descriptionTh: "ดูว่าทีมรับไหวแค่ไหน ตั้งวิธีรีวิว จัดไฟล์ และเขียนเอกสาร", count: 4 },
+    { titleEn: "Tools and System", titleTh: "เครื่องมือและระบบ", descriptionTh: "ดูแลเครื่องมือ ความรู้ของทีม และกติกาของ design system", count: 4 },
+    { titleEn: "Tokens and People", titleTh: "Token และการดูแลคน", descriptionTh: "จัดการ token ต้อนรับคนใหม่ และทำเส้นทางเติบโตให้ชัด", count: 3 },
+    { titleEn: "Measure and Tell", titleTh: "วัดผลและสื่อสาร", descriptionTh: "หาตัวเลขที่บอกคุณค่าของงาน แล้วเล่าให้ผู้บริหารเข้าใจ", count: 3 },
+  ],
+  "ux-research": [
+    { titleEn: "Research Foundations", titleTh: "ตั้งหลักงานวิจัย", descriptionTh: "เส้นทางอาชีพ พื้นฐาน คำถามวิจัยกับคำถามธุรกิจ และจริยธรรม", count: 4 },
+    { titleEn: "Plan and Choose", titleTh: "วางแผนและเลือกวิธี", descriptionTh: "วางแผน หาผู้เข้าร่วม และเลือกระหว่างเชิงคุณภาพกับเชิงปริมาณ", count: 4 },
+    { titleEn: "Listen and Observe", titleTh: "ฟังและสังเกต", descriptionTh: "สัมภาษณ์ เขียนสคริปต์ สังเกตการใช้งาน และทำ diary study", count: 4 },
+    { titleEn: "Test the Experience", titleTh: "ทดสอบการใช้งาน", descriptionTh: "usability test วางแผนทดสอบ ออกแบบแบบสอบถาม และ card sorting", count: 4 },
+    { titleEn: "Make Sense of It", titleTh: "วิเคราะห์ข้อมูล", descriptionTh: "tree testing วิเคราะห์ผล จัดกลุ่มความคิด และแยก insight จากสิ่งที่เห็น", count: 4 },
+    { titleEn: "Synthesise and Share", titleTh: "สรุปและนำเสนอ", descriptionTh: "เปลี่ยน insight เป็นโอกาส เขียนรายงาน เก็บคลัง และนำเสนอทีม", count: 4 },
+    { titleEn: "Take It Further", titleTh: "ต่อยอดสู่งานจริง", descriptionTh: "ผสมหลายวิธี วาง research ops ทำ case study และวัดผลกระทบ", count: 4 },
+  ],
+  "ux-research-method": [
+    { titleEn: "Pick the Right Method", titleTh: "เลือกวิธีให้ถูก", descriptionTh: "ภาพรวม ตารางเลือกวิธี และความต่างของ generative กับ evaluative", count: 4 },
+    { titleEn: "Core Methods", titleTh: "วิธีเก็บข้อมูลหลัก", descriptionTh: "สัมภาษณ์ ลงพื้นที่จริง แบบสอบถาม และการทดสอบการใช้งาน", count: 4 },
+    { titleEn: "Specialised Methods", titleTh: "วิธีเสริมเฉพาะทาง", descriptionTh: "card sorting tree testing diary study และการทดสอบไอเดีย", count: 4 },
+    { titleEn: "Quality and Synthesis", titleTh: "คุณภาพและการสรุป", descriptionTh: "จำนวนตัวอย่าง อคติ วิธีสรุป และการทำ portfolio", count: 4 },
+  ],
+  "agile-ux-ui": [
+    { titleEn: "Get in Rhythm", titleTh: "เข้าจังหวะ Agile", descriptionTh: "ภาพรวม mindset การวางแผน sprint และสมดุลของ discovery กับ delivery", count: 4 },
+    { titleEn: "Plan the Design Work", titleTh: "วางแผนงานออกแบบ", descriptionTh: "จัด backlog ทำ story mapping design spike และ wireframe แบบเบา", count: 4 },
+    { titleEn: "Work with the Team", titleTh: "ทำงานร่วมกับทีม", descriptionTh: "ทดลองก่อนเขียนโค้ด รับ critique เขียน AC และทำงานกับ PO และ dev", count: 4 },
+    { titleEn: "Ship and Learn", titleTh: "ส่งมอบและเรียนรู้", descriptionTh: "ตรวจงานก่อนปล่อย จัดการ design debt เก็บบทเรียน และทำ case", count: 4 },
+  ],
+  "design-system": [
+    { titleEn: "Foundations", titleTh: "รากฐานของระบบ", descriptionTh: "ภาพรวม token สี ตัวอักษร ระยะห่าง และส่วนประกอบของ component", count: 4 },
+    { titleEn: "Build Components", titleTh: "สร้าง component", descriptionTh: "ปุ่ม ฟอร์ม สถานะต่าง ๆ การเข้าถึง และ component ใน Figma", count: 4 },
+    { titleEn: "Hand It to the Team", titleTh: "ส่งต่อให้ทีมใช้", descriptionTh: "ส่ง token เข้าโค้ด เขียนเอกสาร วางกติกา และชวนทีมมาใช้", count: 4 },
+    { titleEn: "Measure and Maintain", titleTh: "วัดผลและดูแล", descriptionTh: "ดูตัวเลขการใช้งาน จัดการของค้าง และทำ case study", count: 3 },
+  ],
+  "product-owner": [
+    { titleEn: "Start and Prioritise", titleTh: "เริ่มต้นและจัด backlog", descriptionTh: "เส้นทางอาชีพ แปลงเป้าธุรกิจเป็นผลลัพธ์ เขียน story และจัดลำดับ", count: 4 },
+    { titleEn: "People and Domain", titleTh: "ทำงานกับคนและ domain", descriptionTh: "จูนกับ stakeholder เข้าจังหวะ sprint วิเคราะห์ requirement และรู้จัก domain", count: 4 },
+    { titleEn: "Plan and Deliver", titleTh: "วางแผนและส่งมอบ", descriptionTh: "วาง roadmap เขียน acceptance criteria เตรียมปล่อย และอธิบายการตัดสินใจ", count: 4 },
+  ],
+  "product-analytics": [
+    { titleEn: "Goals and Metrics", titleTh: "ตั้งเป้าด้วยข้อมูล", descriptionTh: "เส้นทางอาชีพสาย data หา North Star และแตกเป็น KPI", count: 4 },
+    { titleEn: "Track and Query", titleTh: "เก็บและถามข้อมูล", descriptionTh: "วางแผน event ตั้งชื่อให้เป็นระบบ และเขียน SQL หาคำตอบ", count: 4 },
+    { titleEn: "Dashboards and Behaviour", titleTh: "Dashboard และพฤติกรรม", descriptionTh: "ออกแบบ dashboard ที่ตัดสินใจได้ ดู funnel และ cohort", count: 4 },
+    { titleEn: "Experiment and Verify", titleTh: "ทดลองและตรวจสอบ", descriptionTh: "ตั้ง A/B test อ่านผลให้ถูก และตรวจคุณภาพข้อมูล", count: 3 },
+    { titleEn: "Tell the Story", titleTh: "เล่าเรื่องด้วยข้อมูล", descriptionTh: "คิดแบบ Python เล่า insight และทำงานร่วมกับ data engineer", count: 3 },
+    { titleEn: "Present and Grow", titleTh: "นำเสนอและต่อยอด", descriptionTh: "รายงานระดับผู้บริหาร คลังเรื่องเล่าสัมภาษณ์ และ case study", count: 3 },
+  ],
+  "ai-product-workflow": [
+    { titleEn: "Start Using AI", titleTh: "เริ่มใช้ AI ในงาน", descriptionTh: "ดูว่า AI ช่วยตรงไหน เขียน prompt และใช้ช่วยงานวิจัยกับงานเขียน", count: 4 },
+    { titleEn: "AI in Design", titleTh: "AI ช่วยออกแบบ", descriptionTh: "ใช้ช่วย critique ทำ prototype จำ design system และตรวจงาน", count: 4 },
+    { titleEn: "Safe and Shipped", titleTh: "ใช้อย่างปลอดภัยและลงมือ", descriptionTh: "ดูแลข้อมูลบริษัท ใช้วิจารณญาณคน แล้วส่งงานจริงสักชิ้น", count: 3 },
+  ],
+  "career-portfolio": [
+    { titleEn: "Shape Your Portfolio", titleTh: "วางโครง portfolio", descriptionTh: "ดูทักษะที่พาไปต่อ วางโครง case study และเขียนเหตุผลเบื้องหลัง", count: 4 },
+    { titleEn: "Show the Value", titleTh: "เล่าให้เห็นคุณค่า", descriptionTh: "เชื่อมงานกับผลธุรกิจ นำเสนอ และเตรียมคลังเรื่องเล่า", count: 3 },
+    { titleEn: "Prepare and Go", titleTh: "เตรียมตัวและลงมือ", descriptionTh: "ซ้อมคุยเรื่องเงินเดือน จัด LinkedIn กับเรซูเม่ และลุยแผน 30 วัน", count: 3 },
+  ],
+  "cx-communication": [
+    { titleEn: "CX Foundations", titleTh: "พื้นฐาน CX", descriptionTh: "ประสบการณ์ที่ลูกค้าไว้ใจ ความเชื่อมั่น และการโน้มน้าว", count: 4 },
+    { titleEn: "Crisis and Measurement", titleTh: "วิกฤตและการวัดผล", descriptionTh: "รับมือช่วงวิกฤต อ่านค่า CSAT สร้างทีม และมองลูกค้าให้ครบวง", count: 4 },
+    { titleEn: "Tools and Recovery", titleTh: "เครื่องมือและการกู้ใจ", descriptionTh: "เครื่องมือ CX ระบบรับฟังเสียงลูกค้า และ playbook กู้สถานการณ์", count: 3 },
+    { titleEn: "Communicate at Level", titleTh: "สื่อสารระดับมืออาชีพ", descriptionTh: "ศิลปะการสื่อสาร เล่าเรื่อง CX ให้ผู้บริหาร และทำ case", count: 3 },
+  ],
+  "stock-investing": [
+    { titleEn: "Before You Start", titleTh: "ตั้งหลักก่อนลงทุน", descriptionTh: "ออมกับลงทุนต่างกันอย่างไร ความเสี่ยง ระยะเวลา และเงินสำรอง", count: 4 },
+    { titleEn: "Know the Market", titleTh: "รู้จักตลาด", descriptionTh: "ระดับความเสี่ยงที่รับได้ หุ้นคืออะไร ซื้อขายผ่านใคร และราคาเสนอ", count: 4 },
+    { titleEn: "Orders and Businesses", titleTh: "ส่งคำสั่งและอ่านธุรกิจ", descriptionTh: "คำสั่งซื้อขาย อ่านธุรกิจ งบการเงิน และความเสี่ยงของกิจการ", count: 4 },
+    { titleEn: "Value and Allocate", titleTh: "ประเมินค่าและจัดพอร์ต", descriptionTh: "พื้นฐานการประเมินมูลค่า กระจายความเสี่ยง และแบ่งสัดส่วน", count: 4 },
+    { titleEn: "Discipline and Traps", titleTh: "วินัยและกับดัก", descriptionTh: "ทยอยลงทุน ปรับพอร์ต รู้ทันอคติ และสังเกตกลโกง", count: 4 },
+  ],
+  "thai-tax-personal-finance": [
+    { titleEn: "Tax Basics", titleTh: "พื้นฐานภาษี", descriptionTh: "ปีภาษี ค่าลดหย่อน และภาษีหัก ณ ที่จ่าย", count: 4 },
+    { titleEn: "Kinds of Income", titleTh: "รายได้แต่ละแบบ", descriptionTh: "เงินเดือน ฟรีแลนซ์ ค่าเช่า ดอกเบี้ยและเงินปันผล", count: 4 },
+    { titleEn: "Calculate and Forms", titleTh: "คำนวณและแบบฟอร์ม", descriptionTh: "รายได้ต่างประเทศ อัตราก้าวหน้า ส่วนต่างภาษี และแบบ ภ.ง.ด.", count: 4 },
+    { titleEn: "File and Keep Records", titleTh: "ยื่นและเก็บเอกสาร", descriptionTh: "เอกสารที่ต้องเตรียม ยื่นออนไลน์ เก็บหลักฐาน และเช็กลิสต์ฟรีแลนซ์", count: 4 },
+    { titleEn: "Check and Ask", titleTh: "ตรวจทานและขอคำปรึกษา", descriptionTh: "ข้อผิดพลาดที่พบบ่อย กลโกงภาษี และเมื่อไรควรปรึกษาผู้เชี่ยวชาญ", count: 4 },
+  ],
+};
+
 const expandedModules: Record<string, CurriculumModule[]> = Object.fromEntries(
-  Object.entries(expandedPathTopics).map(([pathId, topics]) => [
-    pathId,
-    topics.map((topic, index) => ({
-      id: `${pathId}-${slugify(topic)}`,
-      number: index + 1,
-      titleEn: topic,
-      titleTh: `${topic} สำหรับการเรียนรู้แบบใช้งานจริง`,
-      descriptionTh: `บทเรียนเรื่อง ${topic} พร้อมคำอธิบายไทย ตัวอย่าง และแบบฝึกหัดที่เกี่ยวข้อง`,
-      lessonIds: [`${pathId}-${slugify(topic)}`],
-    })),
-  ]),
+  Object.entries(expandedPathTopics).map(([pathId, topics]) => {
+    const groups = expandedModuleGroups[pathId as keyof typeof expandedPathTopics];
+    const grouped = groups.reduce((sum, group) => sum + group.count, 0);
+    if (grouped !== topics.length) {
+      throw new Error(`Module groups for "${pathId}" cover ${grouped} topics but the course has ${topics.length}.`);
+    }
+
+    let cursor = 0;
+    return [
+      pathId,
+      groups.map((group, index) => {
+        const slice = topics.slice(cursor, cursor + group.count);
+        cursor += group.count;
+        return {
+          id: `${pathId}-module-${index + 1}`,
+          number: index + 1,
+          titleEn: group.titleEn,
+          titleTh: group.titleTh,
+          descriptionTh: group.descriptionTh,
+          lessonIds: slice.map((topic) => `${pathId}-${slugify(topic)}`),
+        };
+      }),
+    ];
+  }),
 );
 
 const educationalDisclaimer = {
@@ -432,8 +538,8 @@ function vocab(id: string, word: string, thaiMeaning: string, simpleDefinition: 
     thaiMeaning,
     partOfSpeech: "noun",
     simpleDefinition,
-    exampleSentence: `${word} helps a design team make a clearer product decision.`,
-    exampleTranslationTh: `${word} ช่วยให้ทีมออกแบบตัดสินใจเกี่ยวกับ product ได้ชัดขึ้น`,
+    exampleSentence: `Use ${word} when explaining ${topic.toLowerCase()} in a real work discussion.`,
+    exampleTranslationTh: `ใช้ ${word} เมื่อต้องอธิบายเรื่อง ${topic} ในสถานการณ์ทำงานจริง`,
     skill,
     topic,
   };
@@ -456,6 +562,150 @@ function check(question: string, questionTh: string, correct: string, wrongA: st
     explanation: "The strongest answer connects the concept to a useful product decision.",
     explanationTh,
   };
+}
+
+function youtubeVideo(
+  id: string,
+  youtubeId: string,
+  titleEn: string,
+  sourceName: string,
+  durationLabel: string,
+  whyWatchTh: string,
+  noticeTh: string[],
+  afterWatchPromptTh: string,
+): LessonVideo {
+  return {
+    id,
+    youtubeId,
+    titleEn,
+    sourceName,
+    watchUrl: `https://www.youtube.com/watch?v=${youtubeId}`,
+    durationLabel,
+    whyWatchTh,
+    noticeTh,
+    afterWatchPromptTh,
+  };
+}
+
+function videosForLesson(pathId: string, title: string): LessonVideo[] {
+  const key = `${pathId}:${title}`.toLocaleLowerCase();
+
+  if (key.includes("ux-ui:understand ux") || key.includes("ux-ui:core ux principles")) {
+    return [
+      youtubeVideo(
+        "ux-ui-nng-what-is-ux",
+        "8PM6KxV8GRc",
+        "What Is User Experience?",
+        "Nielsen Norman Group",
+        "Short video",
+        "ดูเพื่อวางภาพรวมก่อนว่า UX คือประสบการณ์ทั้งหมดที่ผู้ใช้มีกับ product ไม่ใช่แค่หน้าจอ",
+        ["จับคำว่า user experience ว่าครอบคลุมเป้าหมาย ความรู้สึก และความสำเร็จของผู้ใช้", "ดูให้เห็นว่าการออกแบบที่ดีเริ่มจากสิ่งที่ผู้ใช้พยายามทำให้สำเร็จ"],
+        "หลังดู ลองอธิบาย UX ด้วยภาษาของตัวเองหนึ่งประโยค โดยไม่ใช้คำว่า “สวย”",
+      ),
+      youtubeVideo(
+        "ux-ui-nng-ux-vs-ui",
+        "5KUNmgt_pvY",
+        "UX vs. UI",
+        "Nielsen Norman Group",
+        "Short video",
+        "ดูเพื่อเห็นภาพว่า UX และ UI ต่างกันอย่างไร ก่อนกลับมาอ่าน checklist ในบทเรียน",
+        ["จับว่า UX คือประสบการณ์และเป้าหมาย ส่วน UI คือสิ่งที่ผู้ใช้เห็นและโต้ตอบ", "สังเกตวิธีอธิบายด้วยภาษาคนทั่วไป ไม่ใช่ศัพท์ยาก"],
+        "หลังดู ลองเขียนหนึ่งประโยคว่าหน้าจอที่คุณใช้อยู่มีปัญหา UX หรือ UI มากกว่ากัน",
+      ),
+    ];
+  }
+
+  if (key.includes("usability") || key.includes("heuristic")) {
+    return [
+      youtubeVideo(
+        "ux-usability-heuristic-visibility",
+        "cTtc90jCULU",
+        "Usability Heuristic 1: Visibility of System Status",
+        "Nielsen Norman Group",
+        "Short video",
+        "ดูเพื่อเข้าใจว่าระบบควรบอกผู้ใช้เสมอว่ากำลังเกิดอะไรขึ้น",
+        ["สังเกต feedback หลังผู้ใช้กดปุ่ม", "เชื่อมกับ quiz feedback และ progress state ในแอปนี้"],
+        "หลังดู ลองหา 1 จุดในแอปที่ควรบอกสถานะผู้ใช้ให้ชัดขึ้น",
+      ),
+    ];
+  }
+
+  if (key.includes("research") || key.includes("interview") || key.includes("persona")) {
+    return [
+      youtubeVideo(
+        "ux-research-methods-nng",
+        "BtKHHIBJnL8",
+        "15 User Research Methods",
+        "Nielsen Norman Group",
+        "Short video",
+        "ดูเพื่อเห็นภาพว่า research ไม่ได้มีแค่วิธีเดียว และแต่ละวิธีตอบคำถามต่างกัน",
+        ["จับว่าแต่ละ method ใช้ตอบคำถามแบบไหน", "แยกให้ได้ว่าอะไรช่วยหา insight และอะไรช่วย validate solution"],
+        "หลังดู เลือก 1 method ที่เหมาะกับปัญหางานของคุณ แล้วเขียนเหตุผลสั้น ๆ",
+      ),
+    ];
+  }
+
+  if (key.includes("design system") || key.includes("component") || key.includes("tokens")) {
+    return [
+      youtubeVideo(
+        "figma-design-system-intro",
+        "Dtd40cHQQlk",
+        "Introduction to Design Systems",
+        "Figma",
+        "Course video",
+        "ดูเพื่อเห็นภาพว่า design system คือวิธีทำให้ทีมออกแบบและ build ได้สอดคล้องกัน ไม่ใช่แค่ชุด UI สวย ๆ",
+        ["สังเกตคำว่า component, pattern และ guideline", "ดูว่าระบบช่วยลดการตัดสินใจซ้ำอย่างไร"],
+        "หลังดู ลองเลือก component หนึ่งตัวในแอปนี้ แล้วเขียน state ที่ควรมี",
+      ),
+    ];
+  }
+
+  if (key.includes("english-work") || key.includes("meeting language") || key.includes("email tone") || key.includes("clear updates")) {
+    return [
+      youtubeVideo(
+        "bbc-present-perfect-work",
+        "pvoqkQHb3lo",
+        "Present Perfect Simple or Continuous",
+        "BBC Learning English",
+        "Grammar video",
+        "ดูเพื่อจับ grammar ที่ใช้บอกงานที่เสร็จแล้วหรือกำลังทำต่อ เหมาะกับ status update ในที่ทำงาน",
+        ["ฟังความต่างระหว่าง have done และ have been doing", "จดหนึ่งประโยคที่เอาไปใช้กับงานจริงได้"],
+        "หลังดู ลองเขียน update งาน 2 ประโยค: งานที่เสร็จแล้วหนึ่งประโยค และงานที่กำลังทำหนึ่งประโยค",
+      ),
+    ];
+  }
+
+  if (key.includes("art-direction:mood and tone") || key.includes("visual references")) {
+    return [
+      youtubeVideo(
+        "art-direction-moodboard-process",
+        "FzNpsv6l-mY",
+        "How to Make a Mood Board",
+        "Design education video",
+        "Tutorial video",
+        "ดูเพื่อเห็นขั้นตอนเปลี่ยน reference ให้กลายเป็น direction ที่ใช้ตัดสินใจงานภาพได้จริง",
+        ["สังเกตว่า reference แต่ละภาพควรมีเหตุผล", "อย่าดูแค่ความสวย ให้ดู color, material, spacing และ feeling"],
+        "หลังดู ลองเขียน 3 คำของ mood และ 3 สิ่งที่ควรหลีกเลี่ยงในโปรเจกต์ของคุณ",
+      ),
+    ];
+  }
+
+  if (key.includes("product-analytics") || key.includes("data analyst") || key.includes("metric")) {
+    return [
+      youtubeVideo(
+        "product-analytics-intro",
+        "5O4ST-R5ZVw",
+        "Product Analytics Course for Beginners",
+        "Product analytics education video",
+        "Course video",
+        "ดูเพื่อเข้าใจว่า data analyst และ product team ใช้ metric เพื่อหาปัญหาและตัดสินใจอย่างไร",
+        ["จับคำว่า event, funnel, metric และ insight", "สังเกตว่า data ต้องนำไปสู่ action ไม่ใช่รายงานอย่างเดียว"],
+        "หลังดู ลองเลือก metric หนึ่งตัวของแอปเรียนนี้ แล้วเขียนว่าจะใช้ตัดสินใจอะไร",
+      ),
+    ];
+  }
+
+  return [];
 }
 
 const seedLessons: Record<string, UxLessonSeed> = {
@@ -923,7 +1173,7 @@ seedLessons["User Flow"] = seedLessons["Information Architecture, Sitemap and Us
 
 function makePlaceholderContent(title: string, moduleTitle: string): Pick<
   UxLessonSeed,
-  "summaryTh" | "professionalLevel" | "estimatedMinutes" | "objectives" | "sections" | "examples" | "visualMedia" | "mistakes" | "mistakesTh" | "junior" | "senior" | "juniorTh" | "seniorTh" | "vocabulary" | "keyTakeaway" | "keyTakeawayTh" | "miniCheck" | "relatedQuestionIds" | "references"
+  "summaryTh" | "professionalLevel" | "estimatedMinutes" | "objectives" | "sections" | "examples" | "visualMedia" | "videos" | "mistakes" | "mistakesTh" | "junior" | "senior" | "juniorTh" | "seniorTh" | "vocabulary" | "keyTakeaway" | "keyTakeawayTh" | "miniCheck" | "relatedQuestionIds" | "references"
 > {
   if (title === "Capstone Project Flow") {
     return {
@@ -1032,6 +1282,7 @@ function makeUxLesson(module: (typeof uxModulesBase)[number], moduleIndex: numbe
     sections: content.sections,
     practicalExamples: content.examples,
     visualMedia: content.visualMedia,
+    videos: content.videos ?? videosForLesson("ux-ui", title),
     commonMistakes: content.mistakes,
     commonMistakesTh: content.mistakesTh,
     juniorThinking: content.junior,
@@ -1074,6 +1325,15 @@ const pathChapterTitles: Record<string, string[]> = {
   "graphic-design": ["Layout Basics", "Typography", "Composition", "Color Contrast", "Visual Hierarchy"],
   "english-work": ["Clear Updates", "Meeting Language", "Email Tone", "Giving Feedback", "Explaining Decisions"],
   ielts: ["Task 1 Overview", "Task 2 Position", "Reading Keywords", "Listening Distractors", "Speaking Examples"],
+  toeic: [
+    "TOEIC Listening and Reading Overview",
+    "TOEIC Part 5 Grammar Foundations",
+    "TOEIC Workplace Vocabulary",
+    "TOEIC Listening: Photos and Conversations",
+    "TOEIC Reading: Email, Notice and Article",
+    "TOEIC Time Strategy",
+    "TOEIC Mini Test Review",
+  ],
   communication: ["Concise Updates", "Active Listening", "Tone Control", "Stakeholder Alignment", "Difficult Messages"],
   "critical-thinking": ["Assumptions", "Evidence Quality", "Root Cause", "Decision Criteria", "Argument Structure"],
 };
@@ -1145,6 +1405,14 @@ const pathLessonGuides: Record<
     vocab: "Exam Strategy",
     visualItems: ["Task", "Keywords", "Structure", "Time", "Review"],
   },
+  toeic: {
+    focus: "ฝึก TOEIC Listening และ Reading จากภาษาอังกฤษในที่ทำงาน เช่น email, notice, schedule, announcement, meeting และ report",
+    outcome: "จับ grammar signal, context clue และ business vocabulary ได้เร็วขึ้นโดยไม่ต้องแปลทุกคำ",
+    practice: "ทำโจทย์ Part 5, reading passage และ listening transcript สั้น ๆ แล้วอ่าน feedback ว่าผิดเพราะ grammar, vocabulary หรือ inference",
+    mistake: "ท่องศัพท์อย่างเดียว แต่ไม่ฝึกดู tense, part of speech, preposition, connector และ clue รอบช่องว่าง",
+    vocab: "TOEIC Strategy",
+    visualItems: ["Part type", "Context clue", "Grammar signal", "Best answer", "Review error"],
+  },
   communication: {
     focus: "ทำให้การสื่อสารกับทีมชัดขึ้นผ่าน context, tone, listening และ alignment",
     outcome: "พูดหรือเขียนแล้วอีกฝ่ายรู้ว่าประเด็นคืออะไร ต้องตัดสินใจอะไร และจะไปต่ออย่างไร",
@@ -1213,6 +1481,7 @@ type RealLessonPack = {
   objectives: string[];
   sections: LessonSection[];
   examples: LessonPracticalExample[];
+  videos?: LessonVideo[];
   mistakes: string[];
   junior: string;
   senior: string;
@@ -1863,6 +2132,7 @@ function makePathLesson(path: LearningPath, title: string, index: number): Learn
       : [`Explain ${title} in simple English.`, "Apply the lesson to a realistic workplace situation.", "Write one clearer sentence, decision, or next step."],
     sections: lessonSections,
     practicalExamples,
+    videos: realLessonPack?.videos ?? videosForLesson(path.id, title),
     visualMedia: [
       {
         type: "flow",
@@ -2058,6 +2328,13 @@ const sourceGroundingByPath: Record<
       "https://carbondesignsystem.com/guidelines/content/overview/",
     ],
     fieldChecklist: ["Customer emotion", "Clear explanation", "Recovery option", "Trust signal", "Satisfaction metric"],
+  },
+  toeic: {
+    sourceNoteTh:
+      "เนื้อหานี้อิงโครงสร้าง TOEIC Listening and Reading จาก ETS: ข้อสอบแบ่งเป็น Listening 4 parts และ Reading 3 parts รวม 200 ข้อ โดยบทเรียนในแอปนี้เขียนเป็นตัวอย่างใหม่เพื่อฝึกกลยุทธ์ ไม่ใช่ข้อสอบจริงจาก ETS",
+    sourceNames: ["ETS TOEIC Listening and Reading Test Content"],
+    references: ["https://www.ets.org/toeic/test-takers/listening-reading/about/content.html"],
+    fieldChecklist: ["Part type", "Grammar signal", "Workplace context", "Best answer", "Review mistake"],
   },
   "ux-ui": {
     sourceNoteTh:
@@ -2610,6 +2887,76 @@ function expandedTopicCopy(pathId: string, title: string) {
       takeaway: "Metric ที่ดีช่วยให้ CX team รู้ว่าควรแก้ตรงไหนและผลกระทบคืออะไร",
       vocab: "CSAT",
     },
+    "TOEIC Listening and Reading Overview": {
+      summaryTh: "บทนี้ทำให้เห็นภาพรวม TOEIC Listening and Reading ก่อนเริ่มทำโจทย์จริง ว่าข้อสอบแบ่งเป็น 7 parts และวัดภาษาอังกฤษในบริบทการทำงาน",
+      what: "TOEIC Listening and Reading วัดการฟังและอ่านภาษาอังกฤษที่ใช้ในที่ทำงาน เช่น announcement, phone message, email, notice, schedule และ report โดยข้อสอบจริงมี Listening 4 parts และ Reading 3 parts",
+      why: "ถ้ารู้ part type ก่อน คุณจะไม่เสียเวลาอ่านหรือฟังผิดวิธี เพราะแต่ละ part ต้องใช้กลยุทธ์ต่างกัน เช่น Part 5 ดู grammar signal ส่วน Part 7 ต้องจับ purpose, detail และ inference",
+      how: "เริ่มจากแยกว่าโจทย์กำลังวัดอะไร: grammar, vocabulary, specific detail, main idea, speaker intent หรือ relationship จากนั้นอ่านตัวเลือกแบบตัดช้อยส์ที่ผิดชัดก่อน",
+      example: "ถ้าโจทย์ถามว่า Why did the speaker call? ให้ฟังหรืออ่านหา purpose ไม่ใช่จดทุกตัวเลขที่ได้ยิน",
+      mistake: "ทำข้อสอบแบบแปลทุกคำ ทำให้ช้าและพลาด clue สำคัญที่บอกว่าคำถามต้องการอะไร",
+      takeaway: "TOEIC ทำได้ดีขึ้นเมื่อรู้หน้าที่ของแต่ละ part และฝึกเลือก clue ให้ตรงคำถาม",
+      vocab: "TOEIC Part Type",
+    },
+    "TOEIC Part 5 Grammar Foundations": {
+      summaryTh: "Part 5 คือโจทย์เติมคำในประโยค เหมาะสำหรับฝึก grammar signal เช่น part of speech, tense, preposition, connector และ subject-verb agreement",
+      what: "เวลาเจอช่องว่าง อย่าเริ่มจากแปลทั้งประโยค ให้ดูตำแหน่งของช่องว่างก่อนว่าต้องการ noun, verb, adjective, adverb, preposition หรือ connector",
+      why: "หลายข้อใน Part 5 ตอบได้จากโครงสร้างประโยค เช่น ช่องว่างหลัง article มักต้องการ noun ส่วนช่องว่างก่อน adjective อาจต้องการ adverb",
+      how: "ใช้ลำดับ 4 ขั้น: ดูคำรอบช่องว่าง → ระบุหน้าที่คำ → ตัดตัวเลือกคนละ part of speech → ค่อยอ่าน meaning เพื่อยืนยัน",
+      example: "The manager spoke ___ about the new policy. หลัง verb spoke ต้องการ adverb เพื่อบอกวิธีพูด คำตอบจึงเป็น clearly ไม่ใช่ clear",
+      mistake: "เลือกคำที่แปลเหมือนถูก แต่ part of speech ไม่เข้ากับประโยค",
+      takeaway: "Part 5 ให้ดู grammar signal ก่อน meaning เสมอ",
+      vocab: "Grammar Signal",
+    },
+    "TOEIC Workplace Vocabulary": {
+      summaryTh: "TOEIC ใช้คำศัพท์ที่เจอบ่อยในสำนักงาน ธุรกิจ การเดินทาง การประชุม การซื้อขาย และ customer service",
+      what: "คำศัพท์ TOEIC ไม่ได้ยากเสมอไป แต่ต้องรู้ collocation และ context เช่น make an appointment, submit a report, attend a meeting, process a refund",
+      why: "ถ้าจำแค่คำแปลเดี่ยว ๆ คุณอาจเลือกคำผิด เพราะ TOEIC มักทดสอบคำที่ใช้คู่กันหรือคำที่เหมาะกับสถานการณ์ทำงาน",
+      how: "เรียนคำศัพท์เป็นกลุ่มสถานการณ์: schedule, office, travel, customer issue, finance, hiring และ operations แล้วฝึกเขียนประโยคสั้น ๆ จากคำเหล่านั้น",
+      example: "คำว่า appointment มักใช้กับ schedule, reschedule, confirm หรือ cancel ส่วนคำว่า report มักใช้กับ submit, review หรือ prepare",
+      mistake: "จำคำศัพท์เป็น list ยาว ๆ แต่ไม่รู้ว่าคำนั้นอยู่ใน sentence pattern ไหน",
+      takeaway: "จำ vocabulary เป็น phrase และ workplace scene จะใช้ทำโจทย์ได้ดีกว่าจำคำเดี่ยว",
+      vocab: "Workplace Collocation",
+    },
+    "TOEIC Listening: Photos and Conversations": {
+      summaryTh: "บทนี้ฝึกคิดแบบ Listening โดยใช้ transcript และสถานการณ์แทนเสียงจริง เพื่อให้เข้าใจวิธีจับ clue ก่อนทำโจทย์เสียง",
+      what: "Listening ต้องจับภาพรวมเร็ว: ใครพูดกับใคร สถานที่คือที่ไหน จุดประสงค์คืออะไร และ action ถัดไปคืออะไร",
+      why: "ในข้อสอบจริง distractor มักเป็นคำที่ได้ยินจริงแต่ไม่ใช่คำตอบ หรือเป็นคำที่เสียงคล้ายกัน ดังนั้นต้องฟังความหมายรวม ไม่ใช่เก็บคำเดี่ยว",
+      how: "ก่อนฟังให้ดูคำถามและตัวเลือกคร่าว ๆ แล้วคาดเดาว่าต้องฟังหา purpose, time, place, problem หรือ next action",
+      example: "ถ้าบทสนทนาพูดว่า The printer is out of paper, but I already ordered more supplies. คำตอบอาจเกี่ยวกับ office supplies ไม่ใช่ repair service",
+      mistake: "เลือกคำตอบเพราะมีคำเดียวกับ transcript โดยไม่ดูว่าประโยคนั้นตอบคำถามจริงไหม",
+      takeaway: "Listening ที่ดีคือการจับ purpose และ next action ไม่ใช่จำทุกคำ",
+      vocab: "Listening Clue",
+    },
+    "TOEIC Reading: Email, Notice and Article": {
+      summaryTh: "Reading ใน TOEIC มักใช้เอกสารทำงาน เช่น email, notice, memo, advertisement และ article ต้องอ่านแบบมีเป้าหมาย",
+      what: "เริ่มจากอ่านคำถามก่อนเพื่อรู้ว่าต้องหา detail, purpose, meaning in context หรือ inference จากนั้น scan passage เฉพาะส่วนที่เกี่ยวข้อง",
+      why: "ถ้าอ่าน passage ทุกคำตั้งแต่ต้นจนจบก่อนดูคำถาม จะเสียเวลาและอาจจำรายละเอียดผิด",
+      how: "ใช้ 3 รอบ: skim เพื่อรู้เรื่องหลัก → scan หาคำหรือข้อมูลที่โจทย์ถาม → verify ด้วยประโยคก่อนและหลัง clue",
+      example: "ถ้า email บอกว่า Please submit the revised estimate by Friday. คำถามเรื่อง deadline ให้ตอบ Friday ไม่ใช่วันที่ประชุมในย่อหน้าอื่น",
+      mistake: "เจอคำเหมือนในตัวเลือกแล้วรีบตอบ โดยไม่อ่านบริบทรอบประโยค",
+      takeaway: "Reading ต้องอ่านแบบมีภารกิจ: purpose, detail, inference หรือ vocabulary in context",
+      vocab: "Reading Purpose",
+    },
+    "TOEIC Time Strategy": {
+      summaryTh: "TOEIC เป็นข้อสอบที่ต้องบริหารเวลา โดยเฉพาะ Reading ที่มีโจทย์เยอะและ passage ยาว",
+      what: "Time strategy คือการรู้ว่าข้อไหนควรตอบเร็ว ข้อไหนควรข้ามชั่วคราว และเมื่อไรควรตัดตัวเลือกแทนการอ่านซ้ำหลายรอบ",
+      why: "คะแนนไม่ได้มาจากข้อยากอย่างเดียว แต่มาจากการเก็บข้อที่ทำได้ให้ครบก่อนหมดเวลา",
+      how: "ฝึกตั้ง time box: Part 5 ใช้ grammar signal ให้เร็ว, Part 6 อ่านทั้ง paragraph สั้น ๆ, Part 7 อ่านคำถามก่อนและกลับไปหา evidence",
+      example: "ถ้าติด Part 5 เกิน 45 วินาที ให้ตัดช้อยส์ที่ผิด grammar ชัดเจน เลือกคำตอบที่ดีที่สุด แล้ว mark ไว้กลับมาทวนถ้ามีเวลา",
+      mistake: "ใช้เวลานานกับข้อเดียวจนเสียข้อที่ง่ายกว่าอีกหลายข้อ",
+      takeaway: "TOEIC ต้องฝึกทั้งความถูกและจังหวะการตัดสินใจ",
+      vocab: "Time Box",
+    },
+    "TOEIC Mini Test Review": {
+      summaryTh: "หลังทำ mini test ต้องทวนอย่างเป็นระบบว่าผิดเพราะอะไร เพื่อไม่ให้ผิดซ้ำใน pattern เดิม",
+      what: "Review ที่ดีแยก error เป็น grammar, vocabulary, detail, inference, distractor หรือ time pressure แล้วจด pattern ที่ต้องฝึกต่อ",
+      why: "ถ้าดูแค่ว่าถูกหรือผิด คุณจะไม่รู้ว่าควรเรียนอะไรเพิ่ม แต่ถ้า tag error ได้ คุณจะเห็นจุดอ่อนจริง",
+      how: "หลังตอบผิด ให้เขียน 1 บรรทัด: clue อยู่ตรงไหน, ทำไมคำตอบที่เลือกผิด, และกฎหรือ phrase ที่ต้องจำคืออะไร",
+      example: "ถ้าผิดเพราะเลือก economical แทน economic ให้จดว่า economic report = รายงานเศรษฐกิจ ส่วน economical = ประหยัด",
+      mistake: "ทำข้อสอบเยอะขึ้นเรื่อย ๆ แต่ไม่ทวน pattern ที่ผิด ทำให้คะแนนไม่ขยับ",
+      takeaway: "การทวน error คือส่วนที่ทำให้ Practice กลายเป็นการเรียนรู้จริง",
+      vocab: "Error Pattern",
+    },
     "Building High-Impact CX Teams": {
       summaryTh: "ทีม CX ที่มี impact ต้องเชื่อม customer insight กับ product, operations, marketing และ leadership",
       what: "High-impact CX team ไม่ใช่แค่รับเรื่องร้องเรียน แต่ต้องหา pattern, เสนอ improvement และผลักดันการแก้ root cause",
@@ -3109,9 +3456,104 @@ export function lessonsForPath(pathId: string) {
   return lessons.filter((lesson) => lesson.learningPathId === pathId);
 }
 
+/** One sitting. Lessons run 7–12 minutes, so a day is three or four of them. */
+export const targetDayMinutes = 35;
+export const maxDayMinutes = 45;
+
+export function lessonMinutes(lesson: Pick<LearningLesson, "estimatedMinutes" | "readingMinutes">) {
+  return lesson.estimatedMinutes ?? lesson.readingMinutes ?? 10;
+}
+
+/**
+ * Split a run of lessons into balanced days.
+ *
+ * Balanced, not greedy: filling four-at-a-time left a five-lesson course as a
+ * 40-minute day followed by a 10-minute one. This picks the day count from the
+ * total time first, then spreads the lessons evenly across it, so a 35-minute
+ * course stays a single sitting and a 47-lesson one lands near the target
+ * every day instead of drifting.
+ */
+function splitIntoDays<T extends { id: string; estimatedMinutes?: number; readingMinutes: number }>(items: T[]): T[][] {
+  if (!items.length) return [];
+  const total = items.reduce((sum, item) => sum + lessonMinutes(item), 0);
+  if (total <= maxDayMinutes) return [items];
+
+  // Aim for the target, but never leave a day over the ceiling: rounding
+  // alone let a 50-minute chapter through as a single day (50/35 rounds to 1).
+  const dayCount = Math.max(Math.ceil(total / maxDayMinutes), Math.round(total / targetDayMinutes), 1);
+  const perDay = Math.ceil(items.length / dayCount);
+  const days: T[][] = [];
+  for (let index = 0; index < items.length; index += perDay) {
+    days.push(items.slice(index, index + perDay));
+  }
+  return days;
+}
+
+/**
+ * Day blocks for a course with no authored chapters — ten of them carry 5–7
+ * lessons and used to render as one undifferentiated list.
+ */
+function fallbackDayModules(pathId: string): CurriculumModule[] {
+  const pathLessons = lessons.filter((lesson) => lesson.learningPathId === pathId);
+  const days = splitIntoDays(pathLessons);
+  if (days.length <= 1) return [];
+
+  return days.map((slice, index) => ({
+    id: `${pathId}-day-${index + 1}`,
+    number: index + 1,
+    titleEn: `Day ${index + 1}`,
+    titleTh: `วันที่ ${index + 1}`,
+    descriptionTh: `${slice.length} บทเรียน ประมาณ ${slice.reduce((sum, lesson) => sum + lessonMinutes(lesson), 0)} นาที`,
+    lessonIds: slice.map((lesson) => lesson.id),
+  }));
+}
+
+/**
+ * UX/UI keeps its eight hand-written themes, but its chapters ran about 48
+ * minutes each — over a comfortable sitting. Any theme longer than that is cut
+ * into consecutive days that keep the theme's name; the "Day N · ≈32 min"
+ * label on the heading tells them apart.
+ */
+function dayPacedModules(modules: CurriculumModule[], pathId: string): CurriculumModule[] {
+  const byId = new Map(lessons.filter((lesson) => lesson.learningPathId === pathId).map((lesson) => [lesson.id, lesson]));
+  const out: CurriculumModule[] = [];
+
+  for (const chapter of modules) {
+    const chapterLessons = chapter.lessonIds.map((id) => byId.get(id)).filter((lesson): lesson is LearningLesson => Boolean(lesson));
+    const days = splitIntoDays(chapterLessons);
+    for (const slice of days) {
+      out.push({
+        ...chapter,
+        id: days.length > 1 ? `${chapter.id}-d${out.length + 1}` : chapter.id,
+        number: out.length + 1,
+        lessonIds: slice.map((lesson) => lesson.id),
+      });
+    }
+  }
+  return out;
+}
+
 export function modulesForPath(pathId: string) {
-  if (pathId === "ux-ui") return curriculumModules;
-  return expandedModules[pathId] ?? [];
+  if (pathId === "ux-ui") return dayPacedModules(curriculumModules, pathId);
+  const authored = expandedModules[pathId];
+  return authored ? dayPacedModules(authored, pathId) : fallbackDayModules(pathId);
+}
+
+/** How long a chapter takes, for the "≈35 min" label on the course page. */
+export function moduleMinutes(pathId: string, lessonIds: string[]) {
+  const byId = new Map(lessons.filter((lesson) => lesson.learningPathId === pathId).map((lesson) => [lesson.id, lesson]));
+  return lessonIds.reduce((sum, id) => {
+    const lesson = byId.get(id);
+    return sum + (lesson ? lessonMinutes(lesson) : 0);
+  }, 0);
+}
+
+/** Total study time and day count for a course. */
+export function coursePlan(pathId: string) {
+  const pathLessons = lessons.filter((lesson) => lesson.learningPathId === pathId);
+  const minutes = pathLessons.reduce((sum, lesson) => sum + lessonMinutes(lesson), 0);
+  const days = Math.max(1, modulesForPath(pathId).length);
+  return { minutes, days, lessons: pathLessons.length, minutesPerDay: Math.round(minutes / days) };
 }
 
 export function findPathBySlug(slug: string) {

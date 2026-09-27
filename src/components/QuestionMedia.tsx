@@ -62,18 +62,18 @@ function QuestionImage({
   const imageClassName = displayMode === "cover" ? "object-cover" : "object-contain";
 
   return (
-    <figure className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white shadow-[0_18px_48px_rgba(23,23,23,0.08)]">
+    <figure className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-2)] shadow-[var(--elev-3)]">
       {image.label ? (
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-          <span className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--text-secondary)]">{image.label}</span>
+          <span className="font-display text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)]">{image.label}</span>
           {allowZoom ? (
             <button
               type="button"
               onClick={onZoom}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-black"
               aria-label={`Zoom image ${image.label}`}
             >
-              <Soft3DIcon name="actionZoom" size="sm" decorative shadow={false} />
+              <Soft3DIcon name="actionZoom" size="sm" decorative />
             </button>
           ) : null}
         </div>
@@ -89,7 +89,7 @@ function QuestionImage({
           {!hasError ? (
             <>
               {!isLoaded ? (
-                <div className="absolute inset-0 z-10 grid place-items-center bg-white/50 text-xs font-semibold text-[var(--text-muted)]">
+                <div className="absolute inset-0 z-10 grid place-items-center bg-[var(--surface-2)] text-xs font-semibold text-[var(--text-muted)]">
                   Loading image
                 </div>
               ) : null}
@@ -98,7 +98,7 @@ function QuestionImage({
                 alt={showThai && !showEnglish ? image.altTh : image.altEn}
                 fill
                 sizes="(min-width: 1280px) 760px, (min-width: 768px) 88vw, 92vw"
-                className={`${imageClassName} p-2 transition duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+                className={`${imageClassName} p-2 transition duration-200 ${isLoaded ? "opacity-100" : "opacity-0"}`}
                 loading="eager"
                 onLoad={() => setIsLoaded(true)}
                 onError={() => setHasError(true)}
@@ -108,7 +108,6 @@ function QuestionImage({
           ) : (
             <div className="grid h-full place-items-center p-6 text-center">
               <div>
-                <Soft3DIcon name="actionZoom" size="md" decorative shadow={false} className="mx-auto" />
                 <p className="mt-3 text-sm font-semibold text-[var(--text-primary)]">Image unavailable</p>
                 <p className="font-subtitle mt-1 text-xs leading-5 text-[var(--text-secondary)]">{image.altEn}</p>
               </div>
@@ -148,25 +147,25 @@ function ImageZoomDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[#171717]/70 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-label={showThai && !showEnglish ? image.altTh : image.altEn}
       onMouseDown={onClose}
     >
       <div
-        className="relative w-full max-w-6xl rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-3 shadow-2xl"
+        className="relative w-full max-w-6xl rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-2)] p-3 shadow-2xl"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-white/85 text-[var(--text-primary)] transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-black"
+          className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] transition hover:bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-black"
           aria-label="Close image preview"
         >
-          <Soft3DIcon name="statusIncorrect" size="sm" decorative shadow={false} />
+          <Soft3DIcon name="statusIncorrect" size="sm" decorative />
         </button>
-        <div className="grid max-h-[78vh] place-items-center overflow-hidden rounded-[1rem] bg-[var(--surface)]">
+        <div className="grid max-h-[78vh] place-items-center overflow-hidden rounded-[var(--radius-sm)] bg-[var(--surface)]">
           <Image
             src={image.src}
             alt={showThai && !showEnglish ? image.altTh : image.altEn}
@@ -174,7 +173,7 @@ function ImageZoomDialog({
             height={image.height}
             className="h-auto max-h-[78vh] w-auto max-w-full object-contain"
             unoptimized
-            priority
+           
           />
         </div>
         {image.captionEn || image.captionTh ? (
